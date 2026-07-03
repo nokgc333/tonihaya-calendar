@@ -9,3 +9,17 @@ export function weekdayOf(year: number, month: number, day: number): number {
 export function toEpochDay(year: number, month: number, day: number): number {
   return Math.floor(Date.UTC(year, month - 1, day) / MS_PER_DAY);
 }
+
+/** 通日から暦日（year/month/day）へ復元 */
+export function fromEpochDay(epochDay: number): {
+  year: number;
+  month: number;
+  day: number;
+} {
+  const date = new Date(epochDay * MS_PER_DAY);
+  return {
+    year: date.getUTCFullYear(),
+    month: date.getUTCMonth() + 1,
+    day: date.getUTCDate(),
+  };
+}
