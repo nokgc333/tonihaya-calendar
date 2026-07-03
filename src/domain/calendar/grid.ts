@@ -1,3 +1,4 @@
+import { weekdayOf } from "../shared/date";
 import type { CalendarDay, CalendarWeek, WeekStart } from "./types";
 
 /** うるう年判定（グレゴリオ暦） */
@@ -17,11 +18,6 @@ export function daysInMonth(year: number, month: number): number {
 }
 
 const DAYS_PER_WEEK = 7;
-
-/** 曜日（0=日曜 … 6=土曜）。UTC基準でタイムゾーン影響を排除 */
-function weekdayOf(year: number, month: number, day: number): number {
-  return new Date(Date.UTC(year, month - 1, day)).getUTCDay();
-}
 
 /**
  * 指定年月のカレンダーグリッドを週配列で返す。
