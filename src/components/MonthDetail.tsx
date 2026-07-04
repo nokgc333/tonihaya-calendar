@@ -154,8 +154,8 @@ function Stat({
   readonly unit: string;
 }) {
   return (
-    <div className="flex items-baseline justify-between gap-4">
-      <span className="text-xs" style={{ color: "var(--text-muted)" }}>
+    <div className="flex items-baseline gap-2">
+      <span className="w-14 shrink-0 text-xs" style={{ color: "var(--text-muted)" }}>
         {label}
       </span>
       <span className="text-lg font-bold tabular-nums">
