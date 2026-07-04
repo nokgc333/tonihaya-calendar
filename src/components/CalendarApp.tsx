@@ -14,24 +14,32 @@ export function CalendarApp() {
     : null;
 
   return (
-    <main className="mx-auto max-w-[1400px] px-4 py-5">
-      <TodayHeader today={today} countdowns={countdowns} />
+    // min-w で375px以下はレイアウトを固定（それ未満は横スクロールで切り捨て）。
+    <main className="mx-auto min-w-[375px] max-w-[1400px] px-4 py-5">
       {zoom.level === "overview" || zoom.month === undefined ? (
-        <OverviewBody
-          year={zoom.year}
-          today={today}
-          onYearChange={(y) => navigate({ level: "overview", year: clampYear(y) }, "replace")}
-          onMonthClick={(m) => navigate({ level: "month", year: zoom.year, month: m }, "push")}
-        />
+        <>
+          <TodayHeader today={today} countdowns={countdowns} />
+          <OverviewBody
+            year={zoom.year}
+            today={today}
+            onYearChange={(y) => navigate({ level: "overview", year: clampYear(y) }, "replace")}
+            onMonthClick={(m) => navigate({ level: "month", year: zoom.year, month: m }, "push")}
+          />
+        </>
       ) : (
-        <MonthDetail
-          year={zoom.year}
-          month={zoom.month}
-          today={today}
-          countdowns={countdowns}
-          onBack={() => navigate({ level: "overview", year: zoom.year }, "push")}
-          onMonthChange={(m) => navigate({ level: "month", year: zoom.year, month: m }, "replace")}
-        />
+        // L1はヘッダー・ナビ・本体を同じ最大幅ラッパーに入れ、左右の余白を統一する。
+        // 横並び(≥1168px)では1136px、縦積みでは800pxに揃える。
+        <div className="mx-auto w-full max-w-[800px] min-[1168px]:max-w-[1136px]">
+          <TodayHeader today={today} countdowns={countdowns} />
+          <MonthDetail
+            year={zoom.year}
+            month={zoom.month}
+            today={today}
+            countdowns={countdowns}
+            onBack={() => navigate({ level: "overview", year: zoom.year }, "push")}
+            onMonthChange={(m) => navigate({ level: "month", year: zoom.year, month: m }, "replace")}
+          />
+        </div>
       )}
     </main>
   );

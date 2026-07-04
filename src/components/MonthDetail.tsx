@@ -14,11 +14,9 @@ interface CivilDate {
 
 const WEEKDAY_JA = ["日", "月", "火", "水", "木", "金", "土"] as const;
 
-// カレンダーは縦横比固定（正方形セル）。幅を上限で抑えることで高さ（約800px）を制御する。
-// 縦積み時は aside もこの幅に統一する。
-const PANEL_WIDTH = "w-full max-w-[800px]";
-// カレンダー(800) + gap(16) + aside(320) が収まらない幅では aside をカレンダー下へ回す。
-const SIDE_BY_SIDE = "min-[1168px]:flex-row min-[1168px]:items-start min-[1168px]:justify-center";
+// 幅はラッパー(CalendarApp)側で制御する。ここでは横並び(≥1168px)でカレンダー800/aside320に固定し、
+// それ未満では縦積み（各要素はラッパー幅いっぱい）にする。
+const SIDE_BY_SIDE = "min-[1168px]:flex-row min-[1168px]:items-start";
 
 export function MonthDetail({
   year,
@@ -82,25 +80,25 @@ export function MonthDetail({
         </div>
       </nav>
 
-      {/* 収まる幅では [カレンダー | aside] 横並び中央寄せ。収まらない幅では aside をカレンダー下へ。 */}
-      <div className={`flex flex-col items-center gap-4 ${SIDE_BY_SIDE}`}>
+      {/* 収まる幅では [カレンダー | aside] 横並び。収まらない幅では aside をカレンダー下へ。 */}
+      <div className={`flex flex-col gap-4 ${SIDE_BY_SIDE}`}>
         <div
-          className={`${PANEL_WIDTH} min-[1168px]:w-[800px] min-[1168px]:shrink-0`}
+          className="w-full min-[1168px]:w-[800px] min-[1168px]:shrink-0"
           style={{ viewTransitionName: `month-${month}` }}
         >
           <MonthCard month={detail.month} weekStart="sun" size="lg" spacious />
         </div>
 
-        {/* 遊びセクションは ≤712px のときだけカレンダー直下・aside直上に縦並びで表示する。 */}
+        {/* 遊びセクションは ≤712px のときだけカレンダー直下・aside直上に表示する（幅いっぱい・2行中央）。 */}
         {countdowns && (
-          <div className={`${PANEL_WIDTH} min-[713px]:hidden`}>
-            <CountdownChips countdowns={countdowns} vertical />
+          <div className="w-full min-[713px]:hidden">
+            <CountdownChips countdowns={countdowns} block />
           </div>
         )}
 
-        {/* aside はカードUIを維持しつつ背景を少し濃く(--surface-2)してカレンダーと区別する。 */}
+        {/* aside はカードUIを維持しつつ背景を少し明るく(--surface-2)してカレンダーと区別する。 */}
         <aside
-          className={`${PANEL_WIDTH} rounded-xl border p-4 min-[1168px]:w-80 min-[1168px]:max-w-none min-[1168px]:shrink-0`}
+          className="w-full rounded-xl border p-4 min-[1168px]:w-80 min-[1168px]:max-w-none min-[1168px]:shrink-0"
           style={{ borderColor: "var(--border)", background: "var(--surface-2)" }}
         >
           <div className="mb-3 flex items-baseline gap-2">
