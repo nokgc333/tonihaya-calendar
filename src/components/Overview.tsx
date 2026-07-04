@@ -58,6 +58,11 @@ export function Overview() {
     setYearDraft(String(resolved));
   };
 
+  // 現在（今年）へジャンプ
+  const jumpToCurrentYear = (): void =>
+    setYear(clampYear(today?.year ?? new Date().getFullYear()));
+  const isCurrentYear = today !== null && year === today.year;
+
   return (
     <main className="mx-auto max-w-[1400px] px-4 py-5">
       <header className="mb-5 flex flex-wrap items-end justify-between gap-4">
@@ -107,6 +112,13 @@ export function Overview() {
         />
         <NavButton onClick={() => shiftYear(1)} label="1 ›" />
         <NavButton onClick={() => shiftYear(10)} label="10 ››" />
+        <NavButton
+          onClick={jumpToCurrentYear}
+          label="今年"
+          disabled={isCurrentYear}
+          className="ml-1"
+          suppressHydrationWarning
+        />
         <span className="ml-2 text-[11px]" style={{ color: "var(--text-faint)" }}>
           {MIN_YEAR}–{MAX_YEAR}
         </span>
@@ -138,12 +150,28 @@ function CountdownChip({ label, value }: { readonly label: string; readonly valu
   );
 }
 
-function NavButton({ onClick, label }: { readonly onClick: () => void; readonly label: string }) {
+function NavButton({
+  onClick,
+  label,
+  disabled = false,
+  className = "",
+  suppressHydrationWarning = false,
+}: {
+  readonly onClick: () => void;
+  readonly label: string;
+  readonly disabled?: boolean;
+  readonly className?: string;
+  readonly suppressHydrationWarning?: boolean;
+}) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className="rounded-md border px-2.5 py-1 text-sm font-medium tabular-nums transition-opacity hover:opacity-70"
+      disabled={disabled}
+      suppressHydrationWarning={suppressHydrationWarning}
+      className={`rounded-md border px-2.5 py-1 text-sm font-medium tabular-nums transition-opacity ${
+        disabled ? "cursor-default opacity-40" : "hover:opacity-70"
+      } ${className}`}
       style={{ borderColor: "var(--border)", color: "var(--text)" }}
     >
       {label}
