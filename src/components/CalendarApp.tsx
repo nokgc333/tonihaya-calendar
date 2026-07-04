@@ -1,17 +1,31 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { getCountdowns, type Countdown } from "@/domain/countdown";
 import { clampYear } from "@/domain/view";
 import { useZoomState } from "@/hooks/useZoomState";
 import { TodayHeader } from "@/components/TodayHeader";
-import { OverviewBody } from "@/components/OverviewBody";
+import { OverviewBody, type OverviewLayout } from "@/components/OverviewBody";
 import { MonthDetail } from "@/components/MonthDetail";
+
+const LAYOUT_STORAGE_KEY = "tonihaya.overviewLayout";
 
 export function CalendarApp() {
   const { zoom, today, navigate } = useZoomState();
   const countdowns: Countdown | null = today
     ? getCountdowns(today.year, today.month, today.day)
     : null;
+
+  // 俯瞰レイアウト（3行×4列 / 4行×3列）。localStorage に保存し次回以降も維持。
+  const [overviewLayout, setOverviewLayout] = useState<OverviewLayout>("3x4");
+  useEffect(() => {
+    const saved = localStorage.getItem(LAYOUT_STORAGE_KEY);
+    if (saved === "3x4" || saved === "4x3") setOverviewLayout(saved);
+  }, []);
+  const changeOverviewLayout = (next: OverviewLayout): void => {
+    setOverviewLayout(next);
+    localStorage.setItem(LAYOUT_STORAGE_KEY, next);
+  };
 
   return (
     // min-w で375px以下はレイアウトを固定（それ未満は横スクロールで切り捨て）。
@@ -23,8 +37,10 @@ export function CalendarApp() {
           <OverviewBody
             year={zoom.year}
             today={today}
+            layout={overviewLayout}
             onYearChange={(y) => navigate({ level: "overview", year: clampYear(y) }, "replace")}
             onMonthClick={(m) => navigate({ level: "month", year: zoom.year, month: m }, "push")}
+            onLayoutChange={changeOverviewLayout}
           />
         </div>
       ) : (

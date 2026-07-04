@@ -4,6 +4,9 @@ import { MAX_YEAR, MIN_YEAR, buildYearView, clampYear, resolveYearInput } from "
 import { MonthCard } from "@/components/MonthCard";
 import { useEffect, useState } from "react";
 
+/** 俯瞰カレンダーの表示レイアウト（3行×4列 / 4行×3列） */
+export type OverviewLayout = "3x4" | "4x3";
+
 interface CivilDate {
   readonly year: number;
   readonly month: number;
@@ -13,13 +16,17 @@ interface CivilDate {
 export function OverviewBody({
   year,
   today,
+  layout,
   onYearChange,
   onMonthClick,
+  onLayoutChange,
 }: {
   readonly year: number;
   readonly today: CivilDate | null;
+  readonly layout: OverviewLayout;
   readonly onYearChange: (year: number) => void;
   readonly onMonthClick: (month: number) => void;
+  readonly onLayoutChange: (layout: OverviewLayout) => void;
 }) {
   const [yearDraft, setYearDraft] = useState<string>(String(year));
   useEffect(() => setYearDraft(String(year)), [year]);
@@ -28,6 +35,9 @@ export function OverviewBody({
   const isCurrentYear = today !== null && year === today.year;
 
   const commitYearDraft = (): void => onYearChange(resolveYearInput(yearDraft, year));
+
+  // 4行×3列のときは ≥1288px でのみカードを拡大し、3列で幅いっぱいを埋める（縦横比保持）。
+  const zoomClass = layout === "4x3" ? "min-[1288px]:[zoom:1.34]" : "";
 
   return (
     <>
@@ -50,12 +60,20 @@ export function OverviewBody({
         <NavButton onClick={() => onYearChange(clampYear(year + 10))} label="10 ››" />
         <NavButton onClick={() => onYearChange(today?.year ?? new Date().getFullYear())} label="今年" disabled={isCurrentYear} className="ml-1" suppressHydrationWarning />
         <span className="ml-2 text-[11px]" style={{ color: "var(--text-faint)" }}>{MIN_YEAR}–{MAX_YEAR}</span>
+
+        {/* レイアウト切替は広い画面(≥1288px)でのみ表示 */}
+        <div className="ml-auto hidden items-center gap-1 min-[1288px]:flex">
+          <span className="mr-1 text-[11px]" style={{ color: "var(--text-muted)" }}>表示</span>
+          <LayoutButton label="3×4" active={layout === "3x4"} onClick={() => onLayoutChange("3x4")} />
+          <LayoutButton label="4×3" active={layout === "4x3"} onClick={() => onLayoutChange("4x3")} />
+        </div>
       </nav>
 
-      {/* カードは常に305×236pxで固定。幅に応じて4→3→2→1列に折り返し、余りは中央寄せの余白にする。 */}
+      {/* カードは305×242pxで固定。幅に応じて折り返し、余りは中央寄せの余白にする。
+          4×3選択かつ≥1288pxではzoomで拡大し3列に。 */}
       <div className="flex flex-wrap justify-center gap-3">
         {view.months.map((m) => (
-          <div key={m.month} className="w-[305px]">
+          <div key={m.month} className={`w-[305px] ${zoomClass}`}>
             <MonthCard
               month={m}
               weekStart="sun"
@@ -90,6 +108,32 @@ function NavButton({
       suppressHydrationWarning={suppressHydrationWarning}
       className={`rounded-md border px-2.5 py-1 text-sm font-medium tabular-nums transition-opacity ${disabled ? "cursor-default opacity-40" : "hover:opacity-70"} ${className}`}
       style={{ borderColor: "var(--border)", color: "var(--text)" }}
+    >
+      {label}
+    </button>
+  );
+}
+
+function LayoutButton({
+  label,
+  active,
+  onClick,
+}: {
+  readonly label: string;
+  readonly active: boolean;
+  readonly onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={`rounded-md border px-2 py-1 text-xs tabular-nums transition-opacity ${active ? "font-bold" : "opacity-60 hover:opacity-100"}`}
+      style={{
+        borderColor: active ? "var(--border-strong)" : "var(--border)",
+        color: "var(--text)",
+        background: active ? "var(--surface)" : "transparent",
+      }}
     >
       {label}
     </button>
