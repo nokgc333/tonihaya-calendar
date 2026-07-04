@@ -69,6 +69,7 @@ function buildMonthView(
         weekday: d.weekday,
         inMonth: d.inMonth,
         isToday:
+          d.inMonth &&
           today !== null &&
           today.year === d.year &&
           today.month === d.month &&

@@ -36,6 +36,16 @@ describe("buildYearView", () => {
     expect(other.isToday).toBe(false);
   });
 
+  test("本日フラグは年間で1セルのみ（隣月のパディング日には立たない）", () => {
+    // 2026-07-04 は6月カードの翌月パディングにも現れるが、本日は在月セルのみ
+    const view = buildYearView(2026, { year: 2026, month: 7, day: 4 }, DEFAULT_SETTINGS);
+    const todayCells = view.months
+      .flatMap((m) => m.weeks.flat())
+      .filter((c) => c.isToday);
+    expect(todayCells).toHaveLength(1);
+    expect(todayCells[0].inMonth).toBe(true);
+  });
+
   test("土日フラグ（2024-01-06 土 / 2024-01-07 日）", () => {
     const jan = buildYearView(2024, null, DEFAULT_SETTINGS).months[0];
     const sat = jan.weeks.flat().find((c) => c.inMonth && c.day === 6)!;
