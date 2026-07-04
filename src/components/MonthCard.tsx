@@ -6,7 +6,13 @@ const WEEKDAY_LABELS = ["日", "月", "火", "水", "木", "金", "土"] as cons
 // 月は最大6週。年・月によって4〜6週と変動するが、カード高さを一定に保つため
 // 常に6行分の行トラックを確保する（不足週は空トラックで高さのみ担保）。
 const RESERVED_WEEK_ROWS = 6;
-const DAY_ROW_HEIGHT = "1.5rem"; // DayCellView の h-6 と一致させる
+
+// L0俯瞰は sm、L1単月は lg。行の高さ・文字サイズ・本日円のサイズを切り替える。
+export type MonthCardSize = "sm" | "lg";
+const SIZE = {
+  sm: { row: "1.5rem", dayText: "text-[11px]", circle: "h-6 w-6", weekday: "text-[10px]" },
+  lg: { row: "3.375rem", dayText: "text-base", circle: "h-9 w-9", weekday: "text-xs" },
+} as const;
 
 function weekdayHeader(weekStart: WeekStart): readonly string[] {
   return weekStart === "mon"
@@ -21,14 +27,14 @@ function dayColor(cell: DayCell): string {
   return "var(--text)";
 }
 
-function DayCellView({ cell }: { readonly cell: DayCell }) {
-  const base =
-    "flex h-6 items-center justify-center text-[11px] leading-none tabular-nums";
+function DayCellView({ cell, size }: { readonly cell: DayCell; readonly size: MonthCardSize }) {
+  const s = SIZE[size];
+  const base = `flex h-full items-center justify-center ${s.dayText} leading-none tabular-nums`;
   if (cell.isToday) {
     return (
       <div className={base}>
         <span
-          className="flex h-6 w-6 items-center justify-center rounded-full font-bold"
+          className={`flex ${s.circle} items-center justify-center rounded-full font-bold`}
           style={{ background: "var(--today-bg)", color: "var(--today-fg)" }}
           aria-current="date"
         >
@@ -53,11 +59,13 @@ export function MonthCard({
   weekStart,
   onClick,
   viewTransitionName,
+  size = "sm",
 }: {
   readonly month: MonthView;
   readonly weekStart: WeekStart;
   readonly onClick?: () => void;
   readonly viewTransitionName?: string;
+  readonly size?: MonthCardSize;
 }) {
   return (
     <section
@@ -80,7 +88,7 @@ export function MonthCard({
         {weekdayHeader(weekStart).map((label, i) => (
           <div
             key={label}
-            className="flex h-5 items-center justify-center text-[10px] font-medium"
+            className={`flex h-5 items-center justify-center ${SIZE[size].weekday} font-medium`}
             style={{
               color:
                 i === (weekStart === "mon" ? 6 : 0)
@@ -98,11 +106,11 @@ export function MonthCard({
       <div
         className="grid grid-cols-7 gap-y-0.5"
         style={{
-          gridTemplateRows: `repeat(${RESERVED_WEEK_ROWS}, ${DAY_ROW_HEIGHT})`,
+          gridTemplateRows: `repeat(${RESERVED_WEEK_ROWS}, ${SIZE[size].row})`,
         }}
       >
         {month.weeks.flat().map((cell, i) => (
-          <DayCellView key={i} cell={cell} />
+          <DayCellView key={i} cell={cell} size={size} />
         ))}
       </div>
     </section>

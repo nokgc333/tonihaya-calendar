@@ -71,12 +71,12 @@ export function MonthDetail({
       </nav>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[2fr_1fr]">
-        <div style={{ viewTransitionName: `month-${month}` }} className="text-lg">
-          <MonthCard month={detail.month} weekStart="sun" />
+        <div style={{ viewTransitionName: `month-${month}` }}>
+          <MonthCard month={detail.month} weekStart="sun" size="lg" />
         </div>
 
         <aside
-          className="rounded-xl border p-4"
+          className="self-start rounded-xl border p-4"
           style={{ borderColor: "var(--border)", background: "var(--surface)" }}
         >
           <div className="mb-3 flex items-baseline gap-2">
@@ -85,9 +85,9 @@ export function MonthDetail({
               {detail.month.labelEn} / {detail.month.labelWafu}
             </span>
           </div>
-          <div className="mb-4 flex gap-4 text-sm" style={{ color: "var(--text-muted)" }}>
-            <span>{detail.dayCount}日</span>
-            <span>祝日 {detail.holidayCount}件</span>
+          <div className="mb-4 flex gap-6">
+            <Stat label="日数" value={detail.dayCount} unit="日" />
+            <Stat label="祝日" value={detail.holidayCount} unit="件" />
           </div>
           <h2 className="mb-2 text-xs font-semibold" style={{ color: "var(--text-muted)" }}>
             祝日
@@ -97,7 +97,10 @@ export function MonthDetail({
           ) : (
             <ul className="flex flex-col gap-1">
               {detail.holidays.map((h) => (
-                <li key={`${h.date.month}-${h.date.day}-${h.name}`} className="flex items-baseline gap-2 text-sm">
+                <li
+                  key={`${h.date.month}-${h.date.day}-${h.name}`}
+                  className="grid grid-cols-[4.75rem_1fr] items-baseline gap-2 text-sm"
+                >
                   <span className="tabular-nums" style={{ color: "var(--accent-red)" }}>
                     {h.date.month}/{h.date.day}
                     <span className="ml-1 text-[10px]" style={{ color: "var(--text-muted)" }}>
@@ -111,6 +114,30 @@ export function MonthDetail({
           )}
         </aside>
       </div>
+    </div>
+  );
+}
+
+function Stat({
+  label,
+  value,
+  unit,
+}: {
+  readonly label: string;
+  readonly value: number;
+  readonly unit: string;
+}) {
+  return (
+    <div className="flex flex-col gap-0.5">
+      <span className="text-[10px] font-medium" style={{ color: "var(--text-muted)" }}>
+        {label}
+      </span>
+      <span className="text-2xl font-bold leading-none tabular-nums">
+        {value}
+        <span className="ml-0.5 text-xs font-normal" style={{ color: "var(--text-muted)" }}>
+          {unit}
+        </span>
+      </span>
     </div>
   );
 }
