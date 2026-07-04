@@ -104,7 +104,7 @@ export function MonthCard({
         )}
       </header>
 
-      <div className="grid grid-cols-7">
+      <div className="grid grid-cols-7 pb-1.5">
         {weekdayHeader(weekStart).map((label, i) => (
           <div
             key={label}
@@ -124,7 +124,7 @@ export function MonthCard({
       </div>
 
       <div
-        className={`grid grid-cols-7 gap-y-0.5 ${spacious ? "aspect-[7/6]" : ""}`}
+        className={`grid grid-cols-7 gap-y-0.5 ${spacious ? "aspect-[7/5.3]" : ""}`}
         style={{
           gridTemplateRows: spacious
             ? `repeat(${RESERVED_WEEK_ROWS}, minmax(0, 1fr))`
