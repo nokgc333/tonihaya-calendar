@@ -37,7 +37,9 @@ export function CalendarApp() {
             today={today}
             countdowns={countdowns}
             onBack={() => navigate({ level: "overview", year: zoom.year }, "push")}
-            onMonthChange={(m) => navigate({ level: "month", year: zoom.year, month: m }, "replace")}
+            onMonthChange={(y, m) =>
+              navigate({ level: "month", year: clampYear(y), month: m }, "replace")
+            }
           />
         </div>
       )}

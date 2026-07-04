@@ -31,7 +31,7 @@ export function MonthDetail({
   readonly today: CivilDate | null;
   readonly countdowns: Countdown | null;
   readonly onBack: () => void;
-  readonly onMonthChange: (month: number) => void;
+  readonly onMonthChange: (year: number, month: number) => void;
 }) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent): void => {
@@ -45,7 +45,7 @@ export function MonthDetail({
 
   return (
     <div>
-      <nav className="mb-4 flex items-center gap-2">
+      <nav className="mb-4 flex min-h-10 items-center gap-2">
         <button
           type="button"
           onClick={onBack}
@@ -58,7 +58,9 @@ export function MonthDetail({
         <div className="ml-2 flex items-center gap-1.5">
           <button
             type="button"
-            onClick={() => onMonthChange(month === 1 ? 12 : month - 1)}
+            onClick={() =>
+              month === 1 ? onMonthChange(year - 1, 12) : onMonthChange(year, month - 1)
+            }
             className="rounded-md border px-2 py-1 text-sm transition-opacity hover:opacity-70"
             style={{ borderColor: "var(--border)", color: "var(--text)" }}
             aria-label="前の月"
@@ -70,7 +72,9 @@ export function MonthDetail({
           </span>
           <button
             type="button"
-            onClick={() => onMonthChange(month === 12 ? 1 : month + 1)}
+            onClick={() =>
+              month === 12 ? onMonthChange(year + 1, 1) : onMonthChange(year, month + 1)
+            }
             className="rounded-md border px-2 py-1 text-sm transition-opacity hover:opacity-70"
             style={{ borderColor: "var(--border)", color: "var(--text)" }}
             aria-label="次の月"
@@ -108,7 +112,7 @@ export function MonthDetail({
               {detail.month.labelEn} / {detail.month.labelWafu}
             </span>
           </div>
-          <div className="mb-4 flex flex-col gap-1.5">
+          <div className="mb-4 grid grid-cols-4 gap-2">
             <Stat label="祝日" value={detail.holidayCount} unit="日" />
             <Stat label="総日数" value={detail.dayCount} unit="日" />
             <Stat label="営業日" value={detail.businessDayCount} unit="日" />
@@ -155,13 +159,13 @@ function Stat({
   readonly unit: string;
 }) {
   return (
-    <div className="flex items-baseline gap-2">
-      <span className="w-[4.75rem] shrink-0 text-xs" style={{ color: "var(--text-muted)" }}>
+    <div className="flex flex-col gap-0.5">
+      <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>
         {label}
       </span>
-      <span className="text-lg font-bold tabular-nums">
+      <span className="text-lg font-bold leading-none tabular-nums">
         {value}
-        <span className="ml-0.5 text-xs font-normal" style={{ color: "var(--text-muted)" }}>
+        <span className="ml-0.5 text-[10px] font-normal" style={{ color: "var(--text-muted)" }}>
           {unit}
         </span>
       </span>
