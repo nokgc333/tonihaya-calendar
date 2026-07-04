@@ -1,5 +1,5 @@
-import { Overview } from "@/components/Overview";
+import { CalendarApp } from "@/components/CalendarApp";
 
 export default function Home() {
-  return <Overview />;
+  return <CalendarApp />;
 }

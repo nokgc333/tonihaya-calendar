@@ -51,14 +51,20 @@ function DayCellView({ cell }: { readonly cell: DayCell }) {
 export function MonthCard({
   month,
   weekStart,
+  onClick,
+  viewTransitionName,
 }: {
   readonly month: MonthView;
   readonly weekStart: WeekStart;
+  readonly onClick?: () => void;
+  readonly viewTransitionName?: string;
 }) {
   return (
     <section
-      className="rounded-xl border p-3"
-      style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+      className={`rounded-xl border p-3 text-left ${onClick ? "cursor-pointer transition-colors hover:border-[var(--border-strong)]" : ""}`}
+      style={{ borderColor: "var(--border)", background: "var(--surface)", viewTransitionName }}
+      onClick={onClick}
+      {...(onClick ? { role: "button", tabIndex: 0, onKeyDown: (e: React.KeyboardEvent) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onClick(); } } } : {})}
     >
       <header className="mb-2 flex items-baseline gap-2">
         <span className="text-lg font-bold">{month.labelJa}</span>
