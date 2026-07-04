@@ -45,7 +45,7 @@ export function MonthDetail({
 
   return (
     <div>
-      <nav className="mb-4 flex min-h-10 items-center gap-2">
+      <nav className="mb-5 flex min-h-10 items-center gap-2">
         <button
           type="button"
           onClick={onBack}
