@@ -34,8 +34,8 @@ export function MonthDetail({
   const detail = buildMonthDetail(year, month, today, { weekStart: "sun" });
 
   return (
-    <div>
-      <nav className="mb-4 flex items-center gap-2">
+    <div className="flex h-full flex-col">
+      <nav className="mb-4 flex shrink-0 items-center gap-2">
         <button
           type="button"
           onClick={onBack}
@@ -70,9 +70,9 @@ export function MonthDetail({
         </div>
       </nav>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[2fr_1fr]">
-        <div style={{ viewTransitionName: `month-${month}` }}>
-          <MonthCard month={detail.month} weekStart="sun" size="lg" />
+      <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-[2fr_1fr]">
+        <div className="flex min-h-0 flex-col" style={{ viewTransitionName: `month-${month}` }}>
+          <MonthCard month={detail.month} weekStart="sun" size="lg" fillHeight />
         </div>
 
         <aside
@@ -86,7 +86,7 @@ export function MonthDetail({
             </span>
           </div>
           <div className="mb-4 flex flex-wrap gap-x-5 gap-y-3">
-            <Stat label="祝日" value={detail.holidayCount} unit="件" />
+            <Stat label="祝日" value={detail.holidayCount} unit="日" />
             <Stat label="総日数" value={detail.dayCount} unit="日" />
             <Stat label="営業日" value={detail.businessDayCount} unit="日" />
             <Stat label="営業日残" value={detail.businessDaysRemaining} unit="日" />

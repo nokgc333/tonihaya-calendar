@@ -27,9 +27,19 @@ function dayColor(cell: DayCell): string {
   return "var(--text)";
 }
 
-function DayCellView({ cell, size }: { readonly cell: DayCell; readonly size: MonthCardSize }) {
+function DayCellView({
+  cell,
+  size,
+  fillHeight,
+}: {
+  readonly cell: DayCell;
+  readonly size: MonthCardSize;
+  readonly fillHeight: boolean;
+}) {
   const s = SIZE[size];
-  const base = `flex h-full items-center justify-center ${s.dayText} leading-none tabular-nums`;
+  // 高さ充填時は日付を上端寄せにし、下部に予定を入れる余白を残す。
+  const vAlign = fillHeight ? "items-start pt-1.5" : "items-center";
+  const base = `flex h-full justify-center ${vAlign} ${s.dayText} leading-none tabular-nums`;
   if (cell.isToday) {
     return (
       <div className={base}>
@@ -60,28 +70,38 @@ export function MonthCard({
   onClick,
   viewTransitionName,
   size = "sm",
+  fillHeight = false,
 }: {
   readonly month: MonthView;
   readonly weekStart: WeekStart;
   readonly onClick?: () => void;
   readonly viewTransitionName?: string;
   readonly size?: MonthCardSize;
+  readonly fillHeight?: boolean;
 }) {
   return (
     <section
-      className={`rounded-xl border p-3 text-left ${onClick ? "cursor-pointer transition-colors hover:border-[var(--border-strong)]" : ""}`}
+      className={`rounded-xl border p-3 text-left ${fillHeight ? "flex h-full flex-col" : ""} ${onClick ? "cursor-pointer transition-colors hover:border-[var(--border-strong)]" : ""}`}
       style={{ borderColor: "var(--border)", background: "var(--surface)", viewTransitionName }}
       onClick={onClick}
       {...(onClick ? { role: "button", tabIndex: 0, onKeyDown: (e: React.KeyboardEvent) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onClick(); } } } : {})}
     >
       <header className="mb-2 flex items-baseline gap-2">
         <span className="text-lg font-bold">{month.labelJa}</span>
-        <span className="text-[11px]" style={{ color: "var(--text-muted)" }}>
-          {month.labelEn}
-        </span>
-        <span className="ml-auto text-[11px]" style={{ color: "var(--text-muted)" }}>
-          {month.labelWafu}
-        </span>
+        {size === "lg" ? (
+          <span className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+            {month.labelEn} / {month.labelWafu}
+          </span>
+        ) : (
+          <>
+            <span className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+              {month.labelEn}
+            </span>
+            <span className="ml-auto text-[11px]" style={{ color: "var(--text-muted)" }}>
+              {month.labelWafu}
+            </span>
+          </>
+        )}
       </header>
 
       <div className="grid grid-cols-7">
@@ -104,13 +124,15 @@ export function MonthCard({
       </div>
 
       <div
-        className="grid grid-cols-7 gap-y-0.5"
+        className={`grid grid-cols-7 gap-y-0.5 ${fillHeight ? "min-h-0 flex-1" : ""}`}
         style={{
-          gridTemplateRows: `repeat(${RESERVED_WEEK_ROWS}, ${SIZE[size].row})`,
+          gridTemplateRows: fillHeight
+            ? `repeat(${RESERVED_WEEK_ROWS}, minmax(0, 1fr))`
+            : `repeat(${RESERVED_WEEK_ROWS}, ${SIZE[size].row})`,
         }}
       >
         {month.weeks.flat().map((cell, i) => (
-          <DayCellView key={i} cell={cell} size={size} />
+          <DayCellView key={i} cell={cell} size={size} fillHeight={fillHeight} />
         ))}
       </div>
     </section>
