@@ -27,7 +27,7 @@ function dayColor(cell: DayCell): string {
   return "var(--text)";
 }
 
-/** 単月(spacious)のセル背景。色分けは当月のみ。前後月・平日は面色。 */
+/** セル背景。色分けは当月のみ（土曜=水色・日祝=赤/ピンク）。前後月・平日は面色。 */
 function dayBg(cell: DayCell): string {
   if (!cell.inMonth) return "var(--surface)";
   if (cell.isSunday || cell.isHoliday) return "var(--sun-bg)";
@@ -48,8 +48,8 @@ function DayCellView({
   // ゆったり表示時は日付を上端寄せにし、下部に予定を入れる余白を残す。
   const vAlign = spacious ? "items-start pt-1.5" : "items-center";
   const base = `flex h-full justify-center ${vAlign} ${s.dayText} leading-none tabular-nums`;
-  // 罫線が見えるよう常にセル背景を敷く。spacious は当月の土日祝を色分けする。
-  const bgStyle = { background: spacious ? dayBg(cell) : "var(--surface)" };
+  // 罫線が見えるよう常にセル背景を敷く。当月の土日祝を色分けする（L0/L1共通）。
+  const bgStyle = { background: dayBg(cell) };
   if (cell.isToday) {
     return (
       <div className={base} style={bgStyle}>
