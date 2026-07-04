@@ -79,3 +79,17 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ズーム遷移（View Transitions API）。非対応・reduced-motion では自動的に無効 */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 220ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
