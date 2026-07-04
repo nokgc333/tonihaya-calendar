@@ -136,7 +136,7 @@ export function MonthCard({
       </div>
 
       <div
-        className={`grid grid-cols-7 gap-px overflow-hidden rounded-md border ${spacious ? "aspect-[7/5.3]" : ""}`}
+        className={`grid grid-cols-7 gap-px border ${spacious ? "aspect-[7/5.3]" : ""}`}
         style={{
           gridTemplateRows: spacious
             ? `repeat(${RESERVED_WEEK_ROWS}, minmax(0, 1fr))`
