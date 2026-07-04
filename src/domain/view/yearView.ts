@@ -55,7 +55,7 @@ interface CivilDate {
   readonly day: number;
 }
 
-function buildMonthView(
+export function buildMonthView(
   year: number,
   month: number,
   today: CivilDate | null,
