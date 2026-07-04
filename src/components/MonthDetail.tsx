@@ -2,7 +2,9 @@
 
 import { useEffect } from "react";
 import { buildMonthDetail } from "@/domain/view";
+import type { Countdown } from "@/domain/countdown";
 import { MonthCard } from "@/components/MonthCard";
+import { CountdownChips } from "@/components/CountdownChips";
 
 interface CivilDate {
   readonly year: number;
@@ -12,21 +14,29 @@ interface CivilDate {
 
 const WEEKDAY_JA = ["日", "月", "火", "水", "木", "金", "土"] as const;
 
+// カレンダーは縦横比固定（正方形セル）。幅を上限で抑えることで高さ（約800px）を制御する。
+// 縦積み時は aside もこの幅に統一する。
+const PANEL_WIDTH = "w-full max-w-[800px]";
+
 export function MonthDetail({
   year,
   month,
   today,
+  countdowns,
   onBack,
   onMonthChange,
 }: {
   readonly year: number;
   readonly month: number;
   readonly today: CivilDate | null;
+  readonly countdowns: Countdown | null;
   readonly onBack: () => void;
   readonly onMonthChange: (month: number) => void;
 }) {
   useEffect(() => {
-    const onKey = (e: KeyboardEvent): void => { if (e.key === "Escape") onBack(); };
+    const onKey = (e: KeyboardEvent): void => {
+      if (e.key === "Escape") onBack();
+    };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [onBack]);
@@ -34,8 +44,8 @@ export function MonthDetail({
   const detail = buildMonthDetail(year, month, today, { weekStart: "sun" });
 
   return (
-    <div className="flex h-full flex-col">
-      <nav className="mb-4 flex shrink-0 items-center gap-2">
+    <div>
+      <nav className="mb-4 flex items-center gap-2">
         <button
           type="button"
           onClick={onBack}
@@ -70,14 +80,25 @@ export function MonthDetail({
         </div>
       </nav>
 
-      <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-[2fr_1fr]">
-        <div className="flex min-h-0 flex-col" style={{ viewTransitionName: `month-${month}` }}>
-          <MonthCard month={detail.month} weekStart="sun" size="lg" fillHeight />
+      {/* ≥1024px: [カレンダー | aside] 横並び。≤1023px: 縦積み（幅を統一）。 */}
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
+        <div
+          className={`${PANEL_WIDTH} mx-auto lg:mx-0 lg:max-w-[800px] lg:flex-1`}
+          style={{ viewTransitionName: `month-${month}` }}
+        >
+          <MonthCard month={detail.month} weekStart="sun" size="lg" spacious />
         </div>
 
+        {/* 遊びセクションは ≤712px のときだけカレンダー直下・aside直上に表示する。 */}
+        {countdowns && (
+          <div className={`${PANEL_WIDTH} mx-auto min-[713px]:hidden`}>
+            <CountdownChips countdowns={countdowns} />
+          </div>
+        )}
+
+        {/* aside はカレンダーと別物として、塗り箱をやめ統計チップ＋祝日リストで構成する。 */}
         <aside
-          className="self-start rounded-xl border p-4"
-          style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+          className={`${PANEL_WIDTH} mx-auto lg:mx-0 lg:w-80 lg:max-w-none lg:shrink-0`}
         >
           <div className="mb-3 flex items-baseline gap-2">
             <span className="text-2xl font-bold">{detail.month.labelJa}</span>
@@ -85,17 +106,19 @@ export function MonthDetail({
               {detail.month.labelEn} / {detail.month.labelWafu}
             </span>
           </div>
-          <div className="mb-4 flex flex-wrap gap-x-5 gap-y-3">
-            <Stat label="祝日" value={detail.holidayCount} unit="日" />
-            <Stat label="総日数" value={detail.dayCount} unit="日" />
-            <Stat label="営業日" value={detail.businessDayCount} unit="日" />
-            <Stat label="営業日残" value={detail.businessDaysRemaining} unit="日" />
+          <div className="mb-4 flex flex-wrap gap-2">
+            <StatChip label="祝日" value={detail.holidayCount} unit="日" />
+            <StatChip label="総日数" value={detail.dayCount} unit="日" />
+            <StatChip label="営業日" value={detail.businessDayCount} unit="日" />
+            <StatChip label="営業日残" value={detail.businessDaysRemaining} unit="日" />
           </div>
           <h2 className="mb-2 text-xs font-semibold" style={{ color: "var(--text-muted)" }}>
             祝日
           </h2>
           {detail.holidays.length === 0 ? (
-            <p className="text-sm" style={{ color: "var(--text-faint)" }}>祝日なし</p>
+            <p className="text-sm" style={{ color: "var(--text-faint)" }}>
+              祝日なし
+            </p>
           ) : (
             <ul className="flex flex-col gap-1">
               {detail.holidays.map((h) => (
@@ -120,7 +143,7 @@ export function MonthDetail({
   );
 }
 
-function Stat({
+function StatChip({
   label,
   value,
   unit,
@@ -130,16 +153,19 @@ function Stat({
   readonly unit: string;
 }) {
   return (
-    <div className="flex flex-col gap-0.5">
-      <span className="text-[10px] font-medium" style={{ color: "var(--text-muted)" }}>
+    <div
+      className="rounded-lg border px-3 py-2"
+      style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+    >
+      <div className="text-[10px] font-medium" style={{ color: "var(--text-muted)" }}>
         {label}
-      </span>
-      <span className="text-2xl font-bold leading-none tabular-nums">
+      </div>
+      <div className="text-xl font-bold leading-none tabular-nums">
         {value}
         <span className="ml-0.5 text-xs font-normal" style={{ color: "var(--text-muted)" }}>
           {unit}
         </span>
-      </span>
+      </div>
     </div>
   );
 }

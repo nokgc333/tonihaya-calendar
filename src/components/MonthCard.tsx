@@ -30,15 +30,15 @@ function dayColor(cell: DayCell): string {
 function DayCellView({
   cell,
   size,
-  fillHeight,
+  spacious,
 }: {
   readonly cell: DayCell;
   readonly size: MonthCardSize;
-  readonly fillHeight: boolean;
+  readonly spacious: boolean;
 }) {
   const s = SIZE[size];
-  // 高さ充填時は日付を上端寄せにし、下部に予定を入れる余白を残す。
-  const vAlign = fillHeight ? "items-start pt-1.5" : "items-center";
+  // ゆったり表示時は日付を上端寄せにし、下部に予定を入れる余白を残す。
+  const vAlign = spacious ? "items-start pt-1.5" : "items-center";
   const base = `flex h-full justify-center ${vAlign} ${s.dayText} leading-none tabular-nums`;
   if (cell.isToday) {
     return (
@@ -70,18 +70,18 @@ export function MonthCard({
   onClick,
   viewTransitionName,
   size = "sm",
-  fillHeight = false,
+  spacious = false,
 }: {
   readonly month: MonthView;
   readonly weekStart: WeekStart;
   readonly onClick?: () => void;
   readonly viewTransitionName?: string;
   readonly size?: MonthCardSize;
-  readonly fillHeight?: boolean;
+  readonly spacious?: boolean;
 }) {
   return (
     <section
-      className={`rounded-xl border p-3 text-left ${fillHeight ? "flex h-full flex-col" : ""} ${onClick ? "cursor-pointer transition-colors hover:border-[var(--border-strong)]" : ""}`}
+      className={`rounded-xl border p-3 text-left ${onClick ? "cursor-pointer transition-colors hover:border-[var(--border-strong)]" : ""}`}
       style={{ borderColor: "var(--border)", background: "var(--surface)", viewTransitionName }}
       onClick={onClick}
       {...(onClick ? { role: "button", tabIndex: 0, onKeyDown: (e: React.KeyboardEvent) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onClick(); } } } : {})}
@@ -124,15 +124,15 @@ export function MonthCard({
       </div>
 
       <div
-        className={`grid grid-cols-7 gap-y-0.5 ${fillHeight ? "min-h-0 flex-1" : ""}`}
+        className={`grid grid-cols-7 gap-y-0.5 ${spacious ? "aspect-[7/6]" : ""}`}
         style={{
-          gridTemplateRows: fillHeight
+          gridTemplateRows: spacious
             ? `repeat(${RESERVED_WEEK_ROWS}, minmax(0, 1fr))`
             : `repeat(${RESERVED_WEEK_ROWS}, ${SIZE[size].row})`,
         }}
       >
         {month.weeks.flat().map((cell, i) => (
-          <DayCellView key={i} cell={cell} size={size} fillHeight={fillHeight} />
+          <DayCellView key={i} cell={cell} size={size} spacious={spacious} />
         ))}
       </div>
     </section>
