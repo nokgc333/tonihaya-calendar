@@ -1,0 +1,81 @@
+@import "tailwindcss";
+
+/* ── デザイントークン（モノクロ基調 × 意味の最小アクセント） ── */
+:root {
+  --bg: #ffffff;
+  --surface: #fbfbfb;
+  --border: #ececec;
+  --border-strong: #d4d4d4;
+  --text: #171717;
+  --text-muted: #6b7280;
+  --text-faint: #c4c7cc;
+  --accent-red: #cc1a2b; /* 日曜・祝日 */
+  --accent-sat: #3f5573; /* 土曜（控えめ寒色） */
+  --today-bg: #171717; /* 本日 */
+  --today-fg: #ffffff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0e0f11;
+    --surface: #16181b;
+    --border: #26292e;
+    --border-strong: #3a3e45;
+    --text: #ededed;
+    --text-muted: #9aa0a8;
+    --text-faint: #4b4f56;
+    --accent-red: #ff5a67;
+    --accent-sat: #8fb0d9;
+    --today-bg: #ededed;
+    --today-fg: #0e0f11;
+  }
+}
+
+:root[data-theme="light"] {
+  --bg: #ffffff;
+  --surface: #fbfbfb;
+  --border: #ececec;
+  --border-strong: #d4d4d4;
+  --text: #171717;
+  --text-muted: #6b7280;
+  --text-faint: #c4c7cc;
+  --accent-red: #cc1a2b;
+  --accent-sat: #3f5573;
+  --today-bg: #171717;
+  --today-fg: #ffffff;
+}
+
+:root[data-theme="dark"] {
+  --bg: #0e0f11;
+  --surface: #16181b;
+  --border: #26292e;
+  --border-strong: #3a3e45;
+  --text: #ededed;
+  --text-muted: #9aa0a8;
+  --text-faint: #4b4f56;
+  --accent-red: #ff5a67;
+  --accent-sat: #8fb0d9;
+  --today-bg: #ededed;
+  --today-fg: #0e0f11;
+}
+
+html {
+  color-scheme: light dark;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family:
+    ui-sans-serif, system-ui, -apple-system, "Hiragino Kaku Gothic ProN",
+    "Noto Sans JP", Meiryo, sans-serif;
+  font-feature-settings: "tnum" 1; /* 等幅数字で桁揃え */
+  -webkit-font-smoothing: antialiased;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
