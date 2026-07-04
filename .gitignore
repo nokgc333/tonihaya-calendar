@@ -25,3 +25,6 @@ bin/
 
 # typescript incremental build cache
 *.tsbuildinfo
+
+# SDD scratch (task briefs, reports, progress ledger)
+.superpowers/
