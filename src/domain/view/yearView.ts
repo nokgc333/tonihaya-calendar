@@ -99,9 +99,8 @@ export function buildYearView(
   const months = Array.from({ length: MONTHS_PER_YEAR }, (_, i) =>
     buildMonthView(year, i + 1, today, settings.weekStart),
   );
+  // 遊びセクションは本日基準の事実。表示年に依らず常に算出する
   const countdowns =
-    today !== null && today.year === year
-      ? getCountdowns(today.year, today.month, today.day)
-      : null;
+    today !== null ? getCountdowns(today.year, today.month, today.day) : null;
   return { year, months, countdowns };
 }

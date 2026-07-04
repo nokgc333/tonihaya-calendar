@@ -54,10 +54,16 @@ describe("buildYearView", () => {
     expect(sun.isSunday).toBe(true);
   });
 
-  test("today がその年に属するとき countdowns を含む", () => {
-    const view = buildYearView(2024, { year: 2024, month: 7, day: 4 }, DEFAULT_SETTINGS);
-    expect(view.countdowns).not.toBeNull();
+  test("today が既知なら表示年に依らず countdowns を含む（本日基準・常時表示）", () => {
+    const sameYear = buildYearView(2024, { year: 2024, month: 7, day: 4 }, DEFAULT_SETTINGS);
     const otherYear = buildYearView(2025, { year: 2024, month: 7, day: 4 }, DEFAULT_SETTINGS);
-    expect(otherYear.countdowns).toBeNull();
+    expect(sameYear.countdowns).not.toBeNull();
+    expect(otherYear.countdowns).not.toBeNull();
+    // 本日基準なので表示年が変わっても値は同じ
+    expect(otherYear.countdowns).toEqual(sameYear.countdowns);
+  });
+
+  test("today が null なら countdowns は null", () => {
+    expect(buildYearView(2024, null, DEFAULT_SETTINGS).countdowns).toBeNull();
   });
 });
