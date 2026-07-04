@@ -83,7 +83,7 @@ export function MonthDetail({
       {/* 収まる幅では [カレンダー | aside] 横並び。収まらない幅では aside をカレンダー下へ。 */}
       <div className={`flex flex-col gap-4 ${SIDE_BY_SIDE}`}>
         <div
-          className="w-full min-[1168px]:w-[800px] min-[1168px]:shrink-0"
+          className="w-full max-w-[800px] min-[1168px]:w-[800px] min-[1168px]:max-w-none min-[1168px]:shrink-0"
           style={{ viewTransitionName: `month-${month}` }}
         >
           <MonthCard month={detail.month} weekStart="sun" size="lg" spacious />
@@ -91,14 +91,15 @@ export function MonthDetail({
 
         {/* 遊びセクションは ≤712px のときだけカレンダー直下・aside直上に表示する（幅いっぱい・2行中央）。 */}
         {countdowns && (
-          <div className="w-full min-[713px]:hidden">
+          <div className="w-full max-w-[800px] min-[713px]:hidden">
             <CountdownChips countdowns={countdowns} block />
           </div>
         )}
 
-        {/* aside はカードUIを維持しつつ背景を少し明るく(--surface-2)してカレンダーと区別する。 */}
+        {/* aside はカードUIを維持しつつ背景を少し明るく(--surface-2)してカレンダーと区別する。
+            横並び時はラッパー右端まで広げ、ヘッダーと左右余白を揃える。 */}
         <aside
-          className="w-full rounded-xl border p-4 min-[1168px]:w-80 min-[1168px]:max-w-none min-[1168px]:shrink-0"
+          className="w-full max-w-[800px] rounded-xl border p-4 min-[1168px]:w-auto min-[1168px]:max-w-none min-[1168px]:flex-1"
           style={{ borderColor: "var(--border)", background: "var(--surface-2)" }}
         >
           <div className="mb-3 flex items-baseline gap-2">
@@ -155,10 +156,10 @@ function Stat({
 }) {
   return (
     <div className="flex items-baseline gap-2">
-      <span className="w-14 shrink-0 text-xs" style={{ color: "var(--text-muted)" }}>
+      <span className="w-[4.75rem] shrink-0 text-xs" style={{ color: "var(--text-muted)" }}>
         {label}
       </span>
-      <span className="w-12 text-right text-lg font-bold tabular-nums">
+      <span className="text-lg font-bold tabular-nums">
         {value}
         <span className="ml-0.5 text-xs font-normal" style={{ color: "var(--text-muted)" }}>
           {unit}

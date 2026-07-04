@@ -28,9 +28,8 @@ export function CalendarApp() {
           />
         </div>
       ) : (
-        // L1はヘッダー・ナビ・本体を同じ最大幅ラッパーに入れ、左右の余白を統一する。
-        // 横並び(≥1168px)では1136px、縦積みでは800pxに揃える。
-        <div className="mx-auto w-full max-w-[800px] min-[1168px]:max-w-[1136px]">
+        // L1もL0と同じ最大幅(1256px)ラッパーに入れ、ヘッダー・ナビ・本体の左右余白をL0と統一する。
+        <div className="mx-auto w-full max-w-[1256px]">
           <TodayHeader today={today} countdowns={countdowns} />
           <MonthDetail
             year={zoom.year}
