@@ -86,8 +86,9 @@ export function MonthDetail({
             </span>
           </div>
           <div className="mb-4 flex gap-6">
-            <Stat label="日数" value={detail.dayCount} unit="日" />
             <Stat label="祝日" value={detail.holidayCount} unit="件" />
+            <Stat label="総日数" value={detail.dayCount} unit="日" />
+            <Stat label="営業日" value={detail.businessDayCount} unit="日" />
           </div>
           <h2 className="mb-2 text-xs font-semibold" style={{ color: "var(--text-muted)" }}>
             祝日

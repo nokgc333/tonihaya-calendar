@@ -11,7 +11,7 @@ const RESERVED_WEEK_ROWS = 6;
 export type MonthCardSize = "sm" | "lg";
 const SIZE = {
   sm: { row: "1.5rem", dayText: "text-[11px]", circle: "h-6 w-6", weekday: "text-[10px]" },
-  lg: { row: "3.375rem", dayText: "text-base", circle: "h-9 w-9", weekday: "text-xs" },
+  lg: { row: "5.0625rem", dayText: "text-base", circle: "h-9 w-9", weekday: "text-xs" },
 } as const;
 
 function weekdayHeader(weekStart: WeekStart): readonly string[] {
