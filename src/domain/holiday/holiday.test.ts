@@ -72,3 +72,16 @@ describe("getHolidaysInYear", () => {
     expect(keys).toEqual([...keys].sort((a, b) => a - b));
   });
 });
+
+import { getHolidaysInMonth } from "./holiday";
+
+describe("getHolidaysInMonth", () => {
+  test("5月(2026)は全て month===5", () => {
+    const list = getHolidaysInMonth(2026, 5);
+    expect(list.length).toBeGreaterThan(0);
+    expect(list.every((h) => h.date.month === 5)).toBe(true);
+  });
+  test("6月(2026)は祝日なし", () => {
+    expect(getHolidaysInMonth(2026, 6)).toHaveLength(0);
+  });
+});

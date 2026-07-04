@@ -108,3 +108,8 @@ export function isHoliday(year: number, month: number, day: number): boolean {
 export function getHolidaysInYear(year: number): Holiday[] {
   return computeYearHolidays(year);
 }
+
+/** 指定年月の祝日一覧（振替含む・日付昇順） */
+export function getHolidaysInMonth(year: number, month: number): Holiday[] {
+  return getHolidaysInYear(year).filter((h) => h.date.month === month);
+}
