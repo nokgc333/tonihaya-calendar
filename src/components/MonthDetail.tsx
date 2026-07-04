@@ -112,7 +112,7 @@ export function MonthDetail({
               {detail.month.labelEn} / {detail.month.labelWafu}
             </span>
           </div>
-          <div className="mb-4 grid grid-cols-4 gap-2">
+          <div className="mb-4 grid grid-cols-4 justify-items-start gap-2">
             <Stat label="祝日" value={detail.holidayCount} unit="日" />
             <Stat label="総日数" value={detail.dayCount} unit="日" />
             <Stat label="営業日" value={detail.businessDayCount} unit="日" />
@@ -159,7 +159,7 @@ function Stat({
   readonly unit: string;
 }) {
   return (
-    <div className="flex flex-col items-end gap-0.5 text-right">
+    <div className="flex flex-col items-center gap-0.5 text-center">
       <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>
         {label}
       </span>
