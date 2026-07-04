@@ -1,11 +1,15 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { buildYearView } from "@/domain/view";
+import {
+  MAX_YEAR,
+  MIN_YEAR,
+  buildYearView,
+  clampYear,
+  resolveYearInput,
+} from "@/domain/view";
 import { MonthCard } from "@/components/MonthCard";
 
-const MIN_YEAR = 1950;
-const MAX_YEAR = 2150;
 const WEEKDAY_JA = ["日", "月", "火", "水", "木", "金", "土"] as const;
 
 interface CivilDate {
@@ -14,8 +18,6 @@ interface CivilDate {
   readonly day: number;
 }
 
-const clampYear = (y: number): number => Math.min(MAX_YEAR, Math.max(MIN_YEAR, y));
-
 function weekdayJa(date: CivilDate): string {
   return WEEKDAY_JA[new Date(Date.UTC(date.year, date.month - 1, date.day)).getUTCDay()];
 }
@@ -23,6 +25,8 @@ function weekdayJa(date: CivilDate): string {
 export function Overview() {
   const [today, setToday] = useState<CivilDate | null>(null);
   const [year, setYear] = useState<number>(() => new Date().getFullYear());
+  // 入力中は自由に編集できるドラフト。確定時にのみ year へ反映する
+  const [yearDraft, setYearDraft] = useState<string>(() => String(new Date().getFullYear()));
 
   useEffect(() => {
     const now = new Date();
@@ -35,12 +39,24 @@ export function Overview() {
     setYear(clampYear(current.year));
   }, []);
 
+  // 年がボタン等で変わったら入力欄の表示も同期する
+  useEffect(() => {
+    setYearDraft(String(year));
+  }, [year]);
+
   const view = useMemo(
     () => buildYearView(year, today, { weekStart: "sun" }),
     [year, today],
   );
 
   const shiftYear = (delta: number): void => setYear((y) => clampYear(y + delta));
+
+  // 入力欄の確定（Enter / フォーカスアウト）: クランプして反映、無効なら現在値へ戻す
+  const commitYearDraft = (): void => {
+    const resolved = resolveYearInput(yearDraft, year);
+    setYear(resolved);
+    setYearDraft(String(resolved));
+  };
 
   return (
     <main className="mx-auto max-w-[1400px] px-4 py-5">
@@ -74,13 +90,20 @@ export function Overview() {
         <NavButton onClick={() => shiftYear(-1)} label="‹ 1" />
         <input
           type="number"
-          value={year}
+          value={yearDraft}
           min={MIN_YEAR}
           max={MAX_YEAR}
-          onChange={(e) => setYear(clampYear(Number(e.target.value) || year))}
+          onChange={(e) => setYearDraft(e.target.value)}
+          onBlur={commitYearDraft}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              commitYearDraft();
+              e.currentTarget.blur();
+            }
+          }}
           className="w-24 rounded-md border bg-transparent px-2 py-1 text-center text-lg font-bold tabular-nums"
           style={{ borderColor: "var(--border-strong)", color: "var(--text)" }}
-          aria-label="表示する年"
+          aria-label="表示する年（Enterで確定）"
         />
         <NavButton onClick={() => shiftYear(1)} label="1 ›" />
         <NavButton onClick={() => shiftYear(10)} label="10 ››" />
