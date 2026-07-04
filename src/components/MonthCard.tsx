@@ -86,10 +86,12 @@ export function MonthCard({
       onClick={onClick}
       {...(onClick ? { role: "button", tabIndex: 0, onKeyDown: (e: React.KeyboardEvent) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onClick(); } } } : {})}
     >
-      <header className="mb-2 flex items-baseline gap-2">
-        <span className="text-lg font-bold">{month.labelJa}</span>
+      <header className={`flex items-baseline gap-2 ${size === "lg" ? "mb-3" : "mb-2"}`}>
+        <span className={`font-bold ${size === "lg" ? "text-2xl" : "text-lg"}`}>
+          {month.labelJa}
+        </span>
         {size === "lg" ? (
-          <span className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+          <span className="text-sm" style={{ color: "var(--text-muted)" }}>
             {month.labelEn} / {month.labelWafu}
           </span>
         ) : (

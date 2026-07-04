@@ -31,7 +31,7 @@ export function OverviewBody({
 
   return (
     <>
-      <nav className="mb-5 flex items-center gap-1.5">
+      <nav className="mb-5 flex min-h-10 items-center gap-1.5">
         <NavButton onClick={() => onYearChange(clampYear(year - 10))} label="‹‹ 10" />
         <NavButton onClick={() => onYearChange(clampYear(year - 1))} label="‹ 1" />
         <input
