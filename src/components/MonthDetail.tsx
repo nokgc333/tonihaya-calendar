@@ -158,7 +158,7 @@ function Stat({
       <span className="w-14 shrink-0 text-xs" style={{ color: "var(--text-muted)" }}>
         {label}
       </span>
-      <span className="text-lg font-bold tabular-nums">
+      <span className="w-12 text-right text-lg font-bold tabular-nums">
         {value}
         <span className="ml-0.5 text-xs font-normal" style={{ color: "var(--text-muted)" }}>
           {unit}
