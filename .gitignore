@@ -22,3 +22,6 @@ npm-debug.log*
 *.test
 *.out
 bin/
+
+# typescript incremental build cache
+*.tsbuildinfo
