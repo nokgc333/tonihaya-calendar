@@ -4,8 +4,8 @@
 :root {
   --bg: #ffffff;
   --surface: #fbfbfb;
-  /* aside 用の少し濃い面色。ライトは濃く・ダークは明るく、テーマに応じて自動調整。 */
-  --surface-2: color-mix(in srgb, var(--surface) 88%, var(--text) 12%);
+  /* aside 用の面色。--surface より少し明るく（浮いて見える）してカレンダーと区別する。 */
+  --surface-2: #ffffff;
   --border: #ececec;
   --border-strong: #d4d4d4;
   --text: #171717;
@@ -21,6 +21,7 @@
   :root {
     --bg: #0e0f11;
     --surface: #16181b;
+    --surface-2: #1e2126;
     --border: #26292e;
     --border-strong: #3a3e45;
     --text: #ededed;
@@ -36,6 +37,7 @@
 :root[data-theme="light"] {
   --bg: #ffffff;
   --surface: #fbfbfb;
+  --surface-2: #ffffff;
   --border: #ececec;
   --border-strong: #d4d4d4;
   --text: #171717;
@@ -50,6 +52,7 @@
 :root[data-theme="dark"] {
   --bg: #0e0f11;
   --surface: #16181b;
+  --surface-2: #1e2126;
   --border: #26292e;
   --border-strong: #3a3e45;
   --text: #ededed;
