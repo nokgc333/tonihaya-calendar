@@ -17,7 +17,8 @@ export function CalendarApp() {
     // min-w で375px以下はレイアウトを固定（それ未満は横スクロールで切り捨て）。
     <main className="mx-auto min-w-[375px] max-w-[1400px] px-4 py-5">
       {zoom.level === "overview" || zoom.month === undefined ? (
-        <>
+        // L0もヘッダー・ナビ・カード群を4列ぶん(1256px)の最大幅ラッパーに入れ左右余白を統一。
+        <div className="mx-auto w-full max-w-[1256px]">
           <TodayHeader today={today} countdowns={countdowns} />
           <OverviewBody
             year={zoom.year}
@@ -25,7 +26,7 @@ export function CalendarApp() {
             onYearChange={(y) => navigate({ level: "overview", year: clampYear(y) }, "replace")}
             onMonthClick={(m) => navigate({ level: "month", year: zoom.year, month: m }, "push")}
           />
-        </>
+        </div>
       ) : (
         // L1はヘッダー・ナビ・本体を同じ最大幅ラッパーに入れ、左右の余白を統一する。
         // 横並び(≥1168px)では1136px、縦積みでは800pxに揃える。
