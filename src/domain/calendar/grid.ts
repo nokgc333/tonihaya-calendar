@@ -18,6 +18,8 @@ export function daysInMonth(year: number, month: number): number {
 }
 
 const DAYS_PER_WEEK = 7;
+/** 月グリッドの固定週数（月は最大6週。高さ固定のため常に6週で返す） */
+const WEEKS_PER_MONTH_GRID = 6;
 
 /**
  * 指定年月のカレンダーグリッドを週配列で返す。
@@ -31,9 +33,9 @@ export function getMonthGrid(
   const startOffset = weekStart === "sun" ? 0 : 1;
   const firstWeekday = weekdayOf(year, month, 1);
   const leadingCount = (firstWeekday - startOffset + DAYS_PER_WEEK) % DAYS_PER_WEEK;
-  const totalDays = daysInMonth(year, month);
-  const cellCount =
-    Math.ceil((leadingCount + totalDays) / DAYS_PER_WEEK) * DAYS_PER_WEEK;
+  // カード高さを一定に保つため、月の週数(4〜6)に依らず常に6週で返す。
+  // 不足分は前後月の日で埋める（UI側で淡色表示）。
+  const cellCount = WEEKS_PER_MONTH_GRID * DAYS_PER_WEEK;
 
   const days: CalendarDay[] = [];
   for (let i = 0; i < cellCount; i++) {

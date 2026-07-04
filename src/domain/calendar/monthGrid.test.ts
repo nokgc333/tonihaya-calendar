@@ -6,6 +6,13 @@ const flat = (weeks: readonly (readonly CalendarDay[])[]): CalendarDay[] =>
   weeks.flatMap((w) => [...w]);
 
 describe("getMonthGrid", () => {
+  test("週数に依らず常に6週を返す（カード高さ固定・空行を作らないため）", () => {
+    // 2026-02 は自然には4週だが、6週ぶんを翌月の日で埋めて返す
+    expect(getMonthGrid(2026, 2, "sun")).toHaveLength(6);
+    // 自然に5週の月も6週に揃える
+    expect(getMonthGrid(2024, 1, "sun")).toHaveLength(6);
+  });
+
   test("各週はちょうど7日で構成される", () => {
     const grid = getMonthGrid(2024, 1, "sun");
     for (const week of grid) {
