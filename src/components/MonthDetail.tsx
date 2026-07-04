@@ -17,6 +17,8 @@ const WEEKDAY_JA = ["日", "月", "火", "水", "木", "金", "土"] as const;
 // カレンダーは縦横比固定（正方形セル）。幅を上限で抑えることで高さ（約800px）を制御する。
 // 縦積み時は aside もこの幅に統一する。
 const PANEL_WIDTH = "w-full max-w-[800px]";
+// カレンダー(800) + gap(16) + aside(320) が収まらない幅では aside をカレンダー下へ回す。
+const SIDE_BY_SIDE = "min-[1168px]:flex-row min-[1168px]:items-start min-[1168px]:justify-center";
 
 export function MonthDetail({
   year,
@@ -80,25 +82,26 @@ export function MonthDetail({
         </div>
       </nav>
 
-      {/* ≥1024px: [カレンダー | aside] 横並び。≤1023px: 縦積み（幅を統一）。 */}
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
+      {/* 収まる幅では [カレンダー | aside] 横並び中央寄せ。収まらない幅では aside をカレンダー下へ。 */}
+      <div className={`flex flex-col items-center gap-4 ${SIDE_BY_SIDE}`}>
         <div
-          className={`${PANEL_WIDTH} mx-auto lg:mx-0 lg:max-w-[800px] lg:flex-1`}
+          className={`${PANEL_WIDTH} min-[1168px]:w-[800px] min-[1168px]:shrink-0`}
           style={{ viewTransitionName: `month-${month}` }}
         >
           <MonthCard month={detail.month} weekStart="sun" size="lg" spacious />
         </div>
 
-        {/* 遊びセクションは ≤712px のときだけカレンダー直下・aside直上に表示する。 */}
+        {/* 遊びセクションは ≤712px のときだけカレンダー直下・aside直上に縦並びで表示する。 */}
         {countdowns && (
-          <div className={`${PANEL_WIDTH} mx-auto min-[713px]:hidden`}>
-            <CountdownChips countdowns={countdowns} />
+          <div className={`${PANEL_WIDTH} min-[713px]:hidden`}>
+            <CountdownChips countdowns={countdowns} vertical />
           </div>
         )}
 
-        {/* aside はカレンダーと別物として、塗り箱をやめ統計チップ＋祝日リストで構成する。 */}
+        {/* aside はカードUIを維持しつつ背景を少し濃く(--surface-2)してカレンダーと区別する。 */}
         <aside
-          className={`${PANEL_WIDTH} mx-auto lg:mx-0 lg:w-80 lg:max-w-none lg:shrink-0`}
+          className={`${PANEL_WIDTH} rounded-xl border p-4 min-[1168px]:w-80 min-[1168px]:max-w-none min-[1168px]:shrink-0`}
+          style={{ borderColor: "var(--border)", background: "var(--surface-2)" }}
         >
           <div className="mb-3 flex items-baseline gap-2">
             <span className="text-2xl font-bold">{detail.month.labelJa}</span>
@@ -106,11 +109,11 @@ export function MonthDetail({
               {detail.month.labelEn} / {detail.month.labelWafu}
             </span>
           </div>
-          <div className="mb-4 flex flex-wrap gap-2">
-            <StatChip label="祝日" value={detail.holidayCount} unit="日" />
-            <StatChip label="総日数" value={detail.dayCount} unit="日" />
-            <StatChip label="営業日" value={detail.businessDayCount} unit="日" />
-            <StatChip label="営業日残" value={detail.businessDaysRemaining} unit="日" />
+          <div className="mb-4 flex flex-col gap-1.5">
+            <Stat label="祝日" value={detail.holidayCount} unit="日" />
+            <Stat label="総日数" value={detail.dayCount} unit="日" />
+            <Stat label="営業日" value={detail.businessDayCount} unit="日" />
+            <Stat label="営業日残" value={detail.businessDaysRemaining} unit="日" />
           </div>
           <h2 className="mb-2 text-xs font-semibold" style={{ color: "var(--text-muted)" }}>
             祝日
@@ -143,7 +146,7 @@ export function MonthDetail({
   );
 }
 
-function StatChip({
+function Stat({
   label,
   value,
   unit,
@@ -153,19 +156,16 @@ function StatChip({
   readonly unit: string;
 }) {
   return (
-    <div
-      className="rounded-lg border px-3 py-2"
-      style={{ borderColor: "var(--border)", background: "var(--surface)" }}
-    >
-      <div className="text-[10px] font-medium" style={{ color: "var(--text-muted)" }}>
+    <div className="flex items-baseline justify-between gap-4">
+      <span className="text-xs" style={{ color: "var(--text-muted)" }}>
         {label}
-      </div>
-      <div className="text-xl font-bold leading-none tabular-nums">
+      </span>
+      <span className="text-lg font-bold tabular-nums">
         {value}
         <span className="ml-0.5 text-xs font-normal" style={{ color: "var(--text-muted)" }}>
           {unit}
         </span>
-      </div>
+      </span>
     </div>
   );
 }

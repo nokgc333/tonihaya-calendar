@@ -1,9 +1,15 @@
 import type { Countdown } from "@/domain/countdown";
 
 /** 本日基準の遊びセクション（土曜/月末/四半期末/年末まで）のチップ群 */
-export function CountdownChips({ countdowns }: { readonly countdowns: Countdown }) {
+export function CountdownChips({
+  countdowns,
+  vertical = false,
+}: {
+  readonly countdowns: Countdown;
+  readonly vertical?: boolean;
+}) {
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className={vertical ? "flex flex-col items-start gap-2" : "flex flex-wrap gap-2"}>
       <CountdownChip label="土曜まで" value={countdowns.toSaturday} />
       <CountdownChip label="月末まで" value={countdowns.toMonthEnd} />
       <CountdownChip label="四半期末まで" value={countdowns.toQuarterEnd} />

@@ -4,6 +4,8 @@
 :root {
   --bg: #ffffff;
   --surface: #fbfbfb;
+  /* aside 用の少し濃い面色。ライトは濃く・ダークは明るく、テーマに応じて自動調整。 */
+  --surface-2: color-mix(in srgb, var(--surface) 88%, var(--text) 12%);
   --border: #ececec;
   --border-strong: #d4d4d4;
   --text: #171717;
