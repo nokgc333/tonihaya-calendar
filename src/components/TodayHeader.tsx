@@ -1,4 +1,5 @@
 import type { Countdown } from "@/domain/countdown";
+import { CountdownChips } from "@/components/CountdownChips";
 
 const WEEKDAY_JA = ["日", "月", "火", "水", "木", "金", "土"] as const;
 
@@ -29,24 +30,12 @@ export function TodayHeader({
           {today ? `${today.year}年${today.month}月${today.day}日(${weekdayJa(today)})` : ""}
         </h1>
       </div>
+      {/* 遊びセクションは狭幅(≤712px)では単月ビュー内に移すため、ここでは非表示にする */}
       {countdowns && (
-        <div className="flex flex-wrap gap-2" suppressHydrationWarning>
-          <CountdownChip label="土曜まで" value={countdowns.toSaturday} />
-          <CountdownChip label="月末まで" value={countdowns.toMonthEnd} />
-          <CountdownChip label="四半期末まで" value={countdowns.toQuarterEnd} />
-          <CountdownChip label="年末まで" value={countdowns.toYearEnd} />
+        <div className="max-[712px]:hidden" suppressHydrationWarning>
+          <CountdownChips countdowns={countdowns} />
         </div>
       )}
     </header>
-  );
-}
-
-function CountdownChip({ label, value }: { readonly label: string; readonly value: number }) {
-  return (
-    <div className="rounded-lg border px-3 py-1.5" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
-      <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>{label}</span>
-      <span className="ml-1.5 text-base font-bold tabular-nums">{value}</span>
-      <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>日</span>
-    </div>
   );
 }
