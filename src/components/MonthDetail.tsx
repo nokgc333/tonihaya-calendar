@@ -159,7 +159,7 @@ function Stat({
   readonly unit: string;
 }) {
   return (
-    <div className="flex flex-col items-center gap-0.5 text-center">
+    <div className="flex flex-col items-end gap-0.5 text-right">
       <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>
         {label}
       </span>
