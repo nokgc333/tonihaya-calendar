@@ -6,6 +6,9 @@
   --surface: #fbfbfb;
   /* aside 用の面色。--surface より少し明るく（浮いて見える）してカレンダーと区別する。 */
   --surface-2: #ffffff;
+  /* 単月カレンダーの土曜=水色・日祝=赤/ピンクの薄い背景。テーマに応じて自動調整。 */
+  --sat-bg: color-mix(in srgb, #3b82f6 13%, var(--surface));
+  --sun-bg: color-mix(in srgb, #ef4444 11%, var(--surface));
   --border: #ececec;
   --border-strong: #d4d4d4;
   --text: #171717;

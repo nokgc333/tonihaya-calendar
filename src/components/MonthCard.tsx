@@ -27,6 +27,13 @@ function dayColor(cell: DayCell): string {
   return "var(--text)";
 }
 
+/** 単月(spacious)のセル背景。土曜=水色・日祝=赤/ピンク・平日=面色。 */
+function dayBg(cell: DayCell): string {
+  if (cell.isSunday || cell.isHoliday) return "var(--sun-bg)";
+  if (cell.isSaturday) return "var(--sat-bg)";
+  return "var(--surface)";
+}
+
 function DayCellView({
   cell,
   size,
@@ -40,9 +47,11 @@ function DayCellView({
   // ゆったり表示時は日付を上端寄せにし、下部に予定を入れる余白を残す。
   const vAlign = spacious ? "items-start pt-1.5" : "items-center";
   const base = `flex h-full justify-center ${vAlign} ${s.dayText} leading-none tabular-nums`;
+  // spacious のときだけセル背景（土日祝の色分け）を敷く。
+  const bgStyle = spacious ? { background: dayBg(cell) } : {};
   if (cell.isToday) {
     return (
-      <div className={base}>
+      <div className={base} style={bgStyle}>
         <span
           className={`flex ${s.circle} items-center justify-center rounded-full font-bold`}
           style={{ background: "var(--today-bg)", color: "var(--today-fg)" }}
@@ -56,7 +65,7 @@ function DayCellView({
   return (
     <div
       className={base}
-      style={{ color: dayColor(cell), opacity: cell.inMonth ? 1 : 0.55 }}
+      style={{ ...bgStyle, color: dayColor(cell), opacity: cell.inMonth ? 1 : 0.55 }}
       title={cell.holidayName}
     >
       {cell.day}
@@ -126,11 +135,15 @@ export function MonthCard({
       </div>
 
       <div
-        className={`grid grid-cols-7 gap-y-0.5 ${spacious ? "aspect-[7/5.3]" : ""}`}
+        className={`grid grid-cols-7 ${spacious ? "aspect-[7/5.3] gap-px overflow-hidden rounded-md border" : "gap-y-0.5"}`}
         style={{
           gridTemplateRows: spacious
             ? `repeat(${RESERVED_WEEK_ROWS}, minmax(0, 1fr))`
             : `repeat(${RESERVED_WEEK_ROWS}, ${SIZE[size].row})`,
+          // spacious は 1px の隙間に線色(--border)を透けさせて各日の境界線＋薄い外枠にする。
+          ...(spacious
+            ? { background: "var(--border)", borderColor: "var(--border)" }
+            : {}),
         }}
       >
         {month.weeks.flat().map((cell, i) => (
