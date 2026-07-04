@@ -52,15 +52,17 @@ export function OverviewBody({
         <span className="ml-2 text-[11px]" style={{ color: "var(--text-faint)" }}>{MIN_YEAR}–{MAX_YEAR}</span>
       </nav>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      {/* カードは常に305×236pxで固定。幅に応じて4→3→2→1列に折り返し、余りは中央寄せの余白にする。 */}
+      <div className="flex flex-wrap justify-center gap-3">
         {view.months.map((m) => (
-          <MonthCard
-            key={m.month}
-            month={m}
-            weekStart="sun"
-            viewTransitionName={`month-${m.month}`}
-            onClick={() => onMonthClick(m.month)}
-          />
+          <div key={m.month} className="w-[305px]">
+            <MonthCard
+              month={m}
+              weekStart="sun"
+              viewTransitionName={`month-${m.month}`}
+              onClick={() => onMonthClick(m.month)}
+            />
+          </div>
         ))}
       </div>
     </>
