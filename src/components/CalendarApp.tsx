@@ -65,6 +65,12 @@ export function CalendarApp() {
   // L2⇄L3ズームの起点となる「日ピボット」。日クリック時にflushSyncで確定し、
   // 遷移キャプチャ前にL2の当該日ヘッダー列へ hour-zoom を反映させる。
   const [dayPivot, setDayPivot] = useState<CivilDate | null>(null);
+  // L2/L3の外に出たら（overview/month）ピボットを掃除し、次のL1⇄L2ズームに
+  // 古いdayPivotが残って day-zoom を誤って無効化しないようにする。
+  // ブラウザ戻る(popstate)経由でも確実にクリアされるようzoom.levelを監視する。
+  useEffect(() => {
+    if (zoom.level !== "week" && zoom.level !== "day") setDayPivot(null);
+  }, [zoom.level]);
   const openDay = (y: number, m: number, d: number): void => {
     const target: CivilDate = { year: clampYear(y), month: m, day: d };
     flushSync(() => setDayPivot(target));
