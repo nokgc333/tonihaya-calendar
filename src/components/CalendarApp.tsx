@@ -88,9 +88,12 @@ export function CalendarApp() {
                   "push",
                 )
               }
-              onDayChange={(y, m, dd) =>
-                navigate({ level: "day", year: clampYear(y), month: m, day: dd }, "replace")
-              }
+              onDayChange={(y, m, dd) => {
+                // L3内で日送りしたら、戻り時のモーフが現在表示日の列に着地するよう
+                // ピボットも追従させる（古い日の列へ hour-zoom が残るのを防ぐ）。
+                setDayPivot({ year: clampYear(y), month: m, day: dd });
+                navigate({ level: "day", year: clampYear(y), month: m, day: dd }, "replace");
+              }}
             />
           </div>
         </div>
