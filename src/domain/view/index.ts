@@ -8,3 +8,5 @@ export { buildMonthDetail } from "./monthDetail";
 export type { MonthDetail } from "./monthDetail";
 export { buildWeekView, minutesToOffset } from "./weekView";
 export type { WeekDay, WeekViewModel } from "./weekView";
+export { buildDayView } from "./dayView";
+export type { DayViewModel } from "./dayView";

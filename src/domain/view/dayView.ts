@@ -1,0 +1,44 @@
+import { getHoliday } from "../holiday";
+import { weekdayOf } from "../shared/date";
+import type { WeekDay } from "./weekView";
+
+const SUNDAY = 0;
+const SATURDAY = 6;
+
+interface CivilDate {
+  readonly year: number;
+  readonly month: number;
+  readonly day: number;
+}
+
+export interface DayViewModel {
+  readonly day: WeekDay;
+}
+
+/** 単一日の表示モデルを組み立てる（祝日・土日・today を判定）。 */
+export function buildDayView(
+  year: number,
+  month: number,
+  day: number,
+  today: CivilDate | null,
+): DayViewModel {
+  const weekday = weekdayOf(year, month, day);
+  const holiday = getHoliday(year, month, day);
+  return {
+    day: {
+      year,
+      month,
+      day,
+      weekday,
+      isToday:
+        today !== null &&
+        today.year === year &&
+        today.month === month &&
+        today.day === day,
+      isHoliday: holiday !== null,
+      holidayName: holiday?.name,
+      isSaturday: weekday === SATURDAY,
+      isSunday: weekday === SUNDAY,
+    },
+  };
+}
