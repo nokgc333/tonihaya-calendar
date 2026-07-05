@@ -115,21 +115,18 @@ export function DayView({
         className="flex min-h-0 flex-1 flex-col rounded-md border"
         style={{ borderColor: "var(--border)", viewTransitionName: "hour-zoom" }}
       >
-        {/* 大きな日付ヘッダー（sticky）。L2週ビューのヘッダー行コンテナ(高さ48.5px・
-            直下pb-1.5)とボックス寸法を揃え、ビュー間で見た目を統一する。テキストは中央揃え。
-            祝日名がある日は伸びる。 */}
+        {/* 大きな日付ヘッダー（sticky）。終日行・時間グリッドと同じGRID_COLSのグリッドにし、
+            第1セル(時間軸3.5rem)を空け、日付は第2セル(日カラム)内で中央寄せ。これにより
+            終日行/時間列と中央軸が揃う。祝日名は終日行に出るのでここには表示しない。
+            高さ48.5px・直下pb-1.5でL2ヘッダー行とボックス寸法を統一する。 */}
         <div
-          className="sticky top-0 z-10 flex min-h-[48.5px] shrink-0 flex-col justify-center pb-1.5"
-          style={{ background: "var(--surface)" }}
+          className="sticky top-0 z-10 grid min-h-[48.5px] shrink-0 items-center pb-1.5"
+          style={{ gridTemplateColumns: GRID_COLS, background: "var(--surface)" }}
         >
+          <div />
           <div className="text-center text-lg font-bold tabular-nums" style={{ color: dayColor(d) }}>
             {year}年{month}月{day}日（{WEEKDAY_JA[d.weekday]}）
           </div>
-          {d.holidayName ? (
-            <div className="text-center text-xs" style={{ color: "var(--accent-red)" }}>
-              {d.holidayName}
-            </div>
-          ) : null}
         </div>
 
         {/* 終日行 */}
