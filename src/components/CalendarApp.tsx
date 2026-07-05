@@ -7,6 +7,7 @@ import { useZoomState } from "@/hooks/useZoomState";
 import { TodayHeader } from "@/components/TodayHeader";
 import { OverviewBody, type OverviewLayout } from "@/components/OverviewBody";
 import { MonthDetail } from "@/components/MonthDetail";
+import { WeekView } from "@/components/WeekView";
 
 const LAYOUT_STORAGE_KEY = "tonihaya.overviewLayout";
 
@@ -26,6 +27,26 @@ export function CalendarApp() {
     setOverviewLayout(next);
     localStorage.setItem(LAYOUT_STORAGE_KEY, next);
   };
+
+  if (zoom.level === "week" && zoom.month !== undefined && zoom.day !== undefined) {
+    return (
+      <main className="mx-auto flex h-dvh min-w-[375px] max-w-[1256px] flex-col px-4 py-5">
+        <TodayHeader today={today} countdowns={countdowns} />
+        <div className="min-h-0 flex-1">
+          <WeekView
+            year={zoom.year}
+            month={zoom.month}
+            day={zoom.day}
+            today={today}
+            onBack={() => navigate({ level: "month", year: zoom.year, month: zoom.month! }, "push")}
+            onWeekChange={(y, m, d) =>
+              navigate({ level: "week", year: clampYear(y), month: m, day: d }, "replace")
+            }
+          />
+        </div>
+      </main>
+    );
+  }
 
   return (
     // min-w で375px以下はレイアウトを固定（それ未満は横スクロールで切り捨て）。
@@ -55,6 +76,9 @@ export function CalendarApp() {
             onBack={() => navigate({ level: "overview", year: zoom.year }, "push")}
             onMonthChange={(y, m) =>
               navigate({ level: "month", year: clampYear(y), month: m }, "replace")
+            }
+            onDayClick={(y, m, d) =>
+              navigate({ level: "week", year: clampYear(y), month: m, day: d }, "push")
             }
           />
         </div>

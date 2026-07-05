@@ -25,6 +25,7 @@ export function MonthDetail({
   countdowns,
   onBack,
   onMonthChange,
+  onDayClick,
 }: {
   readonly year: number;
   readonly month: number;
@@ -32,6 +33,7 @@ export function MonthDetail({
   readonly countdowns: Countdown | null;
   readonly onBack: () => void;
   readonly onMonthChange: (year: number, month: number) => void;
+  readonly onDayClick: (year: number, month: number, day: number) => void;
 }) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent): void => {
@@ -90,7 +92,7 @@ export function MonthDetail({
           className="w-full max-w-[800px] min-[1168px]:w-[800px] min-[1168px]:max-w-none min-[1168px]:shrink-0"
           style={{ viewTransitionName: `month-${month}` }}
         >
-          <MonthCard month={detail.month} weekStart="sun" size="lg" spacious />
+          <MonthCard month={detail.month} year={year} weekStart="sun" size="lg" spacious onDayClick={onDayClick} />
         </div>
 
         {/* 遊びセクションは ≤712px のときだけカレンダー直下・aside直上に表示する（幅いっぱい・2行中央）。 */}

@@ -39,20 +39,39 @@ function DayCellView({
   cell,
   size,
   spacious,
+  onDayClick,
+  cellYear,
+  cellMonth,
 }: {
   readonly cell: DayCell;
   readonly size: MonthCardSize;
   readonly spacious: boolean;
+  readonly onDayClick?: (year: number, month: number, day: number) => void;
+  readonly cellYear?: number;
+  readonly cellMonth?: number;
 }) {
   const s = SIZE[size];
-  // ゆったり表示時は日付を上端寄せにし、下部に予定を入れる余白を残す。
   const vAlign = spacious ? "items-start pt-1.5" : "items-center";
-  const base = `flex h-full justify-center ${vAlign} ${s.dayText} leading-none tabular-nums`;
-  // 罫線が見えるよう常にセル背景を敷く。当月の土日祝を色分けする（L0/L1共通）。
+  const clickable = onDayClick && cellYear !== undefined && cellMonth !== undefined ? "cursor-pointer hover:brightness-95" : "";
+  const base = `flex h-full justify-center ${vAlign} ${clickable} ${s.dayText} leading-none tabular-nums`;
   const bgStyle = { background: dayBg(cell) };
+  const handlers =
+    onDayClick && cellYear !== undefined && cellMonth !== undefined
+      ? {
+          role: "button" as const,
+          tabIndex: 0,
+          onClick: () => onDayClick(cellYear, cellMonth, cell.day),
+          onKeyDown: (e: React.KeyboardEvent) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              onDayClick(cellYear, cellMonth, cell.day);
+            }
+          },
+        }
+      : {};
   if (cell.isToday) {
     return (
-      <div className={base} style={bgStyle}>
+      <div className={base} style={bgStyle} {...handlers}>
         <span
           className={`flex ${s.circle} items-center justify-center rounded-full font-bold`}
           style={{ background: "var(--today-bg)", color: "var(--today-fg)" }}
@@ -68,10 +87,26 @@ function DayCellView({
       className={base}
       style={{ ...bgStyle, color: dayColor(cell), opacity: cell.inMonth ? 1 : 0.55 }}
       title={cell.holidayName}
+      {...handlers}
     >
       {cell.day}
     </div>
   );
+}
+
+/** セルが前後月にはみ出ている場合の実際の年・月を解決する（DayCellは年月を持たないため）。 */
+function resolveCellMonth(
+  cells: readonly DayCell[],
+  index: number,
+  year: number,
+  month: number,
+): { readonly year: number; readonly month: number } {
+  if (cells[index].inMonth) return { year, month };
+  const firstInMonthIdx = cells.findIndex((c) => c.inMonth);
+  if (index < firstInMonthIdx) {
+    return month === 1 ? { year: year - 1, month: 12 } : { year, month: month - 1 };
+  }
+  return month === 12 ? { year: year + 1, month: 1 } : { year, month: month + 1 };
 }
 
 export function MonthCard({
@@ -81,6 +116,8 @@ export function MonthCard({
   viewTransitionName,
   size = "sm",
   spacious = false,
+  onDayClick,
+  year,
 }: {
   readonly month: MonthView;
   readonly weekStart: WeekStart;
@@ -88,6 +125,8 @@ export function MonthCard({
   readonly viewTransitionName?: string;
   readonly size?: MonthCardSize;
   readonly spacious?: boolean;
+  readonly onDayClick?: (year: number, month: number, day: number) => void;
+  readonly year?: number;
 }) {
   return (
     <section
@@ -146,9 +185,20 @@ export function MonthCard({
           borderColor: "var(--border)",
         }}
       >
-        {month.weeks.flat().map((cell, i) => (
-          <DayCellView key={i} cell={cell} size={size} spacious={spacious} />
-        ))}
+        {month.weeks.flat().map((cell, i, cells) => {
+          const resolved = year !== undefined ? resolveCellMonth(cells, i, year, month.month) : undefined;
+          return (
+            <DayCellView
+              key={i}
+              cell={cell}
+              size={size}
+              spacious={spacious}
+              onDayClick={onDayClick}
+              cellYear={resolved?.year}
+              cellMonth={resolved?.month}
+            />
+          );
+        })}
       </div>
     </section>
   );
