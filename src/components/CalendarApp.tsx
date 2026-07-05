@@ -39,9 +39,19 @@ export function CalendarApp() {
   // 遷移キャプチャ前にL1へ view-transition-name を反映させる。後退時も同じ日を保持して
   // 週グリッド→日セルへ対称にモーフィングさせる。
   const [pivotDay, setPivotDay] = useState<CivilDate | null>(null);
+  // 週を開いたときのL1の文脈月（＝画面に表示していた月）。前月/翌月のグレーセルを
+  // 押したときでも「戻る」で実日付の月ではなく文脈月へ戻すために保持する。
+  const [weekOrigin, setWeekOrigin] = useState<{ year: number; month: number } | null>(null);
   const openDayWeek = (y: number, m: number, d: number): void => {
     const day: CivilDate = { year: clampYear(y), month: m, day: d };
-    flushSync(() => setPivotDay(day));
+    const origin =
+      zoom.level === "month" && zoom.month !== undefined
+        ? { year: zoom.year, month: zoom.month }
+        : { year: day.year, month: day.month };
+    flushSync(() => {
+      setPivotDay(day);
+      setWeekOrigin(origin);
+    });
     navigate({ level: "week", year: day.year, month: day.month, day: day.day }, "push");
   };
   // L1から週以外へ移動する際は、遷移キャプチャ前にピボットを消して day-zoom セルの
@@ -63,7 +73,11 @@ export function CalendarApp() {
               month={zoom.month}
               day={zoom.day}
               today={today}
-              onBack={() => navigate({ level: "month", year: zoom.year, month: zoom.month! }, "push")}
+              onBack={() => {
+                // 実日付の月ではなく、週を開いた文脈月へ戻す（グレーセル経由でもズレない）。
+                const o = weekOrigin ?? { year: zoom.year, month: zoom.month! };
+                navigate({ level: "month", year: o.year, month: o.month }, "push");
+              }}
               onWeekChange={(y, m, d) =>
                 navigate({ level: "week", year: clampYear(y), month: m, day: d }, "replace")
               }
