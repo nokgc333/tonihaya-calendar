@@ -200,10 +200,11 @@ export function WeekView({
                   <button
                     key={`c-${h}-${d.month}-${d.day}`}
                     type="button"
+                    tabIndex={-1}
+                    aria-hidden="true"
                     onClick={() => onDayOpen(d.year, d.month, d.day)}
                     className="w-full cursor-pointer border-t border-l transition-opacity hover:opacity-80"
                     style={{ height: HOUR_HEIGHT, borderColor: "var(--border)", background: dayBg(d) }}
-                    aria-label={`${d.month}月${d.day}日を開く`}
                   />
                 ))}
               </Fragment>
