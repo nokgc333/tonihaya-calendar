@@ -6,3 +6,5 @@ export type { ZoomState } from "./zoom";
 export { buildMonthView } from "./yearView";
 export { buildMonthDetail } from "./monthDetail";
 export type { MonthDetail } from "./monthDetail";
+export { buildWeekView, minutesToOffset } from "./weekView";
+export type { WeekDay, WeekViewModel } from "./weekView";
