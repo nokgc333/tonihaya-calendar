@@ -152,8 +152,8 @@ export function WeekView({
 
         {/* 終日行（祝日名） */}
         <div
-          className="grid shrink-0 border-b"
-          style={{ gridTemplateColumns: GRID_COLS, borderColor: "var(--border)" }}
+          className="grid shrink-0 border-y"
+          style={{ gridTemplateColumns: GRID_COLS, borderColor: "var(--border-strong)" }}
         >
           <div className="p-1 text-right text-[10px]" style={{ color: "var(--text-muted)" }}>
             終日
