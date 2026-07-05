@@ -115,9 +115,10 @@ export function DayView({
         className="flex min-h-0 flex-1 flex-col rounded-md border"
         style={{ borderColor: "var(--border)", viewTransitionName: "hour-zoom" }}
       >
-        {/* 大きな日付ヘッダー（sticky） */}
+        {/* 大きな日付ヘッダー（sticky）。L2週ビューの日ヘッダー列(p-1・高さ48.5px)と
+            ボックス寸法を揃え、ビュー間で見た目を統一する。祝日名がある日は伸びる。 */}
         <div
-          className="sticky top-0 z-10 shrink-0 px-3 py-2"
+          className="sticky top-0 z-10 flex min-h-[48.5px] shrink-0 flex-col justify-center p-1"
           style={{ background: "var(--surface)" }}
         >
           <div className="text-lg font-bold tabular-nums" style={{ color: dayColor(d) }}>
