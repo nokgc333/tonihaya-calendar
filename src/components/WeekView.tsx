@@ -124,9 +124,12 @@ export function WeekView({
       </nav>
 
       {/* スクロール横断の外枠。列幅を保つため横スクロール可 */}
+      {/* L2⇄L3遷移中(dayPivot非null)は外枠のday-zoomを外し、対応先を持たない外枠が
+          単独スナップショット化してhour-zoomモーフに干渉するのを防ぐ。L1⇄L2遷移時は
+          dayPivotがnullなのでday-zoomが有効になる。 */}
       <div
         className="flex min-h-0 flex-1 flex-col overflow-x-auto rounded-md border"
-        style={{ borderColor: "var(--border)", viewTransitionName: "day-zoom" }}
+        style={{ borderColor: "var(--border)", viewTransitionName: dayPivot ? "none" : "day-zoom" }}
       >
         {/* 曜日+日付ヘッダー（sticky）。L0/L1の曜日行に合わせ外枠なし・面色#fbfbfb。 */}
         <div
