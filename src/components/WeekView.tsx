@@ -108,7 +108,7 @@ export function WeekView({
           >
             ‹
           </button>
-          <span className="min-w-[13rem] text-center text-base font-bold tabular-nums">
+          <span className="min-w-[13rem] text-center text-xl font-bold tabular-nums">
             {first.year}年{first.month}月{first.day}日 〜 {last.month}月{last.day}日
           </span>
           <button

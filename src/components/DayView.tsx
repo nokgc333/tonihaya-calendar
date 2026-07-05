@@ -97,7 +97,7 @@ export function DayView({
           >
             ‹
           </button>
-          <span className="min-w-[12rem] text-center text-base font-bold tabular-nums">
+          <span className="min-w-[12rem] text-center text-xl font-bold tabular-nums">
             {year}年{month}月{day}日（{WEEKDAY_JA[d.weekday]}）
           </span>
           <button
