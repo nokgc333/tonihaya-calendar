@@ -9,6 +9,7 @@ import { TodayHeader } from "@/components/TodayHeader";
 import { OverviewBody, type OverviewLayout } from "@/components/OverviewBody";
 import { MonthDetail } from "@/components/MonthDetail";
 import { WeekView } from "@/components/WeekView";
+import { DayView } from "@/components/DayView";
 
 const LAYOUT_STORAGE_KEY = "tonihaya.overviewLayout";
 
@@ -61,6 +62,33 @@ export function CalendarApp() {
     run();
   };
 
+  if (zoom.level === "day" && zoom.month !== undefined && zoom.day !== undefined) {
+    return (
+      <main className="mx-auto flex h-dvh min-w-[375px] max-w-[1400px] flex-col px-4 py-5">
+        <div className="mx-auto flex min-h-0 w-full max-w-[1256px] flex-1 flex-col">
+          <TodayHeader today={today} countdowns={countdowns} />
+          <div className="min-h-0 flex-1">
+            <DayView
+              year={zoom.year}
+              month={zoom.month}
+              day={zoom.day}
+              today={today}
+              onBack={() =>
+                navigate(
+                  { level: "week", year: zoom.year, month: zoom.month!, day: zoom.day! },
+                  "push",
+                )
+              }
+              onDayChange={(y, m, dd) =>
+                navigate({ level: "day", year: clampYear(y), month: m, day: dd }, "replace")
+              }
+            />
+          </div>
+        </div>
+      </main>
+    );
+  }
+
   if (zoom.level === "week" && zoom.month !== undefined && zoom.day !== undefined) {
     return (
       <main className="mx-auto flex h-dvh min-w-[375px] max-w-[1400px] flex-col px-4 py-5">
@@ -80,6 +108,9 @@ export function CalendarApp() {
               }}
               onWeekChange={(y, m, d) =>
                 navigate({ level: "week", year: clampYear(y), month: m, day: d }, "replace")
+              }
+              onDayOpen={(y, m, d) =>
+                navigate({ level: "day", year: clampYear(y), month: m, day: d }, "push")
               }
             />
           </div>

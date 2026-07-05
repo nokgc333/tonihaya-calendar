@@ -34,6 +34,7 @@ export function WeekView({
   today,
   onBack,
   onWeekChange,
+  onDayOpen,
 }: {
   readonly year: number;
   readonly month: number;
@@ -41,6 +42,7 @@ export function WeekView({
   readonly today: CivilDate | null;
   readonly onBack: () => void;
   readonly onWeekChange: (year: number, month: number, day: number) => void;
+  readonly onDayOpen: (year: number, month: number, day: number) => void;
 }) {
   const week = buildWeekView(year, month, day, today, { weekStart: "sun" });
   const bodyRef = useRef<HTMLDivElement>(null);
@@ -126,9 +128,12 @@ export function WeekView({
         >
           <div />
           {week.days.map((d) => (
-            <div
+            <button
               key={`h-${d.month}-${d.day}`}
-              className="p-1 text-center"
+              type="button"
+              onClick={() => onDayOpen(d.year, d.month, d.day)}
+              className="w-full cursor-pointer p-1 text-center transition-opacity hover:opacity-70"
+              aria-label={`${d.month}月${d.day}日を開く`}
             >
               <div className="text-[11px]" style={{ color: dayColor(d) }}>
                 {WEEKDAY_JA[d.weekday]}
@@ -146,7 +151,7 @@ export function WeekView({
                   {d.day}
                 </div>
               )}
-            </div>
+            </button>
           ))}
         </div>
 
@@ -181,10 +186,13 @@ export function WeekView({
                   {h}:00
                 </div>
                 {week.days.map((d) => (
-                  <div
+                  <button
                     key={`c-${h}-${d.month}-${d.day}`}
-                    className="border-t border-l"
+                    type="button"
+                    onClick={() => onDayOpen(d.year, d.month, d.day)}
+                    className="w-full cursor-pointer border-t border-l transition-opacity hover:opacity-80"
                     style={{ height: HOUR_HEIGHT, borderColor: "var(--border)", background: dayBg(d) }}
+                    aria-label={`${d.month}月${d.day}日を開く`}
                   />
                 ))}
               </Fragment>
