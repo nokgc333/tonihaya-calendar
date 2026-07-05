@@ -30,19 +30,22 @@ export function CalendarApp() {
 
   if (zoom.level === "week" && zoom.month !== undefined && zoom.day !== undefined) {
     return (
-      <main className="mx-auto flex h-dvh min-w-[375px] max-w-[1256px] flex-col px-4 py-5">
-        <TodayHeader today={today} countdowns={countdowns} />
-        <div className="min-h-0 flex-1">
-          <WeekView
-            year={zoom.year}
-            month={zoom.month}
-            day={zoom.day}
-            today={today}
-            onBack={() => navigate({ level: "month", year: zoom.year, month: zoom.month! }, "push")}
-            onWeekChange={(y, m, d) =>
-              navigate({ level: "week", year: clampYear(y), month: m, day: d }, "replace")
-            }
-          />
+      <main className="mx-auto flex h-dvh min-w-[375px] max-w-[1400px] flex-col px-4 py-5">
+        {/* L0/L1と左右余白・最大幅(1256px)を統一する。 */}
+        <div className="mx-auto flex min-h-0 w-full max-w-[1256px] flex-1 flex-col">
+          <TodayHeader today={today} countdowns={countdowns} />
+          <div className="min-h-0 flex-1">
+            <WeekView
+              year={zoom.year}
+              month={zoom.month}
+              day={zoom.day}
+              today={today}
+              onBack={() => navigate({ level: "month", year: zoom.year, month: zoom.month! }, "push")}
+              onWeekChange={(y, m, d) =>
+                navigate({ level: "week", year: clampYear(y), month: m, day: d }, "replace")
+              }
+            />
+          </div>
         </div>
       </main>
     );

@@ -79,7 +79,7 @@ export function WeekView({
 
   return (
     <div className="flex h-full flex-col">
-      <nav className="mb-3 flex shrink-0 items-center gap-2">
+      <nav className="mb-5 flex min-h-10 shrink-0 items-center gap-2">
         <button
           type="button"
           onClick={onBack}
@@ -119,17 +119,16 @@ export function WeekView({
         className="flex min-h-0 flex-1 flex-col overflow-x-auto rounded-md border"
         style={{ borderColor: "var(--border)" }}
       >
-        {/* 曜日+日付ヘッダー（sticky） */}
+        {/* 曜日+日付ヘッダー（sticky）。L0/L1の曜日行に合わせ外枠なし・面色#fbfbfb。 */}
         <div
-          className="sticky top-0 z-10 grid shrink-0 border-b"
-          style={{ gridTemplateColumns: GRID_COLS, borderColor: "var(--border)", background: "var(--surface)" }}
+          className="sticky top-0 z-10 grid shrink-0 pb-1.5"
+          style={{ gridTemplateColumns: GRID_COLS, background: "var(--surface)" }}
         >
           <div />
           {week.days.map((d) => (
             <div
               key={`h-${d.month}-${d.day}`}
-              className="border-l p-1 text-center"
-              style={{ borderColor: "var(--border)", background: dayBg(d) }}
+              className="p-1 text-center"
             >
               <div className="text-[11px]" style={{ color: dayColor(d) }}>
                 {WEEKDAY_JA[d.weekday]}
