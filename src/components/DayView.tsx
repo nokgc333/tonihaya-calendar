@@ -74,7 +74,9 @@ export function DayView({
     : 0;
 
   return (
-    <div className="mx-auto flex h-full w-full max-w-2xl flex-col">
+    // nav はL2週ビューと同じ全幅・左寄せのまま（L2↔L3でナビバーが連続して見える）。
+    // 中央寄せ・狭幅にするのはカレンダー枠(hour-zoom)だけに留める。
+    <div className="flex h-full flex-col">
       <nav className="mb-5 flex min-h-10 shrink-0 items-center gap-2">
         <button
           type="button"
@@ -110,9 +112,9 @@ export function DayView({
         </div>
       </nav>
 
-      {/* 時間グリッドの外枠（L2の日カラムからのモーフ着地点） */}
+      {/* 時間グリッドの外枠（L2の日カラムからのモーフ着地点）。中央寄せ・狭幅はここだけ。 */}
       <div
-        className="flex min-h-0 flex-1 flex-col rounded-md border"
+        className="mx-auto flex w-full min-h-0 max-w-2xl flex-1 flex-col rounded-md border"
         style={{ borderColor: "var(--border)", viewTransitionName: "hour-zoom" }}
       >
         {/* 大きな日付ヘッダー（sticky）。終日行・時間グリッドと同じGRID_COLSのグリッドにし、
