@@ -35,6 +35,7 @@ export function WeekView({
   onBack,
   onWeekChange,
   onDayOpen,
+  dayPivot,
 }: {
   readonly year: number;
   readonly month: number;
@@ -43,10 +44,16 @@ export function WeekView({
   readonly onBack: () => void;
   readonly onWeekChange: (year: number, month: number, day: number) => void;
   readonly onDayOpen: (year: number, month: number, day: number) => void;
+  readonly dayPivot: { readonly year: number; readonly month: number; readonly day: number } | null;
 }) {
   const week = buildWeekView(year, month, day, today, { weekStart: "sun" });
   const bodyRef = useRef<HTMLDivElement>(null);
   const todayIndex = week.days.findIndex((d) => d.isToday);
+  const isPivot = (d: WeekDay): boolean =>
+    dayPivot !== null &&
+    dayPivot.year === d.year &&
+    dayPivot.month === d.month &&
+    dayPivot.day === d.day;
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent): void => {
@@ -133,6 +140,7 @@ export function WeekView({
               type="button"
               onClick={() => onDayOpen(d.year, d.month, d.day)}
               className="w-full cursor-pointer p-1 text-center transition-opacity hover:opacity-70"
+              style={isPivot(d) ? { viewTransitionName: "hour-zoom" } : undefined}
               aria-label={`${d.month}月${d.day}日を開く`}
             >
               <div className="text-[11px]" style={{ color: dayColor(d) }}>

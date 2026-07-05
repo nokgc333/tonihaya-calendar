@@ -62,6 +62,15 @@ export function CalendarApp() {
     run();
   };
 
+  // L2⇄L3ズームの起点となる「日ピボット」。日クリック時にflushSyncで確定し、
+  // 遷移キャプチャ前にL2の当該日ヘッダー列へ hour-zoom を反映させる。
+  const [dayPivot, setDayPivot] = useState<CivilDate | null>(null);
+  const openDay = (y: number, m: number, d: number): void => {
+    const target: CivilDate = { year: clampYear(y), month: m, day: d };
+    flushSync(() => setDayPivot(target));
+    navigate({ level: "day", year: target.year, month: target.month, day: target.day }, "push");
+  };
+
   if (zoom.level === "day" && zoom.month !== undefined && zoom.day !== undefined) {
     return (
       <main className="mx-auto flex h-dvh min-w-[375px] max-w-[1400px] flex-col px-4 py-5">
@@ -102,16 +111,17 @@ export function CalendarApp() {
               day={zoom.day}
               today={today}
               onBack={() => {
+                flushSync(() => setDayPivot(null));
                 // 実日付の月ではなく、週を開いた文脈月へ戻す（グレーセル経由でもズレない）。
                 const o = weekOrigin ?? { year: zoom.year, month: zoom.month! };
                 navigate({ level: "month", year: o.year, month: o.month }, "push");
               }}
-              onWeekChange={(y, m, d) =>
-                navigate({ level: "week", year: clampYear(y), month: m, day: d }, "replace")
-              }
-              onDayOpen={(y, m, d) =>
-                navigate({ level: "day", year: clampYear(y), month: m, day: d }, "push")
-              }
+              onWeekChange={(y, m, d) => {
+                flushSync(() => setDayPivot(null));
+                navigate({ level: "week", year: clampYear(y), month: m, day: d }, "replace");
+              }}
+              onDayOpen={openDay}
+              dayPivot={dayPivot}
             />
           </div>
         </div>
