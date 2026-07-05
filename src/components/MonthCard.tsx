@@ -55,15 +55,24 @@ function DayCellView({
   const clickable = onDayClick && cellYear !== undefined && cellMonth !== undefined ? "cursor-pointer hover:brightness-95" : "";
   const base = `flex h-full justify-center ${vAlign} ${clickable} ${s.dayText} leading-none tabular-nums`;
   const bgStyle = { background: dayBg(cell) };
+  // クリックしたセルへ view-transition-name を付け、週ビュー側の同名要素と
+  // モーフィング（L0→L1と同じズーム感）させる。遷移直前の生DOMに直接設定する。
+  const startDayZoom = (el: HTMLElement): void => {
+    el.style.viewTransitionName = "day-zoom";
+  };
   const handlers =
     onDayClick && cellYear !== undefined && cellMonth !== undefined
       ? {
           role: "button" as const,
           tabIndex: 0,
-          onClick: () => onDayClick(cellYear, cellMonth, cell.day),
-          onKeyDown: (e: React.KeyboardEvent) => {
+          onClick: (e: React.MouseEvent<HTMLElement>) => {
+            startDayZoom(e.currentTarget);
+            onDayClick(cellYear, cellMonth, cell.day);
+          },
+          onKeyDown: (e: React.KeyboardEvent<HTMLElement>) => {
             if (e.key === "Enter" || e.key === " ") {
               e.preventDefault();
+              startDayZoom(e.currentTarget);
               onDayClick(cellYear, cellMonth, cell.day);
             }
           },

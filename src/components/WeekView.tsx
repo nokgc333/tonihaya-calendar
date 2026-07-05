@@ -117,7 +117,7 @@ export function WeekView({
       {/* スクロール横断の外枠。列幅を保つため横スクロール可 */}
       <div
         className="flex min-h-0 flex-1 flex-col overflow-x-auto rounded-md border"
-        style={{ borderColor: "var(--border)" }}
+        style={{ borderColor: "var(--border)", viewTransitionName: "day-zoom" }}
       >
         {/* 曜日+日付ヘッダー（sticky）。L0/L1の曜日行に合わせ外枠なし・面色#fbfbfb。 */}
         <div
