@@ -43,4 +43,11 @@ describe("buildDayView", () => {
     expect(buildDayView(2026, 7, 8, { year: 2026, month: 7, day: 9 }).day.isToday).toBe(false);
     expect(buildDayView(2026, 7, 8, null).day.isToday).toBe(false);
   });
+
+  test("祝日かつ週末: 両フラグが立つ", () => {
+    // 2026-05-03 は日曜かつ「憲法記念日」
+    const model = buildDayView(2026, 5, 3, null);
+    expect(model.day.isHoliday).toBe(true);
+    expect(model.day.isSunday || model.day.isSaturday).toBe(true);
+  });
 });
