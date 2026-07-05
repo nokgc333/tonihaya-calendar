@@ -115,17 +115,18 @@ export function DayView({
         className="flex min-h-0 flex-1 flex-col rounded-md border"
         style={{ borderColor: "var(--border)", viewTransitionName: "hour-zoom" }}
       >
-        {/* 大きな日付ヘッダー（sticky）。L2週ビューの日ヘッダー列(p-1・高さ48.5px)と
-            ボックス寸法を揃え、ビュー間で見た目を統一する。祝日名がある日は伸びる。 */}
+        {/* 大きな日付ヘッダー（sticky）。L2週ビューのヘッダー行コンテナ(高さ48.5px・
+            直下pb-1.5)とボックス寸法を揃え、ビュー間で見た目を統一する。テキストは中央揃え。
+            祝日名がある日は伸びる。 */}
         <div
-          className="sticky top-0 z-10 flex min-h-[48.5px] shrink-0 flex-col justify-center p-1"
+          className="sticky top-0 z-10 flex min-h-[48.5px] shrink-0 flex-col justify-center pb-1.5"
           style={{ background: "var(--surface)" }}
         >
-          <div className="text-lg font-bold tabular-nums" style={{ color: dayColor(d) }}>
+          <div className="text-center text-lg font-bold tabular-nums" style={{ color: dayColor(d) }}>
             {year}年{month}月{day}日（{WEEKDAY_JA[d.weekday]}）
           </div>
           {d.holidayName ? (
-            <div className="text-xs" style={{ color: "var(--accent-red)" }}>
+            <div className="text-center text-xs" style={{ color: "var(--accent-red)" }}>
               {d.holidayName}
             </div>
           ) : null}
