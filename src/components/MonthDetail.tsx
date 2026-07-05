@@ -57,7 +57,7 @@ export function MonthDetail({
           style={{ borderColor: "var(--border)", color: "var(--text)" }}
           aria-label="俯瞰に戻る（Escでも戻れます）"
         >
-          ‹ 俯瞰へ
+          ‹ 戻る
         </button>
         <div className="ml-2 flex items-center gap-1.5">
           <button
