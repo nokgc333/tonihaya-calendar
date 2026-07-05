@@ -42,6 +42,7 @@ function DayCellView({
   onDayClick,
   cellYear,
   cellMonth,
+  pivot,
 }: {
   readonly cell: DayCell;
   readonly size: MonthCardSize;
@@ -49,30 +50,25 @@ function DayCellView({
   readonly onDayClick?: (year: number, month: number, day: number) => void;
   readonly cellYear?: number;
   readonly cellMonth?: number;
+  readonly pivot: boolean;
 }) {
   const s = SIZE[size];
   const vAlign = spacious ? "items-start pt-1.5" : "items-center";
   const clickable = onDayClick && cellYear !== undefined && cellMonth !== undefined ? "cursor-pointer hover:brightness-95" : "";
   const base = `flex h-full justify-center ${vAlign} ${clickable} ${s.dayText} leading-none tabular-nums`;
   const bgStyle = { background: dayBg(cell) };
-  // クリックしたセルへ view-transition-name を付け、週ビュー側の同名要素と
-  // モーフィング（L0→L1と同じズーム感）させる。遷移直前の生DOMに直接設定する。
-  const startDayZoom = (el: HTMLElement): void => {
-    el.style.viewTransitionName = "day-zoom";
-  };
+  // ピボット日（L1⇄L2の遷移起点）のセルに view-transition-name を付け、週ビュー側の
+  // 同名要素とモーフィングさせる。前進・後退の両方で対称にズームする。
+  const zoomStyle = pivot ? { viewTransitionName: "day-zoom" } : null;
   const handlers =
     onDayClick && cellYear !== undefined && cellMonth !== undefined
       ? {
           role: "button" as const,
           tabIndex: 0,
-          onClick: (e: React.MouseEvent<HTMLElement>) => {
-            startDayZoom(e.currentTarget);
-            onDayClick(cellYear, cellMonth, cell.day);
-          },
+          onClick: () => onDayClick(cellYear, cellMonth, cell.day),
           onKeyDown: (e: React.KeyboardEvent<HTMLElement>) => {
             if (e.key === "Enter" || e.key === " ") {
               e.preventDefault();
-              startDayZoom(e.currentTarget);
               onDayClick(cellYear, cellMonth, cell.day);
             }
           },
@@ -80,7 +76,7 @@ function DayCellView({
       : {};
   if (cell.isToday) {
     return (
-      <div className={base} style={bgStyle} {...handlers}>
+      <div className={base} style={{ ...bgStyle, ...zoomStyle }} {...handlers}>
         <span
           className={`flex ${s.circle} items-center justify-center rounded-full font-bold`}
           style={{ background: "var(--today-bg)", color: "var(--today-fg)" }}
@@ -94,7 +90,7 @@ function DayCellView({
   return (
     <div
       className={base}
-      style={{ ...bgStyle, color: dayColor(cell), opacity: cell.inMonth ? 1 : 0.55 }}
+      style={{ ...bgStyle, ...zoomStyle, color: dayColor(cell), opacity: cell.inMonth ? 1 : 0.55 }}
       title={cell.holidayName}
       {...handlers}
     >
@@ -127,6 +123,7 @@ export function MonthCard({
   spacious = false,
   onDayClick,
   year,
+  pivotDay,
 }: {
   readonly month: MonthView;
   readonly weekStart: WeekStart;
@@ -136,6 +133,7 @@ export function MonthCard({
   readonly spacious?: boolean;
   readonly onDayClick?: (year: number, month: number, day: number) => void;
   readonly year?: number;
+  readonly pivotDay?: { readonly year: number; readonly month: number; readonly day: number } | null;
 }) {
   return (
     <section
@@ -196,6 +194,12 @@ export function MonthCard({
       >
         {month.weeks.flat().map((cell, i, cells) => {
           const resolved = year !== undefined ? resolveCellMonth(cells, i, year, month.month) : undefined;
+          const isPivot =
+            !!pivotDay &&
+            !!resolved &&
+            resolved.year === pivotDay.year &&
+            resolved.month === pivotDay.month &&
+            cell.day === pivotDay.day;
           return (
             <DayCellView
               key={i}
@@ -205,6 +209,7 @@ export function MonthCard({
               onDayClick={onDayClick}
               cellYear={resolved?.year}
               cellMonth={resolved?.month}
+              pivot={isPivot}
             />
           );
         })}

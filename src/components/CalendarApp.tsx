@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { flushSync } from "react-dom";
 import { getCountdowns, type Countdown } from "@/domain/countdown";
 import { clampYear } from "@/domain/view";
 import { useZoomState } from "@/hooks/useZoomState";
@@ -10,6 +11,12 @@ import { MonthDetail } from "@/components/MonthDetail";
 import { WeekView } from "@/components/WeekView";
 
 const LAYOUT_STORAGE_KEY = "tonihaya.overviewLayout";
+
+interface CivilDate {
+  readonly year: number;
+  readonly month: number;
+  readonly day: number;
+}
 
 export function CalendarApp() {
   const { zoom, today, navigate } = useZoomState();
@@ -26,6 +33,22 @@ export function CalendarApp() {
   const changeOverviewLayout = (next: OverviewLayout): void => {
     setOverviewLayout(next);
     localStorage.setItem(LAYOUT_STORAGE_KEY, next);
+  };
+
+  // L1⇄L2ズームの起点となる「ピボット日」。前進(日クリック)時にflushSyncで確定し、
+  // 遷移キャプチャ前にL1へ view-transition-name を反映させる。後退時も同じ日を保持して
+  // 週グリッド→日セルへ対称にモーフィングさせる。
+  const [pivotDay, setPivotDay] = useState<CivilDate | null>(null);
+  const openDayWeek = (y: number, m: number, d: number): void => {
+    const day: CivilDate = { year: clampYear(y), month: m, day: d };
+    flushSync(() => setPivotDay(day));
+    navigate({ level: "week", year: day.year, month: day.month, day: day.day }, "push");
+  };
+  // L1から週以外へ移動する際は、遷移キャプチャ前にピボットを消して day-zoom セルの
+  // 取り残し（対応先なしのチラつき）を防ぐ。
+  const clearPivotThen = (run: () => void): void => {
+    flushSync(() => setPivotDay(null));
+    run();
   };
 
   if (zoom.level === "week" && zoom.month !== undefined && zoom.day !== undefined) {
@@ -76,13 +99,16 @@ export function CalendarApp() {
             month={zoom.month}
             today={today}
             countdowns={countdowns}
-            onBack={() => navigate({ level: "overview", year: zoom.year }, "push")}
+            onBack={() =>
+              clearPivotThen(() => navigate({ level: "overview", year: zoom.year }, "push"))
+            }
             onMonthChange={(y, m) =>
-              navigate({ level: "month", year: clampYear(y), month: m }, "replace")
+              clearPivotThen(() =>
+                navigate({ level: "month", year: clampYear(y), month: m }, "replace"),
+              )
             }
-            onDayClick={(y, m, d) =>
-              navigate({ level: "week", year: clampYear(y), month: m, day: d }, "push")
-            }
+            onDayClick={openDayWeek}
+            pivotDay={pivotDay}
           />
         </div>
       )}
