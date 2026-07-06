@@ -67,7 +67,7 @@ export function OverviewBody({
 
         {/* 右クラスタ: レイアウト切替（≥1288pxのみ）＋レベル切替（常時・右端）。
             レベル切替はL1/L2/L3でも右端にあるため、L0でも右端に置いて位置を統一する
-            （レイアウト切替をその左に）。各群は薄い背景ボックス(--surface-2)で群化・区別する。 */}
+            （レイアウト切替をその左に）。レベル切替のボックスは LevelSwitcher 自体が持つ。 */}
         <div className="ml-auto flex items-center gap-3">
           <div
             className="hidden items-center gap-1 rounded-lg border px-2 py-1 min-[1288px]:flex"
@@ -77,12 +77,7 @@ export function OverviewBody({
             <LayoutButton label="3×4" active={layout === "3x4"} onClick={() => onLayoutChange("3x4")} />
             <LayoutButton label="4×3" active={layout === "4x3"} onClick={() => onLayoutChange("4x3")} />
           </div>
-          <div
-            className="rounded-lg border px-1.5 py-1"
-            style={{ background: "var(--surface-2)", borderColor: "var(--border)" }}
-          >
-            <LevelSwitcher current="overview" onJump={onJump} />
-          </div>
+          <LevelSwitcher current="overview" onJump={onJump} />
         </div>
       </nav>
 
