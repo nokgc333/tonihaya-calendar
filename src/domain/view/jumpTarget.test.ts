@@ -44,6 +44,20 @@ describe("resolveJumpTarget", () => {
     });
   });
 
+  test("zoom.dayのクランプ: 文脈dayが対象月の日数を超えたら丸める (2/31→2/28)", () => {
+    const zoom: ZoomState = { level: "week", year: 2026, month: 2, day: 31 };
+    expect(resolveJumpTarget("day", zoom, TODAY)).toEqual({
+      level: "day", year: 2026, month: 2, day: 28,
+    });
+  });
+
+  test("zoom.dayのクランプ: うるう年は29に丸める (2/31→2/29)", () => {
+    const zoom: ZoomState = { level: "week", year: 2024, month: 2, day: 31 };
+    expect(resolveJumpTarget("week", zoom, TODAY)).toEqual({
+      level: "week", year: 2024, month: 2, day: 29,
+    });
+  });
+
   test("today=null: month=1, day=1 にフォールバック", () => {
     const zoom: ZoomState = { level: "overview", year: 2026 };
     expect(resolveJumpTarget("day", zoom, null)).toEqual({
