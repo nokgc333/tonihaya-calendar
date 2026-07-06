@@ -1,6 +1,7 @@
 "use client";
 
 import type { JumpLevel } from "@/domain/view";
+import { SegmentButton } from "@/components/SegmentButton";
 
 const LEVELS: readonly { level: JumpLevel; label: string }[] = [
   { level: "overview", label: "年" },
@@ -28,23 +29,15 @@ export function LevelSwitcher({
       {LEVELS.map(({ level, label }) => {
         const active = level === current;
         return (
-          <button
+          <SegmentButton
             key={level}
-            type="button"
+            label={label}
+            active={active}
             onClick={() => onJump(level)}
             disabled={active}
             aria-current={active ? "true" : undefined}
-            className={`rounded-md border px-2 py-1 text-xs tabular-nums transition-opacity ${
-              active ? "cursor-default font-bold" : "opacity-60 hover:opacity-100"
-            }`}
-            style={{
-              borderColor: active ? "var(--border-strong)" : "var(--border)",
-              color: "var(--text)",
-              background: active ? "var(--surface)" : "transparent",
-            }}
-          >
-            {label}
-          </button>
+            className={active ? "cursor-default" : ""}
+          />
         );
       })}
     </div>
