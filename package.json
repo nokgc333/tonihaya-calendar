@@ -1,6 +1,6 @@
 {
   "name": "tonihaya-calendar",
-  "version": "0.1.0",
+  "version": "0.1.3",
   "private": true,
   "type": "module",
   "engines": {
@@ -13,19 +13,22 @@
     "lint": "next lint",
     "test": "vitest run",
     "test:watch": "vitest",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "lighthouse": "node scripts/lighthouse.mjs"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.2",
     "@types/node": "20.17.6",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
+    "lighthouse": "^13.4.0",
     "postcss": "^8.5.16",
     "tailwindcss": "^4.3.2",
     "typescript": "^5.6.0",
     "vitest": "^3.0.0"
   },
   "dependencies": {
+    "@vercel/speed-insights": "^2.0.0",
     "next": "^15.5.20",
     "react": "^19.2.7",
     "react-dom": "^19.2.7"
