@@ -80,7 +80,7 @@ export function DayView({
     // nav はL2週ビューと同じ全幅・左寄せのまま（L2↔L3でナビバーが連続して見える）。
     // 中央寄せ・狭幅にするのはカレンダー枠(hour-zoom)だけに留める。
     <div className="flex h-full flex-col">
-      <nav className="mb-5 flex min-h-10 shrink-0 items-center gap-2">
+      <nav className="mb-5 flex min-h-10 shrink-0 flex-wrap items-center gap-2">
         <button
           type="button"
           onClick={onBack}
