@@ -2,9 +2,11 @@
 
 import { MAX_YEAR, MIN_YEAR, buildYearView, clampYear, resolveYearInput } from "@/domain/view";
 import type { JumpLevel } from "@/domain/view";
+import type { WeekStart } from "@/domain/calendar";
 import { LevelSwitcher } from "@/components/LevelSwitcher";
 import { SegmentButton } from "@/components/SegmentButton";
 import { MonthCard } from "@/components/MonthCard";
+import { SettingsMenu } from "@/components/SettingsMenu";
 import { useEffect, useState } from "react";
 
 /** 俯瞰カレンダーの表示レイアウト（3行×4列 / 4行×3列） */
@@ -24,6 +26,8 @@ export function OverviewBody({
   onMonthClick,
   onLayoutChange,
   onJump,
+  weekStart,
+  onWeekStartChange,
 }: {
   readonly year: number;
   readonly today: CivilDate | null;
@@ -32,11 +36,13 @@ export function OverviewBody({
   readonly onMonthClick: (month: number) => void;
   readonly onLayoutChange: (layout: OverviewLayout) => void;
   readonly onJump: (level: JumpLevel) => void;
+  readonly weekStart: WeekStart;
+  readonly onWeekStartChange: (weekStart: WeekStart) => void;
 }) {
   const [yearDraft, setYearDraft] = useState<string>(String(year));
   useEffect(() => setYearDraft(String(year)), [year]);
 
-  const view = buildYearView(year, today, { weekStart: "sun" });
+  const view = buildYearView(year, today, { weekStart });
   const isCurrentYear = today !== null && year === today.year;
 
   const commitYearDraft = (): void => onYearChange(resolveYearInput(yearDraft, year));
@@ -78,6 +84,7 @@ export function OverviewBody({
             <LayoutButton label="3×4" active={layout === "3x4"} onClick={() => onLayoutChange("3x4")} />
             <LayoutButton label="4×3" active={layout === "4x3"} onClick={() => onLayoutChange("4x3")} />
           </div>
+          <SettingsMenu weekStart={weekStart} onWeekStartChange={onWeekStartChange} />
           <LevelSwitcher current="overview" onJump={onJump} />
         </div>
       </nav>
@@ -89,7 +96,7 @@ export function OverviewBody({
           <div key={m.month} className={`w-[305px] ${zoomClass}`}>
             <MonthCard
               month={m}
-              weekStart="sun"
+              weekStart={weekStart}
               viewTransitionName={`month-${m.month}`}
               onClick={() => onMonthClick(m.month)}
             />

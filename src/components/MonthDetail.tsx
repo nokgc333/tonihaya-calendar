@@ -3,9 +3,11 @@
 import { useEffect } from "react";
 import { buildMonthDetail, type JumpLevel } from "@/domain/view";
 import type { Countdown } from "@/domain/countdown";
+import type { WeekStart } from "@/domain/calendar";
 import { MonthCard } from "@/components/MonthCard";
 import { CountdownChips } from "@/components/CountdownChips";
 import { LevelSwitcher } from "@/components/LevelSwitcher";
+import { SettingsMenu } from "@/components/SettingsMenu";
 
 interface CivilDate {
   readonly year: number;
@@ -29,6 +31,8 @@ export function MonthDetail({
   onDayClick,
   onJump,
   pivotDay,
+  weekStart,
+  onWeekStartChange,
 }: {
   readonly year: number;
   readonly month: number;
@@ -39,6 +43,8 @@ export function MonthDetail({
   readonly onDayClick: (year: number, month: number, day: number) => void;
   readonly onJump: (level: JumpLevel) => void;
   readonly pivotDay?: { readonly year: number; readonly month: number; readonly day: number } | null;
+  readonly weekStart: WeekStart;
+  readonly onWeekStartChange: (weekStart: WeekStart) => void;
 }) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent): void => {
@@ -48,7 +54,7 @@ export function MonthDetail({
     return () => window.removeEventListener("keydown", onKey);
   }, [onBack]);
 
-  const detail = buildMonthDetail(year, month, today, { weekStart: "sun" });
+  const detail = buildMonthDetail(year, month, today, { weekStart });
 
   return (
     <div>
@@ -89,7 +95,8 @@ export function MonthDetail({
             ›
           </button>
         </div>
-        <div className="ml-auto">
+        <div className="ml-auto flex items-center gap-2">
+          <SettingsMenu weekStart={weekStart} onWeekStartChange={onWeekStartChange} />
           <LevelSwitcher current="month" onJump={onJump} />
         </div>
       </nav>
@@ -100,7 +107,7 @@ export function MonthDetail({
           className="w-full max-w-[800px] min-[1168px]:w-[800px] min-[1168px]:max-w-none min-[1168px]:shrink-0"
           style={{ viewTransitionName: `month-${month}` }}
         >
-          <MonthCard month={detail.month} year={year} weekStart="sun" size="lg" spacious onDayClick={onDayClick} pivotDay={pivotDay} />
+          <MonthCard month={detail.month} year={year} weekStart={weekStart} size="lg" spacious onDayClick={onDayClick} pivotDay={pivotDay} />
         </div>
 
         {/* 遊びセクションは ≤712px のときだけカレンダー直下・aside直上に表示する（幅いっぱい・2行中央）。 */}
