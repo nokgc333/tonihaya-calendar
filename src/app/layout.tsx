@@ -4,7 +4,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "tonihaya-calendar — とにかく速い12ヶ月カレンダー",
   description:
-    "12ヶ月を一望できる、とにかく速いカレンダー。六曜・祝日・和風月名・遊びセクション・時間計算を備えた高速ビューアー。",
+    "12ヶ月を一望できる、とにかく速いカレンダー。年→月→週→日のズーム表示、祝日・和風月名・カウントダウンを備えた高速ビューアー。",
   openGraph: {
     title: "tonihaya-calendar",
     description: "とにかく速い12ヶ月俯瞰カレンダー",
