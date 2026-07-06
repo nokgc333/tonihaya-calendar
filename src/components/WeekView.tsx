@@ -1,8 +1,9 @@
 "use client";
 
 import { Fragment, useEffect, useRef } from "react";
-import { buildWeekView, minutesToOffset, type WeekDay } from "@/domain/view";
+import { buildWeekView, minutesToOffset, type JumpLevel, type WeekDay } from "@/domain/view";
 import { fromEpochDay, toEpochDay } from "@/domain/shared/date";
+import { LevelSwitcher } from "@/components/LevelSwitcher";
 
 interface CivilDate {
   readonly year: number;
@@ -36,6 +37,7 @@ export function WeekView({
   onWeekChange,
   onDayOpen,
   dayPivot,
+  onJump,
 }: {
   readonly year: number;
   readonly month: number;
@@ -45,6 +47,7 @@ export function WeekView({
   readonly onWeekChange: (year: number, month: number, day: number) => void;
   readonly onDayOpen: (year: number, month: number, day: number) => void;
   readonly dayPivot: { readonly year: number; readonly month: number; readonly day: number } | null;
+  readonly onJump: (level: JumpLevel) => void;
 }) {
   const week = buildWeekView(year, month, day, today, { weekStart: "sun" });
   const bodyRef = useRef<HTMLDivElement>(null);
@@ -120,6 +123,9 @@ export function WeekView({
           >
             ›
           </button>
+        </div>
+        <div className="ml-auto">
+          <LevelSwitcher current="week" onJump={onJump} />
         </div>
       </nav>
 

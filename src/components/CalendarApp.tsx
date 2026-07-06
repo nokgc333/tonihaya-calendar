@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { flushSync } from "react-dom";
 import { getCountdowns, type Countdown } from "@/domain/countdown";
-import { clampYear } from "@/domain/view";
+import { clampYear, resolveJumpTarget, type JumpLevel } from "@/domain/view";
 import { useZoomState } from "@/hooks/useZoomState";
 import { TodayHeader } from "@/components/TodayHeader";
 import { OverviewBody, type OverviewLayout } from "@/components/OverviewBody";
@@ -77,6 +77,16 @@ export function CalendarApp() {
     navigate({ level: "day", year: target.year, month: target.month, day: target.day }, "push");
   };
 
+  // 年/月/週/日セグメントからの直接ジャンプ。隣接レベル用の共有要素が非隣接
+  // ジャンプで取り残されないよう、両ピボットを掃除してから遷移する。
+  const jumpTo = (level: JumpLevel): void => {
+    flushSync(() => {
+      setPivotDay(null);
+      setDayPivot(null);
+    });
+    navigate(resolveJumpTarget(level, zoom, today), "push");
+  };
+
   if (zoom.level === "day" && zoom.month !== undefined && zoom.day !== undefined) {
     return (
       <main className="mx-auto flex h-dvh min-w-[375px] max-w-[1400px] flex-col px-4 py-5">
@@ -100,6 +110,7 @@ export function CalendarApp() {
                 setDayPivot({ year: clampYear(y), month: m, day: dd });
                 navigate({ level: "day", year: clampYear(y), month: m, day: dd }, "replace");
               }}
+              onJump={jumpTo}
             />
           </div>
         </div>
@@ -131,6 +142,7 @@ export function CalendarApp() {
               }}
               onDayOpen={openDay}
               dayPivot={dayPivot}
+              onJump={jumpTo}
             />
           </div>
         </div>
@@ -173,6 +185,7 @@ export function CalendarApp() {
             }
             onDayClick={openDayWeek}
             pivotDay={pivotDay}
+            onJump={jumpTo}
           />
         </div>
       )}

@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect } from "react";
-import { buildMonthDetail } from "@/domain/view";
+import { buildMonthDetail, type JumpLevel } from "@/domain/view";
 import type { Countdown } from "@/domain/countdown";
 import { MonthCard } from "@/components/MonthCard";
 import { CountdownChips } from "@/components/CountdownChips";
+import { LevelSwitcher } from "@/components/LevelSwitcher";
 
 interface CivilDate {
   readonly year: number;
@@ -26,6 +27,7 @@ export function MonthDetail({
   onBack,
   onMonthChange,
   onDayClick,
+  onJump,
   pivotDay,
 }: {
   readonly year: number;
@@ -35,6 +37,7 @@ export function MonthDetail({
   readonly onBack: () => void;
   readonly onMonthChange: (year: number, month: number) => void;
   readonly onDayClick: (year: number, month: number, day: number) => void;
+  readonly onJump: (level: JumpLevel) => void;
   readonly pivotDay?: { readonly year: number; readonly month: number; readonly day: number } | null;
 }) {
   useEffect(() => {
@@ -85,6 +88,9 @@ export function MonthDetail({
           >
             ›
           </button>
+        </div>
+        <div className="ml-auto">
+          <LevelSwitcher current="month" onJump={onJump} />
         </div>
       </nav>
 

@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { buildDayView, minutesToOffset, type WeekDay } from "@/domain/view";
+import { buildDayView, minutesToOffset, type JumpLevel, type WeekDay } from "@/domain/view";
 import { fromEpochDay, toEpochDay } from "@/domain/shared/date";
+import { LevelSwitcher } from "@/components/LevelSwitcher";
 
 interface CivilDate {
   readonly year: number;
@@ -34,6 +35,7 @@ export function DayView({
   today,
   onBack,
   onDayChange,
+  onJump,
 }: {
   readonly year: number;
   readonly month: number;
@@ -41,6 +43,7 @@ export function DayView({
   readonly today: CivilDate | null;
   readonly onBack: () => void;
   readonly onDayChange: (year: number, month: number, day: number) => void;
+  readonly onJump: (level: JumpLevel) => void;
 }) {
   const { day: d } = buildDayView(year, month, day, today);
   const bodyRef = useRef<HTMLDivElement>(null);
@@ -109,6 +112,9 @@ export function DayView({
           >
             ›
           </button>
+        </div>
+        <div className="ml-auto">
+          <LevelSwitcher current="day" onJump={onJump} />
         </div>
       </nav>
 
