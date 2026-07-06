@@ -3,7 +3,9 @@
 import { Fragment, useEffect, useRef } from "react";
 import { buildWeekView, minutesToOffset, type JumpLevel, type WeekDay } from "@/domain/view";
 import { fromEpochDay, toEpochDay } from "@/domain/shared/date";
+import type { WeekStart } from "@/domain/calendar";
 import { LevelSwitcher } from "@/components/LevelSwitcher";
+import { SettingsMenu } from "@/components/SettingsMenu";
 
 interface CivilDate {
   readonly year: number;
@@ -38,6 +40,8 @@ export function WeekView({
   onDayOpen,
   dayPivot,
   onJump,
+  weekStart,
+  onWeekStartChange,
 }: {
   readonly year: number;
   readonly month: number;
@@ -48,8 +52,10 @@ export function WeekView({
   readonly onDayOpen: (year: number, month: number, day: number) => void;
   readonly dayPivot: { readonly year: number; readonly month: number; readonly day: number } | null;
   readonly onJump: (level: JumpLevel) => void;
+  readonly weekStart: WeekStart;
+  readonly onWeekStartChange: (weekStart: WeekStart) => void;
 }) {
-  const week = buildWeekView(year, month, day, today, { weekStart: "sun" });
+  const week = buildWeekView(year, month, day, today, { weekStart });
   const bodyRef = useRef<HTMLDivElement>(null);
   const todayIndex = week.days.findIndex((d) => d.isToday);
   const isPivot = (d: WeekDay): boolean =>
@@ -124,7 +130,8 @@ export function WeekView({
             ›
           </button>
         </div>
-        <div className="ml-auto">
+        <div className="ml-auto flex items-center gap-2">
+          <SettingsMenu weekStart={weekStart} onWeekStartChange={onWeekStartChange} />
           <LevelSwitcher current="week" onJump={onJump} />
         </div>
       </nav>

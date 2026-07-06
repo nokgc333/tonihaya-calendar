@@ -3,7 +3,9 @@
 import { useEffect, useRef } from "react";
 import { buildDayView, minutesToOffset, type JumpLevel, type WeekDay } from "@/domain/view";
 import { fromEpochDay, toEpochDay } from "@/domain/shared/date";
+import type { WeekStart } from "@/domain/calendar";
 import { LevelSwitcher } from "@/components/LevelSwitcher";
+import { SettingsMenu } from "@/components/SettingsMenu";
 
 interface CivilDate {
   readonly year: number;
@@ -36,6 +38,8 @@ export function DayView({
   onBack,
   onDayChange,
   onJump,
+  weekStart,
+  onWeekStartChange,
 }: {
   readonly year: number;
   readonly month: number;
@@ -44,6 +48,8 @@ export function DayView({
   readonly onBack: () => void;
   readonly onDayChange: (year: number, month: number, day: number) => void;
   readonly onJump: (level: JumpLevel) => void;
+  readonly weekStart: WeekStart;
+  readonly onWeekStartChange: (weekStart: WeekStart) => void;
 }) {
   const { day: d } = buildDayView(year, month, day, today);
   const bodyRef = useRef<HTMLDivElement>(null);
@@ -113,7 +119,8 @@ export function DayView({
             ›
           </button>
         </div>
-        <div className="ml-auto">
+        <div className="ml-auto flex items-center gap-2">
+          <SettingsMenu weekStart={weekStart} onWeekStartChange={onWeekStartChange} />
           <LevelSwitcher current="day" onJump={onJump} />
         </div>
       </nav>
