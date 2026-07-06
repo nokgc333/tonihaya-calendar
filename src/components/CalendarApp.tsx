@@ -182,6 +182,8 @@ export function CalendarApp() {
             onMonthClick={(m) => navigate({ level: "month", year: zoom.year, month: m }, "push")}
             onLayoutChange={changeOverviewLayout}
             onJump={jumpTo}
+            weekStart={weekStart}
+            onWeekStartChange={changeWeekStart}
           />
         </div>
       ) : (
