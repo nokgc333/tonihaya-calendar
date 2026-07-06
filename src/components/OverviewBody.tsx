@@ -65,10 +65,19 @@ export function OverviewBody({
         <NavButton onClick={() => onYearChange(today?.year ?? new Date().getFullYear())} label="今年" disabled={isCurrentYear} className="ml-1" suppressHydrationWarning />
         <span className="ml-2 text-[11px]" style={{ color: "var(--text-faint)" }}>{MIN_YEAR}–{MAX_YEAR}</span>
 
-        {/* 右クラスタ: レベル切替（常時）＋レイアウト切替（≥1288pxのみ） */}
-        <div className="ml-auto flex items-center gap-2">
-          <LevelSwitcher current="overview" onJump={onJump} />
-          <div className="hidden items-center gap-1 min-[1288px]:flex">
+        {/* 右クラスタ: レベル切替（常時）＋レイアウト切替（≥1288pxのみ）。
+            各群を薄い背景ボックス(--surface-2)で囲って群化し、間隔を広げて互いに区別する。 */}
+        <div className="ml-auto flex items-center gap-3">
+          <div
+            className="rounded-lg border px-1.5 py-1"
+            style={{ background: "var(--surface-2)", borderColor: "var(--border)" }}
+          >
+            <LevelSwitcher current="overview" onJump={onJump} />
+          </div>
+          <div
+            className="hidden items-center gap-1 rounded-lg border px-2 py-1 min-[1288px]:flex"
+            style={{ background: "var(--surface-2)", borderColor: "var(--border)" }}
+          >
             <span className="mr-1 text-[11px]" style={{ color: "var(--text-muted)" }}>表示</span>
             <LayoutButton label="3×4" active={layout === "3x4"} onClick={() => onLayoutChange("3x4")} />
             <LayoutButton label="4×3" active={layout === "4x3"} onClick={() => onLayoutChange("4x3")} />
