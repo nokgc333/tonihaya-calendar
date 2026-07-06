@@ -164,6 +164,7 @@ export function CalendarApp() {
             onYearChange={(y) => navigate({ level: "overview", year: clampYear(y) }, "replace")}
             onMonthClick={(m) => navigate({ level: "month", year: zoom.year, month: m }, "push")}
             onLayoutChange={changeOverviewLayout}
+            onJump={jumpTo}
           />
         </div>
       ) : (

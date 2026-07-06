@@ -1,6 +1,8 @@
 "use client";
 
 import { MAX_YEAR, MIN_YEAR, buildYearView, clampYear, resolveYearInput } from "@/domain/view";
+import type { JumpLevel } from "@/domain/view";
+import { LevelSwitcher } from "@/components/LevelSwitcher";
 import { MonthCard } from "@/components/MonthCard";
 import { useEffect, useState } from "react";
 
@@ -20,6 +22,7 @@ export function OverviewBody({
   onYearChange,
   onMonthClick,
   onLayoutChange,
+  onJump,
 }: {
   readonly year: number;
   readonly today: CivilDate | null;
@@ -27,6 +30,7 @@ export function OverviewBody({
   readonly onYearChange: (year: number) => void;
   readonly onMonthClick: (month: number) => void;
   readonly onLayoutChange: (layout: OverviewLayout) => void;
+  readonly onJump: (level: JumpLevel) => void;
 }) {
   const [yearDraft, setYearDraft] = useState<string>(String(year));
   useEffect(() => setYearDraft(String(year)), [year]);
@@ -61,11 +65,14 @@ export function OverviewBody({
         <NavButton onClick={() => onYearChange(today?.year ?? new Date().getFullYear())} label="今年" disabled={isCurrentYear} className="ml-1" suppressHydrationWarning />
         <span className="ml-2 text-[11px]" style={{ color: "var(--text-faint)" }}>{MIN_YEAR}–{MAX_YEAR}</span>
 
-        {/* レイアウト切替は広い画面(≥1288px)でのみ表示 */}
-        <div className="ml-auto hidden items-center gap-1 min-[1288px]:flex">
-          <span className="mr-1 text-[11px]" style={{ color: "var(--text-muted)" }}>表示</span>
-          <LayoutButton label="3×4" active={layout === "3x4"} onClick={() => onLayoutChange("3x4")} />
-          <LayoutButton label="4×3" active={layout === "4x3"} onClick={() => onLayoutChange("4x3")} />
+        {/* 右クラスタ: レベル切替（常時）＋レイアウト切替（≥1288pxのみ） */}
+        <div className="ml-auto flex items-center gap-2">
+          <LevelSwitcher current="overview" onJump={onJump} />
+          <div className="hidden items-center gap-1 min-[1288px]:flex">
+            <span className="mr-1 text-[11px]" style={{ color: "var(--text-muted)" }}>表示</span>
+            <LayoutButton label="3×4" active={layout === "3x4"} onClick={() => onLayoutChange("3x4")} />
+            <LayoutButton label="4×3" active={layout === "4x3"} onClick={() => onLayoutChange("4x3")} />
+          </div>
         </div>
       </nav>
 
