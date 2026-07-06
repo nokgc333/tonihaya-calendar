@@ -33,7 +33,7 @@ export function LevelSwitcher({
             type="button"
             onClick={() => onJump(level)}
             disabled={active}
-            aria-pressed={active}
+            aria-current={active ? "true" : undefined}
             className={`rounded-md border px-2 py-1 text-xs tabular-nums transition-opacity ${
               active ? "cursor-default font-bold" : "opacity-60 hover:opacity-100"
             }`}
