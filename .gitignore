@@ -29,3 +29,6 @@ bin/
 # SDD scratch (task briefs, reports, progress ledger)
 .superpowers/
 .vercel
+
+# Lighthouse レポート出力
+.lighthouse/
