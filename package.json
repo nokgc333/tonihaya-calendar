@@ -28,6 +28,7 @@
     "vitest": "^3.0.0"
   },
   "dependencies": {
+    "@vercel/speed-insights": "^2.0.0",
     "next": "^15.5.20",
     "react": "^19.2.7",
     "react-dom": "^19.2.7"

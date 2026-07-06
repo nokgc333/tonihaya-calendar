@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -26,7 +27,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ja">
-      <body>{children}</body>
+      <body>
+        {children}
+        {/* 本番(Vercel)で実ユーザーのWeb Vitals(RUM)を収集。要ダッシュボードで有効化。 */}
+        <SpeedInsights />
+      </body>
     </html>
   );
 }
