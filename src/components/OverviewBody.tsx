@@ -3,6 +3,7 @@
 import { MAX_YEAR, MIN_YEAR, buildYearView, clampYear, resolveYearInput } from "@/domain/view";
 import type { JumpLevel } from "@/domain/view";
 import { LevelSwitcher } from "@/components/LevelSwitcher";
+import { SegmentButton } from "@/components/SegmentButton";
 import { MonthCard } from "@/components/MonthCard";
 import { useEffect, useState } from "react";
 
@@ -135,19 +136,5 @@ function LayoutButton({
   readonly active: boolean;
   readonly onClick: () => void;
 }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={active}
-      className={`rounded-md border px-2 py-1 text-xs tabular-nums transition-opacity ${active ? "font-bold" : "opacity-60 hover:opacity-100"}`}
-      style={{
-        borderColor: active ? "var(--border-strong)" : "var(--border)",
-        color: "var(--text)",
-        background: active ? "var(--surface)" : "transparent",
-      }}
-    >
-      {label}
-    </button>
-  );
+  return <SegmentButton label={label} active={active} onClick={onClick} aria-pressed={active} />;
 }
