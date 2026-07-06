@@ -23,3 +23,8 @@ export function fromEpochDay(epochDay: number): {
     day: date.getUTCDate(),
   };
 }
+
+/** 指定した年月の日数（翌月0日=当月末日をUTC基準で算出）。 */
+export function daysInMonth(year: number, month: number): number {
+  return new Date(Date.UTC(year, month, 0)).getUTCDate();
+}
