@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { flushSync } from "react-dom";
 import { getCountdowns, type Countdown } from "@/domain/countdown";
 import { clampYear, resolveJumpTarget, type JumpLevel } from "@/domain/view";
+import type { WeekStart } from "@/domain/calendar";
 import { useZoomState } from "@/hooks/useZoomState";
 import { TodayHeader } from "@/components/TodayHeader";
 import { OverviewBody, type OverviewLayout } from "@/components/OverviewBody";
@@ -12,6 +13,7 @@ import { WeekView } from "@/components/WeekView";
 import { DayView } from "@/components/DayView";
 
 const LAYOUT_STORAGE_KEY = "tonihaya.overviewLayout";
+const WEEKSTART_STORAGE_KEY = "tonihaya.weekStart";
 
 interface CivilDate {
   readonly year: number;
@@ -34,6 +36,17 @@ export function CalendarApp() {
   const changeOverviewLayout = (next: OverviewLayout): void => {
     setOverviewLayout(next);
     localStorage.setItem(LAYOUT_STORAGE_KEY, next);
+  };
+
+  // 週開始（日/月）。localStorage に保存し次回以降も維持。全ビューに反映する。
+  const [weekStart, setWeekStart] = useState<WeekStart>("sun");
+  useEffect(() => {
+    const saved = localStorage.getItem(WEEKSTART_STORAGE_KEY);
+    if (saved === "sun" || saved === "mon") setWeekStart(saved);
+  }, []);
+  const changeWeekStart = (next: WeekStart): void => {
+    setWeekStart(next);
+    localStorage.setItem(WEEKSTART_STORAGE_KEY, next);
   };
 
   // L1⇄L2ズームの起点となる「ピボット日」。前進(日クリック)時にflushSyncで確定し、
@@ -111,6 +124,8 @@ export function CalendarApp() {
                 navigate({ level: "day", year: clampYear(y), month: m, day: dd }, "replace");
               }}
               onJump={jumpTo}
+              weekStart={weekStart}
+              onWeekStartChange={changeWeekStart}
             />
           </div>
         </div>
@@ -143,6 +158,8 @@ export function CalendarApp() {
               onDayOpen={openDay}
               dayPivot={dayPivot}
               onJump={jumpTo}
+              weekStart={weekStart}
+              onWeekStartChange={changeWeekStart}
             />
           </div>
         </div>
@@ -187,6 +204,8 @@ export function CalendarApp() {
             onDayClick={openDayWeek}
             pivotDay={pivotDay}
             onJump={jumpTo}
+            weekStart={weekStart}
+            onWeekStartChange={changeWeekStart}
           />
         </div>
       )}
