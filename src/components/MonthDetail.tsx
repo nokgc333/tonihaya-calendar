@@ -96,8 +96,8 @@ export function MonthDetail({
           </button>
         </div>
         <div className="ml-auto flex items-center gap-2">
-          <SettingsMenu weekStart={weekStart} onWeekStartChange={onWeekStartChange} />
           <LevelSwitcher current="month" onJump={onJump} />
+          <SettingsMenu weekStart={weekStart} onWeekStartChange={onWeekStartChange} />
         </div>
       </nav>
 
