@@ -15,6 +15,8 @@ import { DayView } from "@/components/DayView";
 const LAYOUT_STORAGE_KEY = "tonihaya.overviewLayout";
 const WEEKSTART_STORAGE_KEY = "tonihaya.weekStart";
 
+const LEVEL_ORDER: Record<JumpLevel, number> = { overview: 0, month: 1, week: 2, day: 3 };
+
 interface CivilDate {
   readonly year: number;
   readonly month: number;
@@ -90,14 +92,36 @@ export function CalendarApp() {
     navigate({ level: "day", year: target.year, month: target.month, day: target.day }, "push");
   };
 
-  // 年/月/週/日セグメントからの直接ジャンプ。隣接レベル用の共有要素が非隣接
-  // ジャンプで取り残されないよう、両ピボットを掃除してから遷移する。
+  // 年/月/週/日セグメントからのジャンプ。距離で分岐し、隣接は既存モーフを流用する。
+  // 隣接 L1↔L2=day-zoom(pivotDay) / L2↔L3=hour-zoom(dayPivot) / L0↔L1=month-N(無条件)。
+  // 多段は Task2 で jump-zoom を張る（現時点ではクロスフェード）。
   const jumpTo = (level: JumpLevel): void => {
+    const target = resolveJumpTarget(level, zoom, today);
+    const dist = Math.abs(LEVEL_ORDER[target.level] - LEVEL_ORDER[zoom.level]);
+    const a = resolveJumpTarget("day", zoom, today);
+    const anchorDay: CivilDate = { year: a.year, month: a.month!, day: a.day! };
+    const levels = new Set<JumpLevel>([zoom.level, target.level]);
+
     flushSync(() => {
-      setPivotDay(null);
-      setDayPivot(null);
+      if (dist >= 2) {
+        // 多段（現状クロスフェード。Task2でjump-zoom）
+        setPivotDay(null);
+        setDayPivot(null);
+      } else if (levels.has("week") && levels.has("day")) {
+        // 隣接 L2↔L3: hour-zoom
+        setPivotDay(null);
+        setDayPivot(anchorDay);
+      } else if (levels.has("month") && levels.has("week")) {
+        // 隣接 L1↔L2: day-zoom
+        setDayPivot(null);
+        setPivotDay(anchorDay);
+      } else {
+        // 隣接 L0↔L1: month-N（無条件）
+        setPivotDay(null);
+        setDayPivot(null);
+      }
     });
-    navigate(resolveJumpTarget(level, zoom, today), "push");
+    navigate(target, "push");
   };
 
   if (zoom.level === "day" && zoom.month !== undefined && zoom.day !== undefined) {
