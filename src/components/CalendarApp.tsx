@@ -55,6 +55,8 @@ export function CalendarApp() {
   // 遷移キャプチャ前にL1へ view-transition-name を反映させる。後退時も同じ日を保持して
   // 週グリッド→日セルへ対称にモーフィングさせる。
   const [pivotDay, setPivotDay] = useState<CivilDate | null>(null);
+  // 多段ジャンプ（2レベル以上）のズーム起点。全ビューが「その日」の要素に jump-zoom を張る。
+  const [jumpPivot, setJumpPivot] = useState<CivilDate | null>(null);
   // 週を開いたときのL1の文脈月（＝画面に表示していた月）。前月/翌月のグレーセルを
   // 押したときでも「戻る」で実日付の月ではなく文脈月へ戻すために保持する。
   const [weekOrigin, setWeekOrigin] = useState<{ year: number; month: number } | null>(null);
@@ -67,13 +69,17 @@ export function CalendarApp() {
     flushSync(() => {
       setPivotDay(day);
       setWeekOrigin(origin);
+      setJumpPivot(null);
     });
     navigate({ level: "week", year: day.year, month: day.month, day: day.day }, "push");
   };
   // L1から週以外へ移動する際は、遷移キャプチャ前にピボットを消して day-zoom セルの
   // 取り残し（対応先なしのチラつき）を防ぐ。
   const clearPivotThen = (run: () => void): void => {
-    flushSync(() => setPivotDay(null));
+    flushSync(() => {
+      setPivotDay(null);
+      setJumpPivot(null);
+    });
     run();
   };
 
@@ -88,7 +94,10 @@ export function CalendarApp() {
   }, [zoom.level]);
   const openDay = (y: number, m: number, d: number): void => {
     const target: CivilDate = { year: clampYear(y), month: m, day: d };
-    flushSync(() => setDayPivot(target));
+    flushSync(() => {
+      setDayPivot(target);
+      setJumpPivot(null);
+    });
     navigate({ level: "day", year: target.year, month: target.month, day: target.day }, "push");
   };
 
@@ -104,21 +113,25 @@ export function CalendarApp() {
 
     flushSync(() => {
       if (dist >= 2) {
-        // 多段（現状クロスフェード。Task2でjump-zoom）
+        // 多段: 日アンカー jump-zoom。他ピボットは掃除。
         setPivotDay(null);
         setDayPivot(null);
+        setJumpPivot(anchorDay);
       } else if (levels.has("week") && levels.has("day")) {
         // 隣接 L2↔L3: hour-zoom
         setPivotDay(null);
         setDayPivot(anchorDay);
+        setJumpPivot(null);
       } else if (levels.has("month") && levels.has("week")) {
         // 隣接 L1↔L2: day-zoom
         setDayPivot(null);
         setPivotDay(anchorDay);
+        setJumpPivot(null);
       } else {
         // 隣接 L0↔L1: month-N（無条件）
         setPivotDay(null);
         setDayPivot(null);
+        setJumpPivot(null);
       }
     });
     navigate(target, "push");
@@ -135,21 +148,24 @@ export function CalendarApp() {
               month={zoom.month}
               day={zoom.day}
               today={today}
-              onBack={() =>
+              onBack={() => {
+                flushSync(() => setJumpPivot(null));
                 navigate(
                   { level: "week", year: zoom.year, month: zoom.month!, day: zoom.day! },
                   "push",
-                )
-              }
+                );
+              }}
               onDayChange={(y, m, dd) => {
                 // L3内で日送りしたら、戻り時のモーフが現在表示日の列に着地するよう
                 // ピボットも追従させる（古い日の列へ hour-zoom が残るのを防ぐ）。
+                setJumpPivot(null);
                 setDayPivot({ year: clampYear(y), month: m, day: dd });
                 navigate({ level: "day", year: clampYear(y), month: m, day: dd }, "replace");
               }}
               onJump={jumpTo}
               weekStart={weekStart}
               onWeekStartChange={changeWeekStart}
+              jumpPivot={jumpPivot}
             />
           </div>
         </div>
@@ -170,13 +186,19 @@ export function CalendarApp() {
               day={zoom.day}
               today={today}
               onBack={() => {
-                flushSync(() => setDayPivot(null));
+                flushSync(() => {
+                  setDayPivot(null);
+                  setJumpPivot(null);
+                });
                 // 実日付の月ではなく、週を開いた文脈月へ戻す（グレーセル経由でもズレない）。
                 const o = weekOrigin ?? { year: zoom.year, month: zoom.month! };
                 navigate({ level: "month", year: o.year, month: o.month }, "push");
               }}
               onWeekChange={(y, m, d) => {
-                flushSync(() => setDayPivot(null));
+                flushSync(() => {
+                  setDayPivot(null);
+                  setJumpPivot(null);
+                });
                 navigate({ level: "week", year: clampYear(y), month: m, day: d }, "replace");
               }}
               onDayOpen={openDay}
@@ -184,6 +206,7 @@ export function CalendarApp() {
               onJump={jumpTo}
               weekStart={weekStart}
               onWeekStartChange={changeWeekStart}
+              jumpPivot={jumpPivot}
             />
           </div>
         </div>
@@ -202,12 +225,19 @@ export function CalendarApp() {
             year={zoom.year}
             today={today}
             layout={overviewLayout}
-            onYearChange={(y) => navigate({ level: "overview", year: clampYear(y) }, "replace")}
-            onMonthClick={(m) => navigate({ level: "month", year: zoom.year, month: m }, "push")}
+            onYearChange={(y) => {
+              flushSync(() => setJumpPivot(null));
+              navigate({ level: "overview", year: clampYear(y) }, "replace");
+            }}
+            onMonthClick={(m) => {
+              flushSync(() => setJumpPivot(null));
+              navigate({ level: "month", year: zoom.year, month: m }, "push");
+            }}
             onLayoutChange={changeOverviewLayout}
             onJump={jumpTo}
             weekStart={weekStart}
             onWeekStartChange={changeWeekStart}
+            jumpPivot={jumpPivot}
           />
         </div>
       ) : (
@@ -232,6 +262,7 @@ export function CalendarApp() {
             onJump={jumpTo}
             weekStart={weekStart}
             onWeekStartChange={changeWeekStart}
+            jumpPivot={jumpPivot}
           />
         </div>
       )}

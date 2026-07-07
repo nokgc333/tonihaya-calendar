@@ -43,6 +43,7 @@ function DayCellView({
   cellYear,
   cellMonth,
   pivot,
+  jump,
 }: {
   readonly cell: DayCell;
   readonly size: MonthCardSize;
@@ -51,6 +52,7 @@ function DayCellView({
   readonly cellYear?: number;
   readonly cellMonth?: number;
   readonly pivot: boolean;
+  readonly jump: boolean;
 }) {
   const s = SIZE[size];
   const vAlign = spacious ? "items-start pt-1.5" : "items-center";
@@ -59,7 +61,11 @@ function DayCellView({
   const bgStyle = { background: dayBg(cell) };
   // ピボット日（L1⇄L2の遷移起点）のセルに view-transition-name を付け、週ビュー側の
   // 同名要素とモーフィングさせる。前進・後退の両方で対称にズームする。
-  const zoomStyle = pivot ? { viewTransitionName: "day-zoom" } : null;
+  const zoomStyle = pivot
+    ? { viewTransitionName: "day-zoom" }
+    : jump
+      ? { viewTransitionName: "jump-zoom" }
+      : null;
   const handlers =
     onDayClick && cellYear !== undefined && cellMonth !== undefined
       ? {
@@ -124,6 +130,7 @@ export function MonthCard({
   onDayClick,
   year,
   pivotDay,
+  jumpDay,
 }: {
   readonly month: MonthView;
   readonly weekStart: WeekStart;
@@ -134,6 +141,7 @@ export function MonthCard({
   readonly onDayClick?: (year: number, month: number, day: number) => void;
   readonly year?: number;
   readonly pivotDay?: { readonly year: number; readonly month: number; readonly day: number } | null;
+  readonly jumpDay?: { readonly year: number; readonly month: number; readonly day: number } | null;
 }) {
   return (
     <section
@@ -200,6 +208,13 @@ export function MonthCard({
             resolved.year === pivotDay.year &&
             resolved.month === pivotDay.month &&
             cell.day === pivotDay.day;
+          const isJump =
+            !!jumpDay &&
+            cell.inMonth &&
+            !!resolved &&
+            resolved.year === jumpDay.year &&
+            resolved.month === jumpDay.month &&
+            cell.day === jumpDay.day;
           return (
             <DayCellView
               key={i}
@@ -210,6 +225,7 @@ export function MonthCard({
               cellYear={resolved?.year}
               cellMonth={resolved?.month}
               pivot={isPivot}
+              jump={isJump}
             />
           );
         })}

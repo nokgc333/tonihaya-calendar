@@ -33,6 +33,7 @@ export function MonthDetail({
   pivotDay,
   weekStart,
   onWeekStartChange,
+  jumpPivot,
 }: {
   readonly year: number;
   readonly month: number;
@@ -45,6 +46,7 @@ export function MonthDetail({
   readonly pivotDay?: { readonly year: number; readonly month: number; readonly day: number } | null;
   readonly weekStart: WeekStart;
   readonly onWeekStartChange: (weekStart: WeekStart) => void;
+  readonly jumpPivot: { readonly year: number; readonly month: number; readonly day: number } | null;
 }) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent): void => {
@@ -105,9 +107,9 @@ export function MonthDetail({
       <div className={`flex flex-col gap-4 ${SIDE_BY_SIDE}`}>
         <div
           className="w-full max-w-[800px] min-[1168px]:w-[800px] min-[1168px]:max-w-none min-[1168px]:shrink-0"
-          style={{ viewTransitionName: `month-${month}` }}
+          style={{ viewTransitionName: jumpPivot ? undefined : `month-${month}` }}
         >
-          <MonthCard month={detail.month} year={year} weekStart={weekStart} size="lg" spacious onDayClick={onDayClick} pivotDay={pivotDay} />
+          <MonthCard month={detail.month} year={year} weekStart={weekStart} size="lg" spacious onDayClick={onDayClick} pivotDay={pivotDay} jumpDay={jumpPivot} />
         </div>
 
         {/* 遊びセクションは ≤712px のときだけカレンダー直下・aside直上に表示する（幅いっぱい・2行中央）。 */}

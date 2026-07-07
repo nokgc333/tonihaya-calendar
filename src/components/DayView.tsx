@@ -40,6 +40,7 @@ export function DayView({
   onJump,
   weekStart,
   onWeekStartChange,
+  jumpPivot,
 }: {
   readonly year: number;
   readonly month: number;
@@ -50,6 +51,7 @@ export function DayView({
   readonly onJump: (level: JumpLevel) => void;
   readonly weekStart: WeekStart;
   readonly onWeekStartChange: (weekStart: WeekStart) => void;
+  readonly jumpPivot: { readonly year: number; readonly month: number; readonly day: number } | null;
 }) {
   const { day: d } = buildDayView(year, month, day, today);
   const bodyRef = useRef<HTMLDivElement>(null);
@@ -128,7 +130,7 @@ export function DayView({
       {/* 時間グリッドの外枠（L2の日カラムからのモーフ着地点）。中央寄せ・狭幅はここだけ。 */}
       <div
         className="mx-auto flex w-full min-h-0 max-w-2xl flex-1 flex-col rounded-md border"
-        style={{ borderColor: "var(--border)", viewTransitionName: "hour-zoom" }}
+        style={{ borderColor: "var(--border)", viewTransitionName: jumpPivot ? "jump-zoom" : "hour-zoom" }}
       >
         {/* 大きな日付ヘッダー（sticky）。終日行・時間グリッドと同じGRID_COLSのグリッドにし、
             第1セル(時間軸3.5rem)を空け、日付は第2セル(日カラム)内で中央寄せ。これにより
