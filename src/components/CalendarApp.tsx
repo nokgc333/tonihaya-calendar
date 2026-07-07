@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import { getCountdowns, type Countdown } from "@/domain/countdown";
 import { clampYear, resolveJumpTarget, type JumpLevel } from "@/domain/view";
@@ -57,6 +57,17 @@ export function CalendarApp() {
   const [pivotDay, setPivotDay] = useState<CivilDate | null>(null);
   // 多段ジャンプ（2レベル以上）のズーム起点。全ビューが「その日」の要素に jump-zoom を張る。
   const [jumpPivot, setJumpPivot] = useState<CivilDate | null>(null);
+  // jumpPivot はジャンプ遷移の1レンダーだけ保持したい。ジャンプ直後は justJumped で残し、
+  // 次の任意の遷移（ドリル/前後/戻る=popstate含む）で必ず掃除する。個別ハンドラの掃除に加え、
+  // popstate はハンドラを通らないためこの監視が最終保険になる。
+  const justJumpedRef = useRef(false);
+  useEffect(() => {
+    if (justJumpedRef.current) {
+      justJumpedRef.current = false;
+      return;
+    }
+    setJumpPivot(null);
+  }, [zoom.level, zoom.year, zoom.month, zoom.day]);
   // 週を開いたときのL1の文脈月（＝画面に表示していた月）。前月/翌月のグレーセルを
   // 押したときでも「戻る」で実日付の月ではなく文脈月へ戻すために保持する。
   const [weekOrigin, setWeekOrigin] = useState<{ year: number; month: number } | null>(null);
@@ -113,10 +124,11 @@ export function CalendarApp() {
 
     flushSync(() => {
       if (dist >= 2) {
-        // 多段: 日アンカー jump-zoom。他ピボットは掃除。
+        // 多段: 日アンカー jump-zoom。他ピボットは掃除。ジャンプ直後1レンダーだけ保持する印。
         setPivotDay(null);
         setDayPivot(null);
         setJumpPivot(anchorDay);
+        justJumpedRef.current = true;
       } else if (levels.has("week") && levels.has("day")) {
         // 隣接 L2↔L3: hour-zoom
         setPivotDay(null);
