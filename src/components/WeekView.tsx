@@ -39,6 +39,7 @@ export function WeekView({
   onWeekChange,
   onDayOpen,
   dayPivot,
+  pivotDay,
   onJump,
   weekStart,
   onWeekStartChange,
@@ -52,6 +53,7 @@ export function WeekView({
   readonly onWeekChange: (year: number, month: number, day: number) => void;
   readonly onDayOpen: (year: number, month: number, day: number) => void;
   readonly dayPivot: { readonly year: number; readonly month: number; readonly day: number } | null;
+  readonly pivotDay: { readonly year: number; readonly month: number; readonly day: number } | null;
   readonly onJump: (level: JumpLevel) => void;
   readonly weekStart: WeekStart;
   readonly onWeekStartChange: (weekStart: WeekStart) => void;
@@ -70,6 +72,11 @@ export function WeekView({
     jumpPivot.year === d.year &&
     jumpPivot.month === d.month &&
     jumpPivot.day === d.day;
+  const isDayPivot = (d: WeekDay): boolean =>
+    pivotDay !== null &&
+    pivotDay.year === d.year &&
+    pivotDay.month === d.month &&
+    pivotDay.day === d.day;
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent): void => {
@@ -144,12 +151,11 @@ export function WeekView({
       </nav>
 
       {/* スクロール横断の外枠。列幅を保つため横スクロール可 */}
-      {/* L2⇄L3遷移中(dayPivot非null)は外枠のday-zoomを外し、対応先を持たない外枠が
-          単独スナップショット化してhour-zoomモーフに干渉するのを防ぐ。L1⇄L2遷移時は
-          dayPivotがnullなのでday-zoomが有効になる。 */}
+      {/* 外枠は共有要素を持たず root クロスフェードで現れる。ズームは日ヘッダー
+          （day-zoom/hour-zoom/jump-zoom）が「その日」を狙って担う。 */}
       <div
         className="flex min-h-0 flex-1 flex-col overflow-x-auto rounded-md border"
-        style={{ borderColor: "var(--border)", viewTransitionName: dayPivot ? "none" : "day-zoom" }}
+        style={{ borderColor: "var(--border)" }}
       >
         {/* 曜日+日付ヘッダー（sticky）。L0/L1の曜日行に合わせ外枠なし・面色#fbfbfb。 */}
         <div
@@ -166,9 +172,11 @@ export function WeekView({
               style={
                 isPivot(d)
                   ? { viewTransitionName: "hour-zoom" }
-                  : isJump(d)
-                    ? { viewTransitionName: "jump-zoom" }
-                    : undefined
+                  : isDayPivot(d)
+                    ? { viewTransitionName: "day-zoom" }
+                    : isJump(d)
+                      ? { viewTransitionName: "jump-zoom" }
+                      : undefined
               }
               aria-label={`${d.month}月${d.day}日を開く`}
             >

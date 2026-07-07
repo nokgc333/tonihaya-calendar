@@ -215,6 +215,7 @@ export function CalendarApp() {
               }}
               onDayOpen={openDay}
               dayPivot={dayPivot}
+              pivotDay={pivotDay}
               onJump={jumpTo}
               weekStart={weekStart}
               onWeekStartChange={changeWeekStart}

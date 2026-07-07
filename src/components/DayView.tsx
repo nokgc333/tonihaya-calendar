@@ -127,10 +127,11 @@ export function DayView({
         </div>
       </nav>
 
-      {/* 時間グリッドの外枠（L2の日カラムからのモーフ着地点）。中央寄せ・狭幅はここだけ。 */}
+      {/* 時間グリッドの外枠。中央寄せ・狭幅はここだけ。hour-zoom は日付ヘッダーバーが担い、
+          外枠は多段ジャンプ時のみ jump-zoom を持つ（通常は root クロスフェード）。 */}
       <div
         className="mx-auto flex w-full min-h-0 max-w-2xl flex-1 flex-col rounded-md border"
-        style={{ borderColor: "var(--border)", viewTransitionName: jumpPivot ? "jump-zoom" : "hour-zoom" }}
+        style={{ borderColor: "var(--border)", viewTransitionName: jumpPivot ? "jump-zoom" : undefined }}
       >
         {/* 大きな日付ヘッダー（sticky）。終日行・時間グリッドと同じGRID_COLSのグリッドにし、
             第1セル(時間軸3.5rem)を空け、日付は第2セル(日カラム)内で中央寄せ。これにより
@@ -138,7 +139,11 @@ export function DayView({
             L2ヘッダー行(内容48.5px＋直下pb-1.5=border-box54.5px)と高さを揃える。 */}
         <div
           className="sticky top-0 z-10 grid min-h-[54.5px] shrink-0 items-center pb-1.5"
-          style={{ gridTemplateColumns: GRID_COLS, background: "var(--surface)" }}
+          style={{
+            gridTemplateColumns: GRID_COLS,
+            background: "var(--surface)",
+            viewTransitionName: jumpPivot ? undefined : "hour-zoom",
+          }}
         >
           <div />
           <div className="text-center text-lg font-bold tabular-nums" style={{ color: dayColor(d) }}>
