@@ -84,8 +84,8 @@ export function OverviewBody({
             <LayoutButton label="3×4" active={layout === "3x4"} onClick={() => onLayoutChange("3x4")} />
             <LayoutButton label="4×3" active={layout === "4x3"} onClick={() => onLayoutChange("4x3")} />
           </div>
-          <SettingsMenu weekStart={weekStart} onWeekStartChange={onWeekStartChange} />
           <LevelSwitcher current="overview" onJump={onJump} />
+          <SettingsMenu weekStart={weekStart} onWeekStartChange={onWeekStartChange} />
         </div>
       </nav>
 
