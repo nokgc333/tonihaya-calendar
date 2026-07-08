@@ -211,6 +211,9 @@ export function CalendarApp() {
                 flushSync(() => {
                   setDayPivot(null);
                   setJumpPivot(null);
+                  // 週送り後は「戻る」で文脈月へ戻る（別週）。起点週が定まらないので
+                  // pivotDay を掃除し、以降の月への戻り/ジャンプは day-zoom なしのクロスフェードにする。
+                  setPivotDay(null);
                 });
                 navigate({ level: "week", year: clampYear(y), month: m, day: d }, "replace");
               }}
