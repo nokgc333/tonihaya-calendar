@@ -94,15 +94,15 @@
 | 実機（Playwright） | View Transition のモーフ中間フレームは捕捉不可のため、遷移直前/直後の DOM で共有要素名を検証（`startViewTransition` をラップし before/after のスナップショットと `ready`/`finished` を計測）。①L1↔L2 で `day-zoom` が L1 セル・L2 該当日ヘッダーに各1つ・skip なし ②L2↔L3 で `hour-zoom` が L2 ヘッダー・L3 日付ヘッダーバーに各1つ・skip なし ③外枠に `day-zoom`/`hour-zoom` が付かない ④多段 `jump-zoom` が不変（回帰なし） |
 | 実機（ユーザー） | 各ジャンプ/ドリルのズーム体感を確認。方向が対象に定まり・拡大が控えめになったか |
 
-## 7.5 戻り(L2→L1)はクロスフェード（root-new の穴対策）
+## 7.5 着地側の穴対策：day-zoom は「複製オーバーレイ」に張る
 
 day-zoom の source を「押下日が属する週の行」（MonthCard の週ラッパー）にした副作用として、**戻り(L2→L1)方向で着地側にグレーの穴**が出る問題が判明した。原因は、View Transition が名前付き要素（週ラッパー）を root から「持ち上げる」ため、**着地側スナップショット（root-new）の該当週が抜けてグリッド背景色（`var(--border)`＝グレー）の穴になる**こと。モーフ要素が着地する（≒100%）まで穴が見え続ける。root-new を分離した実機スクショで確定（subgrid/grid-cols-7 とは無関係）。
 
-対策（Fix-A）: **戻り方向だけ day-zoom を張らずクロスフェード**にする。該当週は root-new に残り遷移中ずっと表示される。進む(L1→L2)のズームは維持。
-- `jumpTo` の L1↔L2 分岐: `setPivotDay(zoom.level === "week" ? null : anchorDay)`（週→月のみ null）。
-- `WeekView.onBack`（週→月の戻る）: `flushSync` 内に `setPivotDay(null)` を追加。
-- 掃除は遷移キャプチャ前（`flushSync` → `navigate`）に行う。useEffect では VT キャプチャに間に合わない。
-- 既知の残エッジ: ブラウザの戻る（popstate）経由は `pivotDay` を掃除しないため穴が出得る（アプリ内「戻る」ボタン/「月」ジャンプは対策済み）。必要なら別途対応。
+対策: **`day-zoom` を「本物の週の行」ではなく、その上に重ねた複製オーバーレイに張る**。本物の週は無名のまま root に残り遷移中ずっと表示される（穴が出ない）一方、複製が持ち上がって L2 週ヘッダー行へモーフする。進む・戻る両方向でズームが成立する。
+
+- `MonthCard`：pivot 週は本物の行（無名）＋ `absolute inset-0` の複製オーバーレイ（`aria-hidden`・`pointer-events-none`・`viewTransitionName:"day-zoom"`）を重ねる。オーバーレイは本物にピクセル一致で重なるため静止時の二重表示は無し（実機確認）。複製の列トラックは `grid-cols-subgrid` だとスナップショットで潰れるため **`grid-cols-7`** で自己完結させる。クリックは本物へ通す。
+- `jumpTo` の L1↔L2 分岐は進む・戻る両方向で `setPivotDay(anchorDay)`（穴は上記オーバーレイで防ぐため方向分岐は不要）。`WeekView.onBack` も `pivotDay` を掃除しない。
+- 検証：root-new を分離した実機スクショで戻り時に該当週が残る（穴なし）ことを確認。before/after の `day-zoom` は「複製オーバーレイ ↔ 週ヘッダー行」でペア成立・skip なし。
 
 ## 8. 既知のエッジケース
 

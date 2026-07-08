@@ -135,11 +135,10 @@ export function CalendarApp() {
         setDayPivot(anchorDay);
         setJumpPivot(null);
       } else if (levels.has("month") && levels.has("week")) {
-        // 隣接 L1↔L2: day-zoom。進む(月→週)のみズーム。
-        // 戻る(週→月)は該当週を root から持ち上げると着地側にグレーの穴が残るため、
-        // pivotDay を張らずクロスフェードにする。
+        // 隣接 L1↔L2: day-zoom（進む・戻る両方向）。着地側の穴は MonthCard 側で
+        // 「本物の週は root に残し、複製オーバーレイに day-zoom を張る」ことで防ぐ。
         setDayPivot(null);
-        setPivotDay(zoom.level === "week" ? null : anchorDay);
+        setPivotDay(anchorDay);
         setJumpPivot(null);
       } else {
         // 隣接 L0↔L1: month-N（無条件）
@@ -203,9 +202,6 @@ export function CalendarApp() {
                 flushSync(() => {
                   setDayPivot(null);
                   setJumpPivot(null);
-                  // 戻る(週→月)は day-zoom を張らない。該当週を root から持ち上げると
-                  // 着地側にグレーの穴が残るため、クロスフェードにする。
-                  setPivotDay(null);
                 });
                 // 実日付の月ではなく、週を開いた文脈月へ戻す（グレーセル経由でもズレない）。
                 const o = weekOrigin ?? { year: zoom.year, month: zoom.month! };
