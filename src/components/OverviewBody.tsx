@@ -28,6 +28,7 @@ export function OverviewBody({
   onJump,
   weekStart,
   onWeekStartChange,
+  jumpPivot,
 }: {
   readonly year: number;
   readonly today: CivilDate | null;
@@ -38,6 +39,7 @@ export function OverviewBody({
   readonly onJump: (level: JumpLevel) => void;
   readonly weekStart: WeekStart;
   readonly onWeekStartChange: (weekStart: WeekStart) => void;
+  readonly jumpPivot: { readonly year: number; readonly month: number; readonly day: number } | null;
 }) {
   const [yearDraft, setYearDraft] = useState<string>(String(year));
   useEffect(() => setYearDraft(String(year)), [year]);
@@ -96,8 +98,10 @@ export function OverviewBody({
           <div key={m.month} className={`w-[305px] ${zoomClass}`}>
             <MonthCard
               month={m}
+              year={year}
               weekStart={weekStart}
-              viewTransitionName={`month-${m.month}`}
+              viewTransitionName={jumpPivot ? undefined : `month-${m.month}`}
+              jumpDay={jumpPivot}
               onClick={() => onMonthClick(m.month)}
             />
           </div>

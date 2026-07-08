@@ -39,9 +39,11 @@ export function WeekView({
   onWeekChange,
   onDayOpen,
   dayPivot,
+  pivotDay,
   onJump,
   weekStart,
   onWeekStartChange,
+  jumpPivot,
 }: {
   readonly year: number;
   readonly month: number;
@@ -51,9 +53,11 @@ export function WeekView({
   readonly onWeekChange: (year: number, month: number, day: number) => void;
   readonly onDayOpen: (year: number, month: number, day: number) => void;
   readonly dayPivot: { readonly year: number; readonly month: number; readonly day: number } | null;
+  readonly pivotDay: { readonly year: number; readonly month: number; readonly day: number } | null;
   readonly onJump: (level: JumpLevel) => void;
   readonly weekStart: WeekStart;
   readonly onWeekStartChange: (weekStart: WeekStart) => void;
+  readonly jumpPivot: { readonly year: number; readonly month: number; readonly day: number } | null;
 }) {
   const week = buildWeekView(year, month, day, today, { weekStart });
   const bodyRef = useRef<HTMLDivElement>(null);
@@ -63,6 +67,14 @@ export function WeekView({
     dayPivot.year === d.year &&
     dayPivot.month === d.month &&
     dayPivot.day === d.day;
+  const isJump = (d: WeekDay): boolean =>
+    jumpPivot !== null &&
+    jumpPivot.year === d.year &&
+    jumpPivot.month === d.month &&
+    jumpPivot.day === d.day;
+  // L1↔L2 遷移中は、押下日セルを「週ヘッダー行全体」へモーフさせる（day-zoom）。
+  // pivotDay は L2↔L3 遷移後も残存し得るため、dayPivot/jumpPivot が null のときに限定する。
+  const isDayZoom = pivotDay !== null && dayPivot === null && jumpPivot === null;
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent): void => {
@@ -137,17 +149,20 @@ export function WeekView({
       </nav>
 
       {/* スクロール横断の外枠。列幅を保つため横スクロール可 */}
-      {/* L2⇄L3遷移中(dayPivot非null)は外枠のday-zoomを外し、対応先を持たない外枠が
-          単独スナップショット化してhour-zoomモーフに干渉するのを防ぐ。L1⇄L2遷移時は
-          dayPivotがnullなのでday-zoomが有効になる。 */}
+      {/* 外枠は共有要素を持たず root クロスフェードで現れる。ズームは日ヘッダー
+          （day-zoom/hour-zoom/jump-zoom）が「その日」を狙って担う。 */}
       <div
         className="flex min-h-0 flex-1 flex-col overflow-x-auto rounded-md border"
-        style={{ borderColor: "var(--border)", viewTransitionName: dayPivot ? "none" : "day-zoom" }}
+        style={{ borderColor: "var(--border)" }}
       >
         {/* 曜日+日付ヘッダー（sticky）。L0/L1の曜日行に合わせ外枠なし・面色#fbfbfb。 */}
         <div
           className="sticky top-0 z-10 grid shrink-0 pb-1.5"
-          style={{ gridTemplateColumns: GRID_COLS, background: "var(--surface)" }}
+          style={{
+            gridTemplateColumns: GRID_COLS,
+            background: "var(--surface)",
+            viewTransitionName: isDayZoom ? "day-zoom" : undefined,
+          }}
         >
           <div />
           {week.days.map((d) => (
@@ -156,7 +171,13 @@ export function WeekView({
               type="button"
               onClick={() => onDayOpen(d.year, d.month, d.day)}
               className="w-full cursor-pointer p-1 text-center transition-opacity hover:opacity-70"
-              style={isPivot(d) ? { viewTransitionName: "hour-zoom" } : undefined}
+              style={
+                isPivot(d)
+                  ? { viewTransitionName: "hour-zoom" }
+                  : isJump(d)
+                    ? { viewTransitionName: "jump-zoom" }
+                    : undefined
+              }
               aria-label={`${d.month}月${d.day}日を開く`}
             >
               <div className="text-[11px]" style={{ color: dayColor(d) }}>

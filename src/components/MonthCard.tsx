@@ -42,7 +42,7 @@ function DayCellView({
   onDayClick,
   cellYear,
   cellMonth,
-  pivot,
+  jump,
 }: {
   readonly cell: DayCell;
   readonly size: MonthCardSize;
@@ -50,16 +50,18 @@ function DayCellView({
   readonly onDayClick?: (year: number, month: number, day: number) => void;
   readonly cellYear?: number;
   readonly cellMonth?: number;
-  readonly pivot: boolean;
+  readonly jump: boolean;
 }) {
   const s = SIZE[size];
   const vAlign = spacious ? "items-start pt-1.5" : "items-center";
   const clickable = onDayClick && cellYear !== undefined && cellMonth !== undefined ? "cursor-pointer hover:brightness-95" : "";
   const base = `flex h-full justify-center ${vAlign} ${clickable} ${s.dayText} leading-none tabular-nums`;
   const bgStyle = { background: dayBg(cell) };
-  // ピボット日（L1⇄L2の遷移起点）のセルに view-transition-name を付け、週ビュー側の
-  // 同名要素とモーフィングさせる。前進・後退の両方で対称にズームする。
-  const zoomStyle = pivot ? { viewTransitionName: "day-zoom" } : null;
+  // 多段ジャンプ（jump-zoom）の起点セルにのみ view-transition-name を付ける。
+  // L1⇄L2 の day-zoom は「押下日が属する週の行」（週ラッパー）が担う（MonthCard 本体側）。
+  const zoomStyle = jump
+    ? { viewTransitionName: "jump-zoom" }
+    : null;
   const handlers =
     onDayClick && cellYear !== undefined && cellMonth !== undefined
       ? {
@@ -124,6 +126,7 @@ export function MonthCard({
   onDayClick,
   year,
   pivotDay,
+  jumpDay,
 }: {
   readonly month: MonthView;
   readonly weekStart: WeekStart;
@@ -134,6 +137,7 @@ export function MonthCard({
   readonly onDayClick?: (year: number, month: number, day: number) => void;
   readonly year?: number;
   readonly pivotDay?: { readonly year: number; readonly month: number; readonly day: number } | null;
+  readonly jumpDay?: { readonly year: number; readonly month: number; readonly day: number } | null;
 }) {
   return (
     <section
@@ -192,27 +196,66 @@ export function MonthCard({
           borderColor: "var(--border)",
         }}
       >
-        {month.weeks.flat().map((cell, i, cells) => {
-          const resolved = year !== undefined ? resolveCellMonth(cells, i, year, month.month) : undefined;
-          const isPivot =
+        {(() => {
+          const flat = month.weeks.flat();
+          // 押下日（pivotDay）が属する週かどうか。
+          const isPivotWeek = (week: readonly DayCell[], wi: number): boolean =>
+            year !== undefined &&
             !!pivotDay &&
-            !!resolved &&
-            resolved.year === pivotDay.year &&
-            resolved.month === pivotDay.month &&
-            cell.day === pivotDay.day;
-          return (
-            <DayCellView
-              key={i}
-              cell={cell}
-              size={size}
-              spacious={spacious}
-              onDayClick={onDayClick}
-              cellYear={resolved?.year}
-              cellMonth={resolved?.month}
-              pivot={isPivot}
-            />
-          );
-        })}
+            week.some((cell, ci) => {
+              const r = resolveCellMonth(flat, wi * 7 + ci, year, month.month);
+              return r.year === pivotDay.year && r.month === pivotDay.month && cell.day === pivotDay.day;
+            });
+          const renderCell = (cell: DayCell, wi: number, ci: number, interactive: boolean) => {
+            const i = wi * 7 + ci;
+            const resolved = year !== undefined ? resolveCellMonth(flat, i, year, month.month) : undefined;
+            const isJump =
+              interactive &&
+              !!jumpDay &&
+              cell.inMonth &&
+              !!resolved &&
+              resolved.year === jumpDay.year &&
+              resolved.month === jumpDay.month &&
+              cell.day === jumpDay.day;
+            return (
+              <DayCellView
+                key={ci}
+                cell={cell}
+                size={size}
+                spacious={spacious}
+                onDayClick={interactive ? onDayClick : undefined}
+                cellYear={resolved?.year}
+                cellMonth={resolved?.month}
+                jump={isJump}
+              />
+            );
+          };
+          return month.weeks.map((week, wi) => (
+            <div
+              key={wi}
+              className="relative isolate col-span-7 grid grid-cols-subgrid gap-px"
+              style={{ background: "var(--border)" }}
+            >
+              {week.map((cell, ci) => renderCell(cell, wi, ci, true))}
+              {isPivotWeek(week, wi) && (
+                // day-zoom は「本物の週」ではなく、その背面に敷いた複製オーバーレイに張る。
+                // 本物は root に残って遷移中も表示され続ける（着地側のグレー穴を防ぐ）一方、
+                // 複製が持ち上がって L2 週ヘッダー行へモーフする（進む・戻る両方向でズーム）。
+                // -z-10 で本物セルの背面に置く（isolate で親に閉じ込め）。本物が上に来るので
+                // ホバー/クリックは本物に効き、複製は View Transition のスナップショット専用になる。
+                // 複製は inset-0 で本物にぴったり重なる。列トラックは subgrid だと
+                // スナップショットで潰れるため grid-cols-7 で自己完結させる。
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0 -z-10 grid grid-cols-7 gap-px"
+                  style={{ background: "var(--border)", viewTransitionName: "day-zoom" }}
+                >
+                  {week.map((cell, ci) => renderCell(cell, wi, ci, false))}
+                </div>
+              )}
+            </div>
+          ));
+        })()}
       </div>
     </section>
   );
