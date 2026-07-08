@@ -94,6 +94,18 @@ body {
   animation-duration: 220ms;
 }
 
+/* ズーム元（old スナップショット）を早めにフェードアウトさせ、拡大しながら残る違和感を抑える。
+   day-zoom（L1⇄L2）/hour-zoom（L2⇄L3）が対象。グループのモーフと new のフェードインは既定のまま。 */
+@keyframes zoom-source-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+::view-transition-old(day-zoom),
+::view-transition-old(hour-zoom) {
+  animation: zoom-source-fade-out 140ms ease-out both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-group(*),
   ::view-transition-old(*),
