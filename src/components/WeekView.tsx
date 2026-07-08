@@ -72,11 +72,9 @@ export function WeekView({
     jumpPivot.year === d.year &&
     jumpPivot.month === d.month &&
     jumpPivot.day === d.day;
-  const isDayPivot = (d: WeekDay): boolean =>
-    pivotDay !== null &&
-    pivotDay.year === d.year &&
-    pivotDay.month === d.month &&
-    pivotDay.day === d.day;
+  // L1↔L2 遷移中は、押下日セルを「週ヘッダー行全体」へモーフさせる（day-zoom）。
+  // pivotDay は L2↔L3 遷移後も残存し得るため、dayPivot/jumpPivot が null のときに限定する。
+  const isDayZoom = pivotDay !== null && dayPivot === null && jumpPivot === null;
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent): void => {
@@ -160,7 +158,11 @@ export function WeekView({
         {/* 曜日+日付ヘッダー（sticky）。L0/L1の曜日行に合わせ外枠なし・面色#fbfbfb。 */}
         <div
           className="sticky top-0 z-10 grid shrink-0 pb-1.5"
-          style={{ gridTemplateColumns: GRID_COLS, background: "var(--surface)" }}
+          style={{
+            gridTemplateColumns: GRID_COLS,
+            background: "var(--surface)",
+            viewTransitionName: isDayZoom ? "day-zoom" : undefined,
+          }}
         >
           <div />
           {week.days.map((d) => (
@@ -172,11 +174,9 @@ export function WeekView({
               style={
                 isPivot(d)
                   ? { viewTransitionName: "hour-zoom" }
-                  : isDayPivot(d)
-                    ? { viewTransitionName: "day-zoom" }
-                    : isJump(d)
-                      ? { viewTransitionName: "jump-zoom" }
-                      : undefined
+                  : isJump(d)
+                    ? { viewTransitionName: "jump-zoom" }
+                    : undefined
               }
               aria-label={`${d.month}月${d.day}日を開く`}
             >

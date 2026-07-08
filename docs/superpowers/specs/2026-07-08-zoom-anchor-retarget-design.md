@@ -40,7 +40,7 @@
 
 | モーフ | source（不変） | target（変更後） |
 |--------|---------------|-----------------|
-| `day-zoom`（L1↔L2） | L1 押下日セル | **L2 の該当日ヘッダー button**（`pivotDay` 一致） |
+| `day-zoom`（L1↔L2） | L1 押下日セル | **L2 の週ヘッダー行全体**（sticky 曜日+日付行。実機微調整の結果、当初の「該当日ヘッダー1つ」から「ヘッダー行全体」へ変更） |
 | `hour-zoom`（L2↔L3） | L2 該当日ヘッダー button | **L3 の sticky 日付ヘッダーバー** |
 
 周囲のグリッド本体（週グリッド・日グリッド）は名前を持たず root クロスフェードで現れる。モーフは常に「その日の見出し ↔ その日の見出し」となり、方向が対象に定まり拡大が控えめになる。
@@ -51,25 +51,20 @@
 
 ### 5.1 `src/components/WeekView.tsx`
 - props に `pivotDay: { readonly year:number; readonly month:number; readonly day:number } | null` を追加（`dayPivot` の隣）。分割代入にも追加。
-- 既存 `isPivot`（dayPivot=hour-zoom 判定）の下に `isDayPivot`（pivotDay=day-zoom 判定）を追加:
+- L1↔L2 遷移中フラグ `isDayZoom` を追加（`pivotDay` は L2↔L3 遷移後も残存し得るため `dayPivot`/`jumpPivot` が null のときに限定する）:
   ```tsx
-  const isDayPivot = (d: WeekDay): boolean =>
-    pivotDay !== null &&
-    pivotDay.year === d.year &&
-    pivotDay.month === d.month &&
-    pivotDay.day === d.day;
+  const isDayZoom = pivotDay !== null && dayPivot === null && jumpPivot === null;
   ```
 - **外枠**の `viewTransitionName: dayPivot ? "none" : "day-zoom"` を **除去**（`viewTransitionName` を付けない＝root）。border 等の他 style は維持。コメントも更新。
-- **日ヘッダー button** の `style` を優先順位付きに変更（相互排他だが順序を明示）:
+- **週ヘッダー行**（sticky 曜日+日付行 `<div className="sticky top-0 z-10 grid shrink-0 pb-1.5" ...>`）の `style` に `viewTransitionName: isDayZoom ? "day-zoom" : undefined` を付与（押下日→週ヘッダー行全体へモーフ）。
+- **日ヘッダー button** の `style` は `hour-zoom`（`isPivot`）/`jump-zoom`（`isJump`）のみに（`day-zoom` は button ではなくヘッダー行が担う）:
   ```tsx
   style={
     isPivot(d)
       ? { viewTransitionName: "hour-zoom" }
-      : isDayPivot(d)
-        ? { viewTransitionName: "day-zoom" }
-        : isJump(d)
-          ? { viewTransitionName: "jump-zoom" }
-          : undefined
+      : isJump(d)
+        ? { viewTransitionName: "jump-zoom" }
+        : undefined
   }
   ```
 
@@ -103,7 +98,7 @@
 
 ## 9. 受け入れ基準
 
-- [ ] L1↔L2 ジャンプ/ドリルで、押下日セル ↔ L2 該当日ヘッダーが `day-zoom` でモーフ（方向が該当日に定まる・拡大控えめ）
+- [ ] L1↔L2 ジャンプ/ドリルで、押下日セル ↔ L2 週ヘッダー行全体が `day-zoom` でモーフ（拡大控えめ）
 - [ ] L2↔L3 ジャンプ/ドリルで、L2 該当日ヘッダー ↔ L3 日付ヘッダーバーが `hour-zoom` でモーフ
 - [ ] 週ビュー/日ビュー外枠に `day-zoom`/`hour-zoom` が付かない（root クロスフェードで周囲が現れる）
 - [ ] 多段ジャンプ `jump-zoom`・L0↔L1 `month-N` が不変（回帰なし）
