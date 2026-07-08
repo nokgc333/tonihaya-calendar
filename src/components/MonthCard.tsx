@@ -233,19 +233,21 @@ export function MonthCard({
           return month.weeks.map((week, wi) => (
             <div
               key={wi}
-              className="relative col-span-7 grid grid-cols-subgrid gap-px"
+              className="relative isolate col-span-7 grid grid-cols-subgrid gap-px"
               style={{ background: "var(--border)" }}
             >
               {week.map((cell, ci) => renderCell(cell, wi, ci, true))}
               {isPivotWeek(week, wi) && (
-                // day-zoom は「本物の週」ではなく、その上に重ねた複製オーバーレイに張る。
+                // day-zoom は「本物の週」ではなく、その背面に敷いた複製オーバーレイに張る。
                 // 本物は root に残って遷移中も表示され続ける（着地側のグレー穴を防ぐ）一方、
                 // 複製が持ち上がって L2 週ヘッダー行へモーフする（進む・戻る両方向でズーム）。
+                // -z-10 で本物セルの背面に置く（isolate で親に閉じ込め）。本物が上に来るので
+                // ホバー/クリックは本物に効き、複製は View Transition のスナップショット専用になる。
                 // 複製は inset-0 で本物にぴったり重なる。列トラックは subgrid だと
-                // スナップショットで潰れるため grid-cols-7 で自己完結させる。クリックは本物へ通す。
+                // スナップショットで潰れるため grid-cols-7 で自己完結させる。
                 <div
                   aria-hidden
-                  className="pointer-events-none absolute inset-0 grid grid-cols-7 gap-px"
+                  className="pointer-events-none absolute inset-0 -z-10 grid grid-cols-7 gap-px"
                   style={{ background: "var(--border)", viewTransitionName: "day-zoom" }}
                 >
                   {week.map((cell, ci) => renderCell(cell, wi, ci, false))}
