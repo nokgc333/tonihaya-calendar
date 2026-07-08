@@ -94,9 +94,19 @@
 | 実機（Playwright） | View Transition のモーフ中間フレームは捕捉不可のため、遷移直前/直後の DOM で共有要素名を検証（`startViewTransition` をラップし before/after のスナップショットと `ready`/`finished` を計測）。①L1↔L2 で `day-zoom` が L1 セル・L2 該当日ヘッダーに各1つ・skip なし ②L2↔L3 で `hour-zoom` が L2 ヘッダー・L3 日付ヘッダーバーに各1つ・skip なし ③外枠に `day-zoom`/`hour-zoom` が付かない ④多段 `jump-zoom` が不変（回帰なし） |
 | 実機（ユーザー） | 各ジャンプ/ドリルのズーム体感を確認。方向が対象に定まり・拡大が控えめになったか |
 
+## 7.5 戻り(L2→L1)はクロスフェード（root-new の穴対策）
+
+day-zoom の source を「押下日が属する週の行」（MonthCard の週ラッパー）にした副作用として、**戻り(L2→L1)方向で着地側にグレーの穴**が出る問題が判明した。原因は、View Transition が名前付き要素（週ラッパー）を root から「持ち上げる」ため、**着地側スナップショット（root-new）の該当週が抜けてグリッド背景色（`var(--border)`＝グレー）の穴になる**こと。モーフ要素が着地する（≒100%）まで穴が見え続ける。root-new を分離した実機スクショで確定（subgrid/grid-cols-7 とは無関係）。
+
+対策（Fix-A）: **戻り方向だけ day-zoom を張らずクロスフェード**にする。該当週は root-new に残り遷移中ずっと表示される。進む(L1→L2)のズームは維持。
+- `jumpTo` の L1↔L2 分岐: `setPivotDay(zoom.level === "week" ? null : anchorDay)`（週→月のみ null）。
+- `WeekView.onBack`（週→月の戻る）: `flushSync` 内に `setPivotDay(null)` を追加。
+- 掃除は遷移キャプチャ前（`flushSync` → `navigate`）に行う。useEffect では VT キャプチャに間に合わない。
+- 既知の残エッジ: ブラウザの戻る（popstate）経由は `pivotDay` を掃除しないため穴が出得る（アプリ内「戻る」ボタン/「月」ジャンプは対策済み）。必要なら別途対応。
+
 ## 8. 既知のエッジケース
 
-- 週送り（`shiftWeek`）で `pivotDay` の日が表示週外に出た状態で L2→L1（「月」ジャンプ/戻る）した場合、L2 側に該当日ヘッダーが存在せず `day-zoom` が付かない → クロスフェードにフォールバック。稀なパスであり許容（従来は外枠 `day-zoom` で強引にモーフしていた挙動が、より素直なクロスフェードになるだけ）。
+- 週送り（`shiftWeek`）で `pivotDay` の日が表示週外に出た状態で L2→L1（「月」ジャンプ/戻る）した場合、L2 側に該当日ヘッダーが存在せず `day-zoom` が付かない → クロスフェードにフォールバック。稀なパスであり許容。
 
 ## 9. 受け入れ基準
 
