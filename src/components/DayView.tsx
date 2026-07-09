@@ -128,9 +128,9 @@ export function DayView({
         {/* 大きな日付ヘッダー（sticky）。終日行・時間グリッドと同じGRID_COLSのグリッドにし、
             第1セル(時間軸3.5rem)を空け、日付は第2セル(日カラム)内で中央寄せ。これにより
             終日行/時間列と中央軸が揃う。祝日名は終日行に出るのでここには表示しない。
-            L2ヘッダー行(内容48.5px＋直下pb-1.5=border-box54.5px)と高さを揃える。 */}
+            高さは 58.5px（L2ヘッダー行の 54.5px より +4px 高く、意図的に L3 のみ調整）。 */}
         <div
-          className="sticky top-0 z-10 grid min-h-[54.5px] shrink-0 items-center pb-1.5"
+          className="sticky top-0 z-10 grid min-h-[58.5px] shrink-0 items-center pb-1.5"
           style={{
             gridTemplateColumns: GRID_COLS,
             background: "var(--surface)",
