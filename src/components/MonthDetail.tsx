@@ -9,9 +9,7 @@ import { MonthCard } from "@/components/MonthCard";
 import { CountdownChips } from "@/components/CountdownChips";
 import { LevelSwitcher } from "@/components/LevelSwitcher";
 import { SettingsMenu } from "@/components/SettingsMenu";
-
-
-const WEEKDAY_JA = ["日", "月", "火", "水", "木", "金", "土"] as const;
+import { WEEKDAY_JA } from "@/components/weekdays";
 
 // 幅はラッパー(CalendarApp)側で制御する。ここでは横並び(≥1168px)でカレンダー800/aside320に固定し、
 // それ未満では縦積み（各要素はラッパー幅いっぱい）にする。

@@ -7,11 +7,11 @@ import type { WeekStart } from "@/domain/calendar";
 import { LevelSwitcher } from "@/components/LevelSwitcher";
 import { SettingsMenu } from "@/components/SettingsMenu";
 import { dayBgColor, dayTextColor } from "@/components/dayPalette";
+import { WEEKDAY_JA } from "@/components/weekdays";
 
 
 const HOUR_HEIGHT = 48; // 1時間あたりの高さ(px)
 const HOURS = Array.from({ length: 24 }, (_, h) => h);
-const WEEKDAY_JA = ["日", "月", "火", "水", "木", "金", "土"] as const;
 const GRID_COLS = "3.5rem repeat(7, minmax(4.5rem, 1fr))";
 const SCROLL_LEAD_HOURS = 2;
 

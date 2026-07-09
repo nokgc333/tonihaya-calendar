@@ -1,8 +1,7 @@
 import type { Countdown } from "@/domain/countdown";
 import type { CivilDate } from "@/domain/shared/date";
 import { CountdownChips } from "@/components/CountdownChips";
-
-const WEEKDAY_JA = ["日", "月", "火", "水", "木", "金", "土"] as const;
+import { WEEKDAY_JA } from "@/components/weekdays";
 
 
 function weekdayJa(date: CivilDate): string {

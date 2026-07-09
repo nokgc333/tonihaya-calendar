@@ -2,8 +2,7 @@ import type { DayCell, MonthView } from "@/domain/view";
 import type { CivilDate } from "@/domain/shared/date";
 import type { WeekStart } from "@/domain/calendar";
 import { dayBgColor, dayTextColor } from "@/components/dayPalette";
-
-const WEEKDAY_LABELS = ["日", "月", "火", "水", "木", "金", "土"] as const;
+import { WEEKDAY_JA } from "@/components/weekdays";
 
 // 月は最大6週。年・月によって4〜6週と変動するが、カード高さを一定に保つため
 // 常に6行分の行トラックを確保する（不足週は空トラックで高さのみ担保）。
@@ -18,8 +17,8 @@ const SIZE = {
 
 function weekdayHeader(weekStart: WeekStart): readonly string[] {
   return weekStart === "mon"
-    ? [...WEEKDAY_LABELS.slice(1), WEEKDAY_LABELS[0]]
-    : WEEKDAY_LABELS;
+    ? [...WEEKDAY_JA.slice(1), WEEKDAY_JA[0]]
+    : WEEKDAY_JA;
 }
 
 /** セル文字色。前後月はフェイント、当月は共通パレット（日祝=赤・土=青・平日=標準）。 */
