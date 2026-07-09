@@ -7,6 +7,7 @@ import { clampYear, resolveJumpTarget, type JumpLevel } from "@/domain/view";
 import type { CivilDate } from "@/domain/shared/date";
 import type { WeekStart } from "@/domain/calendar";
 import { useZoomState } from "@/hooks/useZoomState";
+import { EventProvider } from "@/hooks/useEvents";
 import { TodayHeader } from "@/components/TodayHeader";
 import { OverviewBody, type OverviewLayout } from "@/components/OverviewBody";
 import { MonthDetail } from "@/components/MonthDetail";
@@ -20,6 +21,14 @@ const LEVEL_ORDER: Record<JumpLevel, number> = { overview: 0, month: 1, week: 2,
 
 
 export function CalendarApp() {
+  return (
+    <EventProvider>
+      <CalendarAppInner />
+    </EventProvider>
+  );
+}
+
+function CalendarAppInner() {
   const { zoom, today, navigate } = useZoomState();
   const countdowns: Countdown | null = today
     ? getCountdowns(today.year, today.month, today.day)

@@ -8,6 +8,10 @@ import { LevelSwitcher } from "@/components/LevelSwitcher";
 import { SettingsMenu } from "@/components/SettingsMenu";
 import { dayBgColor, dayTextColor } from "@/components/dayPalette";
 import { WEEKDAY_JA } from "@/components/weekdays";
+import { DayTimedEvents } from "@/components/DayTimedEvents";
+import { useEvents } from "@/hooks/useEvents";
+import { eventsForDay } from "@/domain/event";
+import { eventColor } from "@/components/eventColors";
 
 
 const HOUR_HEIGHT = 48; // 1時間あたりの高さ(px)
@@ -41,6 +45,8 @@ export function DayView({
 }) {
   const { day: d } = buildDayView(year, month, day, today);
   const bodyRef = useRef<HTMLDivElement>(null);
+  const { events } = useEvents();
+  const allDayEvents = eventsForDay(events, { year, month, day }).filter((e) => e.allDay);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent): void => {
@@ -146,10 +152,28 @@ export function DayView({
             終日
           </div>
           <div
-            className="min-h-[1.5rem] border-l p-0.5 text-center text-[10px]"
-            style={{ borderColor: "var(--border)", background: dayBgColor(d), color: "var(--accent-red)" }}
+            className="min-h-[1.5rem] space-y-0.5 border-l p-0.5 text-[10px]"
+            style={{ borderColor: "var(--border)", background: dayBgColor(d) }}
           >
-            {d.holidayName ?? ""}
+            {d.holidayName ? (
+              <div className="text-center" style={{ color: "var(--accent-red)" }}>
+                {d.holidayName}
+              </div>
+            ) : null}
+            {allDayEvents.map((e) => {
+              const c = eventColor(e.colorKey);
+              return (
+                <div
+                  key={e.id}
+                  data-event-id={e.id}
+                  className="truncate rounded px-1 text-left leading-tight"
+                  style={{ background: c.bg, color: c.fg, border: `1px solid ${c.border}` }}
+                  title={e.title}
+                >
+                  {e.title}
+                </div>
+              );
+            })}
           </div>
         </div>
 
@@ -170,10 +194,12 @@ export function DayView({
                 />
               </div>
             ))}
+            {/* 時間イベント層（今ラインと同じ relative 親の中に絶対配置） */}
+            <DayTimedEvents date={{ year, month, day }} hourHeight={HOUR_HEIGHT} gutter="3.5rem" />
             {/* 今ライン（今日のみ） */}
             {d.isToday && (
               <div
-                className="pointer-events-none absolute"
+                className="pointer-events-none absolute z-[6]"
                 style={{
                   top: nowOffset,
                   left: "3.5rem",
