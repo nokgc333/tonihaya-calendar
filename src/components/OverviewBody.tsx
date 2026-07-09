@@ -2,6 +2,7 @@
 
 import { MAX_YEAR, MIN_YEAR, buildYearView, clampYear, resolveYearInput } from "@/domain/view";
 import type { JumpLevel } from "@/domain/view";
+import type { CivilDate } from "@/domain/shared/date";
 import type { WeekStart } from "@/domain/calendar";
 import { LevelSwitcher } from "@/components/LevelSwitcher";
 import { SegmentButton } from "@/components/SegmentButton";
@@ -12,11 +13,6 @@ import { useEffect, useState } from "react";
 /** 俯瞰カレンダーの表示レイアウト（3行×4列 / 4行×3列） */
 export type OverviewLayout = "3x4" | "4x3";
 
-interface CivilDate {
-  readonly year: number;
-  readonly month: number;
-  readonly day: number;
-}
 
 export function OverviewBody({
   year,
@@ -39,7 +35,7 @@ export function OverviewBody({
   readonly onJump: (level: JumpLevel) => void;
   readonly weekStart: WeekStart;
   readonly onWeekStartChange: (weekStart: WeekStart) => void;
-  readonly jumpPivot: { readonly year: number; readonly month: number; readonly day: number } | null;
+  readonly jumpPivot: CivilDate | null;
 }) {
   const [yearDraft, setYearDraft] = useState<string>(String(year));
   useEffect(() => setYearDraft(String(year)), [year]);

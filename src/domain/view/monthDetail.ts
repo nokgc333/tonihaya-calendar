@@ -1,6 +1,6 @@
 import { daysInMonth } from "../calendar";
 import { getHolidaysInMonth, isHoliday, type Holiday } from "../holiday";
-import { toEpochDay, weekdayOf } from "../shared/date";
+import { toEpochDay, weekdayOf, type CivilDate } from "../shared/date";
 import { buildMonthView, type MonthView, type YearViewSettings } from "./yearView";
 
 const SUNDAY = 0;
@@ -13,11 +13,6 @@ function isBusinessDay(year: number, month: number, day: number): boolean {
   return !isWeekend && !isHoliday(year, month, day);
 }
 
-interface CivilDate {
-  readonly year: number;
-  readonly month: number;
-  readonly day: number;
-}
 
 export interface MonthDetail {
   readonly month: MonthView;

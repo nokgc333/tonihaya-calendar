@@ -3,12 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import { parseZoom, zoomToQuery, type ZoomState } from "@/domain/view";
+import type { CivilDate } from "@/domain/shared/date";
 
-interface CivilDate {
-  readonly year: number;
-  readonly month: number;
-  readonly day: number;
-}
 
 type HistoryMode = "push" | "replace" | "none";
 

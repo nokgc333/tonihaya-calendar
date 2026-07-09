@@ -1,13 +1,7 @@
-import { daysInMonth } from "../shared/date";
+import { daysInMonth, type CivilDate } from "../shared/date";
 import type { ZoomState } from "./zoom";
 
 export type JumpLevel = "overview" | "month" | "week" | "day";
-
-interface CivilDate {
-  readonly year: number;
-  readonly month: number;
-  readonly day: number;
-}
 
 /**
  * ジャンプ先のズーム状態を決める。今ある文脈(year/month/day)は保持し、
