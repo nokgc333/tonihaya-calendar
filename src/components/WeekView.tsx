@@ -8,6 +8,10 @@ import { LevelSwitcher } from "@/components/LevelSwitcher";
 import { SettingsMenu } from "@/components/SettingsMenu";
 import { dayBgColor, dayTextColor } from "@/components/dayPalette";
 import { WEEKDAY_JA } from "@/components/weekdays";
+import { DayTimedEvents } from "@/components/DayTimedEvents";
+import { useEvents } from "@/hooks/useEvents";
+import { eventsForDay } from "@/domain/event";
+import { eventColor } from "@/components/eventColors";
 
 
 const HOUR_HEIGHT = 48; // 1時間あたりの高さ(px)
@@ -47,6 +51,7 @@ export function WeekView({
 }) {
   const week = buildWeekView(year, month, day, today, { weekStart });
   const bodyRef = useRef<HTMLDivElement>(null);
+  const { events } = useEvents();
   const todayIndex = week.days.findIndex((d) => d.isToday);
   const isPivot = (d: WeekDay): boolean =>
     dayPivot !== null &&
@@ -194,15 +199,40 @@ export function WeekView({
           <div className="p-1 text-right text-[10px]" style={{ color: "var(--text-muted)" }}>
             終日
           </div>
-          {week.days.map((d) => (
-            <div
-              key={`a-${d.month}-${d.day}`}
-              className="min-h-[1.5rem] border-l p-0.5 text-center text-[10px]"
-              style={{ borderColor: "var(--border)", background: dayBgColor(d), color: "var(--accent-red)" }}
-            >
-              {d.holidayName ?? ""}
-            </div>
-          ))}
+          {week.days.map((d) => {
+            const allDayEvents = eventsForDay(events, {
+              year: d.year,
+              month: d.month,
+              day: d.day,
+            }).filter((e) => e.allDay);
+            return (
+              <div
+                key={`a-${d.month}-${d.day}`}
+                className="min-h-[1.5rem] space-y-0.5 border-l p-0.5 text-[10px]"
+                style={{ borderColor: "var(--border)", background: dayBgColor(d) }}
+              >
+                {d.holidayName ? (
+                  <div className="text-center" style={{ color: "var(--accent-red)" }}>
+                    {d.holidayName}
+                  </div>
+                ) : null}
+                {allDayEvents.map((e) => {
+                  const c = eventColor(e.colorKey);
+                  return (
+                    <div
+                      key={e.id}
+                      data-event-id={e.id}
+                      className="truncate rounded px-1 leading-tight"
+                      style={{ background: c.bg, color: c.fg, border: `1px solid ${c.border}` }}
+                      title={e.title}
+                    >
+                      {e.title}
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })}
         </div>
 
         {/* 時間グリッド本体（縦スクロール） */}
@@ -229,10 +259,20 @@ export function WeekView({
                 ))}
               </Fragment>
             ))}
+            {/* 各日の時間イベント層（今ラインと同じ relative 親の中に絶対配置） */}
+            {week.days.map((d, i) => (
+              <DayTimedEvents
+                key={`ev-${d.month}-${d.day}`}
+                date={{ year: d.year, month: d.month, day: d.day }}
+                hourHeight={HOUR_HEIGHT}
+                dayLeft={`(3.5rem + (100% - 3.5rem) * ${i} / 7)`}
+                dayWidth="((100% - 3.5rem) / 7)"
+              />
+            ))}
             {/* 今ライン（今日の列のみ） */}
             {todayIndex >= 0 && (
               <div
-                className="pointer-events-none absolute"
+                className="pointer-events-none absolute z-[6]"
                 style={{
                   top: nowOffset,
                   left: `calc(3.5rem + ${todayIndex} * (100% - 3.5rem) / 7)`,

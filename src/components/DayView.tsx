@@ -195,7 +195,12 @@ export function DayView({
               </div>
             ))}
             {/* 時間イベント層（今ラインと同じ relative 親の中に絶対配置） */}
-            <DayTimedEvents date={{ year, month, day }} hourHeight={HOUR_HEIGHT} gutter="3.5rem" />
+            <DayTimedEvents
+              date={{ year, month, day }}
+              hourHeight={HOUR_HEIGHT}
+              dayLeft="3.5rem"
+              dayWidth="(100% - 3.5rem)"
+            />
             {/* 今ライン（今日のみ） */}
             {d.isToday && (
               <div
