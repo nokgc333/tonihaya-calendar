@@ -8,6 +8,7 @@ import type { CivilDate } from "@/domain/shared/date";
 import type { WeekStart } from "@/domain/calendar";
 import { useZoomState } from "@/hooks/useZoomState";
 import { EventProvider } from "@/hooks/useEvents";
+import { EventEditorProvider } from "@/hooks/useEventEditor";
 import { TodayHeader } from "@/components/TodayHeader";
 import { OverviewBody, type OverviewLayout } from "@/components/OverviewBody";
 import { MonthDetail } from "@/components/MonthDetail";
@@ -23,7 +24,9 @@ const LEVEL_ORDER: Record<JumpLevel, number> = { overview: 0, month: 1, week: 2,
 export function CalendarApp() {
   return (
     <EventProvider>
-      <CalendarAppInner />
+      <EventEditorProvider>
+        <CalendarAppInner />
+      </EventEditorProvider>
     </EventProvider>
   );
 }

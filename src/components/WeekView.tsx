@@ -9,7 +9,9 @@ import { SettingsMenu } from "@/components/SettingsMenu";
 import { dayBgColor, dayTextColor } from "@/components/dayPalette";
 import { WEEKDAY_JA } from "@/components/weekdays";
 import { DayTimedEvents } from "@/components/DayTimedEvents";
+import { AddEventButton } from "@/components/AddEventButton";
 import { useEvents } from "@/hooks/useEvents";
+import { useEventEditor } from "@/hooks/useEventEditor";
 import { eventsForDay } from "@/domain/event";
 import { eventColor } from "@/components/eventColors";
 
@@ -52,6 +54,7 @@ export function WeekView({
   const week = buildWeekView(year, month, day, today, { weekStart });
   const bodyRef = useRef<HTMLDivElement>(null);
   const { events } = useEvents();
+  const { openEdit } = useEventEditor();
   const todayIndex = week.days.findIndex((d) => d.isToday);
   const isPivot = (d: WeekDay): boolean =>
     dayPivot !== null &&
@@ -134,6 +137,7 @@ export function WeekView({
           </button>
         </div>
         <div className="ml-auto flex items-center gap-3">
+          <AddEventButton date={{ year, month, day }} />
           <LevelSwitcher current="week" onJump={onJump} />
           <SettingsMenu weekStart={weekStart} onWeekStartChange={onWeekStartChange} />
         </div>
@@ -219,15 +223,17 @@ export function WeekView({
                 {allDayEvents.map((e) => {
                   const c = eventColor(e.colorKey);
                   return (
-                    <div
+                    <button
                       key={e.id}
+                      type="button"
                       data-event-id={e.id}
-                      className="truncate rounded px-1 leading-tight"
+                      onClick={() => openEdit(e.id)}
+                      className="block w-full truncate rounded px-1 text-left leading-tight transition-opacity hover:opacity-90"
                       style={{ background: c.bg, color: c.fg, border: `1px solid ${c.border}` }}
                       title={e.title}
                     >
                       {e.title}
-                    </div>
+                    </button>
                   );
                 })}
               </div>
@@ -267,6 +273,7 @@ export function WeekView({
                 hourHeight={HOUR_HEIGHT}
                 dayLeft={`(3.5rem + (100% - 3.5rem) * ${i} / 7)`}
                 dayWidth="((100% - 3.5rem) / 7)"
+                onSelect={openEdit}
               />
             ))}
             {/* 今ライン（今日の列のみ） */}

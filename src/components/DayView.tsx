@@ -9,7 +9,9 @@ import { SettingsMenu } from "@/components/SettingsMenu";
 import { dayBgColor, dayTextColor } from "@/components/dayPalette";
 import { WEEKDAY_JA } from "@/components/weekdays";
 import { DayTimedEvents } from "@/components/DayTimedEvents";
+import { AddEventButton } from "@/components/AddEventButton";
 import { useEvents } from "@/hooks/useEvents";
+import { useEventEditor } from "@/hooks/useEventEditor";
 import { eventsForDay } from "@/domain/event";
 import { eventColor } from "@/components/eventColors";
 
@@ -46,6 +48,7 @@ export function DayView({
   const { day: d } = buildDayView(year, month, day, today);
   const bodyRef = useRef<HTMLDivElement>(null);
   const { events } = useEvents();
+  const { openEdit } = useEventEditor();
   const allDayEvents = eventsForDay(events, { year, month, day }).filter((e) => e.allDay);
 
   useEffect(() => {
@@ -114,6 +117,7 @@ export function DayView({
           </button>
         </div>
         <div className="ml-auto flex items-center gap-3">
+          <AddEventButton date={{ year, month, day }} />
           <LevelSwitcher current="day" onJump={onJump} />
           <SettingsMenu weekStart={weekStart} onWeekStartChange={onWeekStartChange} />
         </div>
@@ -163,15 +167,17 @@ export function DayView({
             {allDayEvents.map((e) => {
               const c = eventColor(e.colorKey);
               return (
-                <div
+                <button
                   key={e.id}
+                  type="button"
                   data-event-id={e.id}
-                  className="truncate rounded px-1 text-left leading-tight"
+                  onClick={() => openEdit(e.id)}
+                  className="block w-full truncate rounded px-1 text-left leading-tight transition-opacity hover:opacity-90"
                   style={{ background: c.bg, color: c.fg, border: `1px solid ${c.border}` }}
                   title={e.title}
                 >
                   {e.title}
-                </div>
+                </button>
               );
             })}
           </div>
@@ -200,6 +206,7 @@ export function DayView({
               hourHeight={HOUR_HEIGHT}
               dayLeft="3.5rem"
               dayWidth="(100% - 3.5rem)"
+              onSelect={openEdit}
             />
             {/* 今ライン（今日のみ） */}
             {d.isToday && (
