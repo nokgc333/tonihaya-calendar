@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import { getCountdowns, type Countdown } from "@/domain/countdown";
 import { clampYear, resolveJumpTarget, type JumpLevel } from "@/domain/view";
+import type { CivilDate } from "@/domain/shared/date";
 import type { WeekStart } from "@/domain/calendar";
 import { useZoomState } from "@/hooks/useZoomState";
 import { TodayHeader } from "@/components/TodayHeader";
@@ -17,11 +18,6 @@ const WEEKSTART_STORAGE_KEY = "tonihaya.weekStart";
 
 const LEVEL_ORDER: Record<JumpLevel, number> = { overview: 0, month: 1, week: 2, day: 3 };
 
-interface CivilDate {
-  readonly year: number;
-  readonly month: number;
-  readonly day: number;
-}
 
 export function CalendarApp() {
   const { zoom, today, navigate } = useZoomState();

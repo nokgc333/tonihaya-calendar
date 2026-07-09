@@ -2,16 +2,11 @@
 
 import { Fragment, useEffect, useRef } from "react";
 import { buildWeekView, minutesToOffset, type JumpLevel, type WeekDay } from "@/domain/view";
-import { fromEpochDay, toEpochDay } from "@/domain/shared/date";
+import { fromEpochDay, toEpochDay, type CivilDate } from "@/domain/shared/date";
 import type { WeekStart } from "@/domain/calendar";
 import { LevelSwitcher } from "@/components/LevelSwitcher";
 import { SettingsMenu } from "@/components/SettingsMenu";
 
-interface CivilDate {
-  readonly year: number;
-  readonly month: number;
-  readonly day: number;
-}
 
 const HOUR_HEIGHT = 48; // 1時間あたりの高さ(px)
 const HOURS = Array.from({ length: 24 }, (_, h) => h);
@@ -52,12 +47,12 @@ export function WeekView({
   readonly onBack: () => void;
   readonly onWeekChange: (year: number, month: number, day: number) => void;
   readonly onDayOpen: (year: number, month: number, day: number) => void;
-  readonly dayPivot: { readonly year: number; readonly month: number; readonly day: number } | null;
-  readonly pivotDay: { readonly year: number; readonly month: number; readonly day: number } | null;
+  readonly dayPivot: CivilDate | null;
+  readonly pivotDay: CivilDate | null;
   readonly onJump: (level: JumpLevel) => void;
   readonly weekStart: WeekStart;
   readonly onWeekStartChange: (weekStart: WeekStart) => void;
-  readonly jumpPivot: { readonly year: number; readonly month: number; readonly day: number } | null;
+  readonly jumpPivot: CivilDate | null;
 }) {
   const week = buildWeekView(year, month, day, today, { weekStart });
   const bodyRef = useRef<HTMLDivElement>(null);

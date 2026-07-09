@@ -1,10 +1,10 @@
+import { fromEpochDay, toEpochDay, weekdayOf, type CivilDate } from "../shared/date";
+
 /** 祝日 */
 export interface Holiday {
   readonly name: string;
-  readonly date: { readonly year: number; readonly month: number; readonly day: number };
+  readonly date: CivilDate;
 }
-
-import { fromEpochDay, toEpochDay, weekdayOf } from "../shared/date";
 
 const MONDAY = 1;
 const SUNDAY = 0;

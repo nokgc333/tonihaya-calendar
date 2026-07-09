@@ -1,13 +1,9 @@
 import type { Countdown } from "@/domain/countdown";
+import type { CivilDate } from "@/domain/shared/date";
 import { CountdownChips } from "@/components/CountdownChips";
 
 const WEEKDAY_JA = ["日", "月", "火", "水", "木", "金", "土"] as const;
 
-interface CivilDate {
-  readonly year: number;
-  readonly month: number;
-  readonly day: number;
-}
 
 function weekdayJa(date: CivilDate): string {
   return WEEKDAY_JA[new Date(Date.UTC(date.year, date.month - 1, date.day)).getUTCDay()];

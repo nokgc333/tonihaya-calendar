@@ -1,4 +1,5 @@
 import type { DayCell, MonthView } from "@/domain/view";
+import type { CivilDate } from "@/domain/shared/date";
 import type { WeekStart } from "@/domain/calendar";
 
 const WEEKDAY_LABELS = ["日", "月", "火", "水", "木", "金", "土"] as const;
@@ -136,8 +137,8 @@ export function MonthCard({
   readonly spacious?: boolean;
   readonly onDayClick?: (year: number, month: number, day: number) => void;
   readonly year?: number;
-  readonly pivotDay?: { readonly year: number; readonly month: number; readonly day: number } | null;
-  readonly jumpDay?: { readonly year: number; readonly month: number; readonly day: number } | null;
+  readonly pivotDay?: CivilDate | null;
+  readonly jumpDay?: CivilDate | null;
 }) {
   return (
     <section

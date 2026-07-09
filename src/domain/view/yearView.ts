@@ -1,6 +1,7 @@
 import { getMonthGrid, type WeekStart } from "../calendar";
 import { getCountdowns, type Countdown } from "../countdown";
 import { getHoliday } from "../holiday";
+import type { CivilDate } from "../shared/date";
 
 const SATURDAY = 6;
 const SUNDAY = 0;
@@ -47,12 +48,6 @@ export interface YearView {
 
 export interface YearViewSettings {
   readonly weekStart: WeekStart;
-}
-
-interface CivilDate {
-  readonly year: number;
-  readonly month: number;
-  readonly day: number;
 }
 
 export function buildMonthView(

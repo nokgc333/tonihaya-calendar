@@ -2,16 +2,11 @@
 
 import { useEffect, useRef } from "react";
 import { buildDayView, minutesToOffset, type JumpLevel, type WeekDay } from "@/domain/view";
-import { fromEpochDay, toEpochDay } from "@/domain/shared/date";
+import { fromEpochDay, toEpochDay, type CivilDate } from "@/domain/shared/date";
 import type { WeekStart } from "@/domain/calendar";
 import { LevelSwitcher } from "@/components/LevelSwitcher";
 import { SettingsMenu } from "@/components/SettingsMenu";
 
-interface CivilDate {
-  readonly year: number;
-  readonly month: number;
-  readonly day: number;
-}
 
 const HOUR_HEIGHT = 48; // 1時間あたりの高さ(px)
 const HOURS = Array.from({ length: 24 }, (_, h) => h);
@@ -51,7 +46,7 @@ export function DayView({
   readonly onJump: (level: JumpLevel) => void;
   readonly weekStart: WeekStart;
   readonly onWeekStartChange: (weekStart: WeekStart) => void;
-  readonly jumpPivot: { readonly year: number; readonly month: number; readonly day: number } | null;
+  readonly jumpPivot: CivilDate | null;
 }) {
   const { day: d } = buildDayView(year, month, day, today);
   const bodyRef = useRef<HTMLDivElement>(null);

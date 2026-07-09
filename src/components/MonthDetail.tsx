@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { buildMonthDetail, type JumpLevel } from "@/domain/view";
+import type { CivilDate } from "@/domain/shared/date";
 import type { Countdown } from "@/domain/countdown";
 import type { WeekStart } from "@/domain/calendar";
 import { MonthCard } from "@/components/MonthCard";
@@ -9,11 +10,6 @@ import { CountdownChips } from "@/components/CountdownChips";
 import { LevelSwitcher } from "@/components/LevelSwitcher";
 import { SettingsMenu } from "@/components/SettingsMenu";
 
-interface CivilDate {
-  readonly year: number;
-  readonly month: number;
-  readonly day: number;
-}
 
 const WEEKDAY_JA = ["日", "月", "火", "水", "木", "金", "土"] as const;
 
@@ -43,10 +39,10 @@ export function MonthDetail({
   readonly onMonthChange: (year: number, month: number) => void;
   readonly onDayClick: (year: number, month: number, day: number) => void;
   readonly onJump: (level: JumpLevel) => void;
-  readonly pivotDay?: { readonly year: number; readonly month: number; readonly day: number } | null;
+  readonly pivotDay?: CivilDate | null;
   readonly weekStart: WeekStart;
   readonly onWeekStartChange: (weekStart: WeekStart) => void;
-  readonly jumpPivot: { readonly year: number; readonly month: number; readonly day: number } | null;
+  readonly jumpPivot: CivilDate | null;
 }) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent): void => {
