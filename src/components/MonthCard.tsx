@@ -1,8 +1,11 @@
 import type { DayCell, MonthView } from "@/domain/view";
 import type { CivilDate } from "@/domain/shared/date";
 import type { WeekStart } from "@/domain/calendar";
+import type { CalendarEvent } from "@/domain/event";
+import { eventsForDay, sortForDay } from "@/domain/event";
 import { dayBgColor, dayTextColor } from "@/components/dayPalette";
 import { WEEKDAY_JA } from "@/components/weekdays";
+import { EventChip } from "@/components/EventChip";
 
 // 月は最大6週。年・月によって4〜6週と変動するが、カード高さを一定に保つため
 // 常に6行分の行トラックを確保する（不足週は空トラックで高さのみ担保）。
@@ -41,6 +44,8 @@ function DayCellView({
   cellYear,
   cellMonth,
   jump,
+  dayEvents = [],
+  onEventSelect,
 }: {
   readonly cell: DayCell;
   readonly size: MonthCardSize;
@@ -49,6 +54,8 @@ function DayCellView({
   readonly cellYear?: number;
   readonly cellMonth?: number;
   readonly jump: boolean;
+  readonly dayEvents?: readonly CalendarEvent[];
+  readonly onEventSelect?: (id: string) => void;
 }) {
   const s = SIZE[size];
   const vAlign = spacious ? "items-start pt-1.5" : "items-center";
@@ -74,27 +81,58 @@ function DayCellView({
           },
         }
       : {};
-  if (cell.isToday) {
+
+  const numberNode = cell.isToday ? (
+    <span
+      className={`flex ${s.circle} items-center justify-center rounded-full font-bold`}
+      style={{ background: "var(--today-bg)", color: "var(--today-fg)" }}
+      aria-current="date"
+    >
+      {cell.day}
+    </span>
+  ) : (
+    <span style={{ color: dayColor(cell) }}>{cell.day}</span>
+  );
+
+  // L1（spacious）で当月セルにイベントがあれば、番号の下にチップ（最大3件＋「+N件」）を出す。
+  const MAX_CHIPS = 3;
+  const showChips = spacious && cell.inMonth && dayEvents.length > 0;
+  if (showChips) {
+    const overflow = dayEvents.length - MAX_CHIPS;
     return (
-      <div className={base} style={{ ...bgStyle, ...zoomStyle }} {...handlers}>
-        <span
-          className={`flex ${s.circle} items-center justify-center rounded-full font-bold`}
-          style={{ background: "var(--today-bg)", color: "var(--today-fg)" }}
-          aria-current="date"
-        >
-          {cell.day}
-        </span>
+      <div
+        className={`flex h-full flex-col overflow-hidden ${clickable} ${s.dayText} leading-none tabular-nums`}
+        style={{ ...bgStyle, ...zoomStyle }}
+        {...handlers}
+      >
+        <div className="flex justify-center pt-1.5">{numberNode}</div>
+        <div className="mt-0.5 min-h-0 space-y-0.5 px-0.5">
+          {dayEvents.slice(0, MAX_CHIPS).map((e) => (
+            <EventChip key={e.id} event={e} onSelect={onEventSelect} />
+          ))}
+          {overflow > 0 ? (
+            <div className="px-1 text-[10px]" style={{ color: "var(--text-muted)" }}>
+              +{overflow}件
+            </div>
+          ) : null}
+        </div>
       </div>
     );
   }
+
   return (
     <div
       className={base}
-      style={{ ...bgStyle, ...zoomStyle, color: dayColor(cell), opacity: cell.inMonth ? 1 : 0.55 }}
+      style={{
+        ...bgStyle,
+        ...zoomStyle,
+        ...(cell.isToday ? {} : { color: dayColor(cell) }),
+        opacity: cell.inMonth ? 1 : 0.55,
+      }}
       title={cell.holidayName}
       {...handlers}
     >
-      {cell.day}
+      {cell.isToday ? numberNode : cell.day}
     </div>
   );
 }
@@ -125,6 +163,8 @@ export function MonthCard({
   year,
   pivotDay,
   jumpDay,
+  events,
+  onEventSelect,
 }: {
   readonly month: MonthView;
   readonly weekStart: WeekStart;
@@ -136,6 +176,8 @@ export function MonthCard({
   readonly year?: number;
   readonly pivotDay?: CivilDate | null;
   readonly jumpDay?: CivilDate | null;
+  readonly events?: readonly CalendarEvent[];
+  readonly onEventSelect?: (id: string) => void;
 }) {
   return (
     <section
@@ -215,6 +257,17 @@ export function MonthCard({
               resolved.year === jumpDay.year &&
               resolved.month === jumpDay.month &&
               cell.day === jumpDay.day;
+            // イベントは本物セル（interactive）の当月分のみ。複製オーバーレイには渡さない。
+            const dayEvents =
+              interactive && events && spacious && cell.inMonth && resolved
+                ? sortForDay(
+                    eventsForDay(events, {
+                      year: resolved.year,
+                      month: resolved.month,
+                      day: cell.day,
+                    }),
+                  )
+                : undefined;
             return (
               <DayCellView
                 key={ci}
@@ -225,6 +278,8 @@ export function MonthCard({
                 cellYear={resolved?.year}
                 cellMonth={resolved?.month}
                 jump={isJump}
+                dayEvents={dayEvents}
+                onEventSelect={onEventSelect}
               />
             );
           };

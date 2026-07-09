@@ -10,6 +10,7 @@ import { CountdownChips } from "@/components/CountdownChips";
 import { LevelSwitcher } from "@/components/LevelSwitcher";
 import { SettingsMenu } from "@/components/SettingsMenu";
 import { WEEKDAY_JA } from "@/components/weekdays";
+import { useEvents } from "@/hooks/useEvents";
 
 // 幅はラッパー(CalendarApp)側で制御する。ここでは横並び(≥1168px)でカレンダー800/aside320に固定し、
 // それ未満では縦積み（各要素はラッパー幅いっぱい）にする。
@@ -51,6 +52,7 @@ export function MonthDetail({
   }, [onBack]);
 
   const detail = buildMonthDetail(year, month, today, { weekStart });
+  const { events } = useEvents();
 
   return (
     <div>
@@ -103,7 +105,7 @@ export function MonthDetail({
           className="w-full max-w-[800px] min-[1168px]:w-[800px] min-[1168px]:max-w-none min-[1168px]:shrink-0"
           style={{ viewTransitionName: jumpPivot ? undefined : `month-${month}` }}
         >
-          <MonthCard month={detail.month} year={year} weekStart={weekStart} size="lg" spacious onDayClick={onDayClick} pivotDay={pivotDay} jumpDay={jumpPivot} />
+          <MonthCard month={detail.month} year={year} weekStart={weekStart} size="lg" spacious onDayClick={onDayClick} pivotDay={pivotDay} jumpDay={jumpPivot} events={events} />
         </div>
 
         {/* 遊びセクションは ≤712px のときだけカレンダー直下・aside直上に表示する（幅いっぱい・2行中央）。 */}
