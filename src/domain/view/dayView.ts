@@ -1,15 +1,10 @@
 import { getHoliday } from "../holiday";
-import { weekdayOf } from "../shared/date";
+import { weekdayOf, type CivilDate } from "../shared/date";
 import type { WeekDay } from "./weekView";
 
 const SUNDAY = 0;
 const SATURDAY = 6;
 
-interface CivilDate {
-  readonly year: number;
-  readonly month: number;
-  readonly day: number;
-}
 
 export interface DayViewModel {
   readonly day: WeekDay;

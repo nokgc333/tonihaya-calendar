@@ -10,20 +10,15 @@ export interface Duration {
   readonly minutes: number;
 }
 
-/** 暦日 */
-export interface CivilDate {
-  readonly year: number;
-  readonly month: number;
-  readonly day: number;
-}
-
 /** 時刻演算の結果（日跨ぎ数を含む） */
 export interface TimeResult {
   readonly time: TimeOfDay;
   readonly dayOffset: number;
 }
 
-import { fromEpochDay, toEpochDay } from "../shared/date";
+import { fromEpochDay, toEpochDay, type CivilDate } from "../shared/date";
+
+export type { CivilDate };
 
 const MINUTES_PER_HOUR = 60;
 const MINUTES_PER_DAY = 1440;

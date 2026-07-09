@@ -1,7 +1,8 @@
 import type { DayCell, MonthView } from "@/domain/view";
+import type { CivilDate } from "@/domain/shared/date";
 import type { WeekStart } from "@/domain/calendar";
-
-const WEEKDAY_LABELS = ["日", "月", "火", "水", "木", "金", "土"] as const;
+import { dayBgColor, dayTextColor } from "@/components/dayPalette";
+import { WEEKDAY_JA } from "@/components/weekdays";
 
 // 月は最大6週。年・月によって4〜6週と変動するが、カード高さを一定に保つため
 // 常に6行分の行トラックを確保する（不足週は空トラックで高さのみ担保）。
@@ -16,23 +17,20 @@ const SIZE = {
 
 function weekdayHeader(weekStart: WeekStart): readonly string[] {
   return weekStart === "mon"
-    ? [...WEEKDAY_LABELS.slice(1), WEEKDAY_LABELS[0]]
-    : WEEKDAY_LABELS;
+    ? [...WEEKDAY_JA.slice(1), WEEKDAY_JA[0]]
+    : WEEKDAY_JA;
 }
 
+/** セル文字色。前後月はフェイント、当月は共通パレット（日祝=赤・土=青・平日=標準）。 */
 function dayColor(cell: DayCell): string {
   if (!cell.inMonth) return "var(--text-faint)";
-  if (cell.isSunday || cell.isHoliday) return "var(--accent-red)";
-  if (cell.isSaturday) return "var(--accent-sat)";
-  return "var(--text)";
+  return dayTextColor(cell);
 }
 
-/** セル背景。色分けは当月のみ（土曜=水色・日祝=赤/ピンク）。前後月・平日は面色。 */
+/** セル背景。前後月・平日は面色、当月の土日祝は共通パレット（土=水色・日祝=赤/ピンク）。 */
 function dayBg(cell: DayCell): string {
   if (!cell.inMonth) return "var(--surface)";
-  if (cell.isSunday || cell.isHoliday) return "var(--sun-bg)";
-  if (cell.isSaturday) return "var(--sat-bg)";
-  return "var(--surface)";
+  return dayBgColor(cell);
 }
 
 function DayCellView({
@@ -136,8 +134,8 @@ export function MonthCard({
   readonly spacious?: boolean;
   readonly onDayClick?: (year: number, month: number, day: number) => void;
   readonly year?: number;
-  readonly pivotDay?: { readonly year: number; readonly month: number; readonly day: number } | null;
-  readonly jumpDay?: { readonly year: number; readonly month: number; readonly day: number } | null;
+  readonly pivotDay?: CivilDate | null;
+  readonly jumpDay?: CivilDate | null;
 }) {
   return (
     <section

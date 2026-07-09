@@ -1,34 +1,20 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { buildDayView, minutesToOffset, type JumpLevel, type WeekDay } from "@/domain/view";
-import { fromEpochDay, toEpochDay } from "@/domain/shared/date";
+import { buildDayView, minutesToOffset, type JumpLevel } from "@/domain/view";
+import { fromEpochDay, toEpochDay, type CivilDate } from "@/domain/shared/date";
 import type { WeekStart } from "@/domain/calendar";
 import { LevelSwitcher } from "@/components/LevelSwitcher";
 import { SettingsMenu } from "@/components/SettingsMenu";
+import { dayBgColor, dayTextColor } from "@/components/dayPalette";
+import { WEEKDAY_JA } from "@/components/weekdays";
 
-interface CivilDate {
-  readonly year: number;
-  readonly month: number;
-  readonly day: number;
-}
 
 const HOUR_HEIGHT = 48; // 1時間あたりの高さ(px)
 const HOURS = Array.from({ length: 24 }, (_, h) => h);
-const WEEKDAY_JA = ["日", "月", "火", "水", "木", "金", "土"] as const;
 const GRID_COLS = "3.5rem 1fr";
 const SCROLL_LEAD_HOURS = 2;
 
-function dayColor(d: WeekDay): string {
-  if (d.isSunday || d.isHoliday) return "var(--accent-red)";
-  if (d.isSaturday) return "var(--accent-sat)";
-  return "var(--text)";
-}
-function dayBg(d: WeekDay): string {
-  if (d.isSunday || d.isHoliday) return "var(--sun-bg)";
-  if (d.isSaturday) return "var(--sat-bg)";
-  return "var(--surface)";
-}
 
 export function DayView({
   year,
@@ -51,7 +37,7 @@ export function DayView({
   readonly onJump: (level: JumpLevel) => void;
   readonly weekStart: WeekStart;
   readonly onWeekStartChange: (weekStart: WeekStart) => void;
-  readonly jumpPivot: { readonly year: number; readonly month: number; readonly day: number } | null;
+  readonly jumpPivot: CivilDate | null;
 }) {
   const { day: d } = buildDayView(year, month, day, today);
   const bodyRef = useRef<HTMLDivElement>(null);
@@ -146,7 +132,7 @@ export function DayView({
           }}
         >
           <div />
-          <div className="text-center text-lg font-bold tabular-nums" style={{ color: dayColor(d) }}>
+          <div className="text-center text-lg font-bold tabular-nums" style={{ color: dayTextColor(d) }}>
             {year}年{month}月{day}日（{WEEKDAY_JA[d.weekday]}）
           </div>
         </div>
@@ -161,7 +147,7 @@ export function DayView({
           </div>
           <div
             className="min-h-[1.5rem] border-l p-0.5 text-center text-[10px]"
-            style={{ borderColor: "var(--border)", background: dayBg(d), color: "var(--accent-red)" }}
+            style={{ borderColor: "var(--border)", background: dayBgColor(d), color: "var(--accent-red)" }}
           >
             {d.holidayName ?? ""}
           </div>
@@ -180,7 +166,7 @@ export function DayView({
                 </div>
                 <div
                   className="border-t border-l"
-                  style={{ height: HOUR_HEIGHT, borderColor: "var(--border)", background: dayBg(d) }}
+                  style={{ height: HOUR_HEIGHT, borderColor: "var(--border)", background: dayBgColor(d) }}
                 />
               </div>
             ))}
