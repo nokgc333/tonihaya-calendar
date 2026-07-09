@@ -36,6 +36,41 @@ export function clipEventToDay(event: CalendarEvent, date: CivilDate): DaySegmen
   return { event, startMin, endMin, continuesFromPrev: d > s, continuesToNext: d < e };
 }
 
+export interface LaidOutSegment extends DaySegment {
+  readonly columnIndex: number;
+  readonly columnCount: number;
+}
+
+// 重なる時間イベントを、重なりクラスタ単位で列（レーン）に割り当てる。
+// columnIndex/columnCount から幅=100%/columnCount・左=columnIndex分 を算出して横並び表示する。
+export function layoutDayColumns(segments: readonly DaySegment[]): readonly LaidOutSegment[] {
+  const sorted = [...segments].sort((a, b) => a.startMin - b.startMin || a.endMin - b.endMin);
+  const out: LaidOutSegment[] = [];
+  let cluster: Array<DaySegment & { columnIndex: number }> = [];
+  let clusterMaxEnd = -1;
+
+  const flush = (): void => {
+    const count = cluster.reduce((m, c) => Math.max(m, c.columnIndex + 1), 0);
+    for (const c of cluster) out.push({ ...c, columnCount: count });
+    cluster = [];
+    clusterMaxEnd = -1;
+  };
+
+  for (const s of sorted) {
+    // 現クラスタのどれとも重ならない（開始が全終了以降）なら、クラスタを確定して次へ。
+    if (cluster.length > 0 && s.startMin >= clusterMaxEnd) flush();
+    const occupied = new Set(
+      cluster.filter((c) => c.endMin > s.startMin).map((c) => c.columnIndex),
+    );
+    let col = 0;
+    while (occupied.has(col)) col++;
+    cluster.push({ ...s, columnIndex: col });
+    clusterMaxEnd = Math.max(clusterMaxEnd, s.endMin);
+  }
+  flush();
+  return out;
+}
+
 const PRIORITY_RANK: Record<EventPriority, number> = { high: 0, normal: 1, low: 2 };
 
 export function sortForDay(events: readonly CalendarEvent[]): readonly CalendarEvent[] {
