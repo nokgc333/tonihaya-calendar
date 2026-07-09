@@ -17,6 +17,25 @@ export function eventsForDay(
   return events.filter((e) => epoch(e.start.date) <= d && d <= epoch(e.end.date));
 }
 
+export interface DaySegment {
+  readonly event: CalendarEvent;
+  readonly startMin: number;
+  readonly endMin: number;
+  readonly continuesFromPrev: boolean;
+  readonly continuesToNext: boolean;
+}
+
+export function clipEventToDay(event: CalendarEvent, date: CivilDate): DaySegment | null {
+  if (event.allDay) return null;
+  const d = epoch(date);
+  const s = epoch(event.start.date);
+  const e = epoch(event.end.date);
+  if (d < s || d > e) return null;
+  const startMin = d === s ? minutesOfDay(event.start.time!) : 0;
+  const endMin = d === e ? minutesOfDay(event.end.time!) : 1440;
+  return { event, startMin, endMin, continuesFromPrev: d > s, continuesToNext: d < e };
+}
+
 const PRIORITY_RANK: Record<EventPriority, number> = { high: 0, normal: 1, low: 2 };
 
 export function sortForDay(events: readonly CalendarEvent[]): readonly CalendarEvent[] {

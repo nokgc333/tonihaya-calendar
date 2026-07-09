@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { eventsForDay, minutesOfDay, sortForDay } from "./event";
+import { clipEventToDay, eventsForDay, minutesOfDay, sortForDay } from "./event";
 import type { CalendarEvent } from "./types";
 
 const base = { colorKey: "blue", priority: "normal", createdAt: 0, updatedAt: 0 } as const;
@@ -41,6 +41,43 @@ describe("eventsForDay", () => {
     const other = allDay("x", [2026, 7, 20], [2026, 7, 20]);
     const got = eventsForDay([trip, other], { year: 2026, month: 7, day: 12 });
     expect(got.map((e) => e.id)).toEqual(["trip"]);
+  });
+});
+
+describe("clipEventToDay", () => {
+  const multi: CalendarEvent = {
+    ...base,
+    id: "m",
+    title: "m",
+    allDay: false,
+    start: { date: { year: 2026, month: 7, day: 10 }, time: { hour: 23, minute: 0 } },
+    end: { date: { year: 2026, month: 7, day: 12 }, time: { hour: 2, minute: 0 } },
+  };
+  it("初日は開始時刻〜24:00・翌日へ継続", () => {
+    const s = clipEventToDay(multi, { year: 2026, month: 7, day: 10 })!;
+    expect([s.startMin, s.endMin, s.continuesFromPrev, s.continuesToNext]).toEqual([
+      1380, 1440, false, true,
+    ]);
+  });
+  it("中日は0:00〜24:00・両方継続", () => {
+    const s = clipEventToDay(multi, { year: 2026, month: 7, day: 11 })!;
+    expect([s.startMin, s.endMin, s.continuesFromPrev, s.continuesToNext]).toEqual([
+      0, 1440, true, true,
+    ]);
+  });
+  it("最終日は0:00〜終了時刻・前日から継続", () => {
+    const s = clipEventToDay(multi, { year: 2026, month: 7, day: 12 })!;
+    expect([s.startMin, s.endMin, s.continuesFromPrev, s.continuesToNext]).toEqual([
+      0, 120, true, false,
+    ]);
+  });
+  it("終日イベントは null", () => {
+    expect(
+      clipEventToDay(allDay("a", [2026, 7, 12], [2026, 7, 12]), { year: 2026, month: 7, day: 12 }),
+    ).toBeNull();
+  });
+  it("範囲外の日は null", () => {
+    expect(clipEventToDay(multi, { year: 2026, month: 7, day: 13 })).toBeNull();
   });
 });
 
