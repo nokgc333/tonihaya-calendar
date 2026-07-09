@@ -6,6 +6,7 @@ import { fromEpochDay, toEpochDay, type CivilDate } from "@/domain/shared/date";
 import type { WeekStart } from "@/domain/calendar";
 import { LevelSwitcher } from "@/components/LevelSwitcher";
 import { SettingsMenu } from "@/components/SettingsMenu";
+import { dayBgColor, dayTextColor } from "@/components/dayPalette";
 
 
 const HOUR_HEIGHT = 48; // 1時間あたりの高さ(px)
@@ -14,16 +15,6 @@ const WEEKDAY_JA = ["日", "月", "火", "水", "木", "金", "土"] as const;
 const GRID_COLS = "3.5rem repeat(7, minmax(4.5rem, 1fr))";
 const SCROLL_LEAD_HOURS = 2;
 
-function dayColor(d: WeekDay): string {
-  if (d.isSunday || d.isHoliday) return "var(--accent-red)";
-  if (d.isSaturday) return "var(--accent-sat)";
-  return "var(--text)";
-}
-function dayBg(d: WeekDay): string {
-  if (d.isSunday || d.isHoliday) return "var(--sun-bg)";
-  if (d.isSaturday) return "var(--sat-bg)";
-  return "var(--surface)";
-}
 
 export function WeekView({
   year,
@@ -175,7 +166,7 @@ export function WeekView({
               }
               aria-label={`${d.month}月${d.day}日を開く`}
             >
-              <div className="text-[11px]" style={{ color: dayColor(d) }}>
+              <div className="text-[11px]" style={{ color: dayTextColor(d) }}>
                 {WEEKDAY_JA[d.weekday]}
               </div>
               {d.isToday ? (
@@ -187,7 +178,7 @@ export function WeekView({
                   {d.day}
                 </span>
               ) : (
-                <div className="text-base font-bold tabular-nums" style={{ color: dayColor(d) }}>
+                <div className="text-base font-bold tabular-nums" style={{ color: dayTextColor(d) }}>
                   {d.day}
                 </div>
               )}
@@ -207,7 +198,7 @@ export function WeekView({
             <div
               key={`a-${d.month}-${d.day}`}
               className="min-h-[1.5rem] border-l p-0.5 text-center text-[10px]"
-              style={{ borderColor: "var(--border)", background: dayBg(d), color: "var(--accent-red)" }}
+              style={{ borderColor: "var(--border)", background: dayBgColor(d), color: "var(--accent-red)" }}
             >
               {d.holidayName ?? ""}
             </div>
@@ -233,7 +224,7 @@ export function WeekView({
                     aria-hidden="true"
                     onClick={() => onDayOpen(d.year, d.month, d.day)}
                     className="w-full cursor-pointer border-t border-l transition-opacity hover:opacity-80"
-                    style={{ height: HOUR_HEIGHT, borderColor: "var(--border)", background: dayBg(d) }}
+                    style={{ height: HOUR_HEIGHT, borderColor: "var(--border)", background: dayBgColor(d) }}
                   />
                 ))}
               </Fragment>

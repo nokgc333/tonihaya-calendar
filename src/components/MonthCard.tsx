@@ -1,6 +1,7 @@
 import type { DayCell, MonthView } from "@/domain/view";
 import type { CivilDate } from "@/domain/shared/date";
 import type { WeekStart } from "@/domain/calendar";
+import { dayBgColor, dayTextColor } from "@/components/dayPalette";
 
 const WEEKDAY_LABELS = ["日", "月", "火", "水", "木", "金", "土"] as const;
 
@@ -21,19 +22,16 @@ function weekdayHeader(weekStart: WeekStart): readonly string[] {
     : WEEKDAY_LABELS;
 }
 
+/** セル文字色。前後月はフェイント、当月は共通パレット（日祝=赤・土=青・平日=標準）。 */
 function dayColor(cell: DayCell): string {
   if (!cell.inMonth) return "var(--text-faint)";
-  if (cell.isSunday || cell.isHoliday) return "var(--accent-red)";
-  if (cell.isSaturday) return "var(--accent-sat)";
-  return "var(--text)";
+  return dayTextColor(cell);
 }
 
-/** セル背景。色分けは当月のみ（土曜=水色・日祝=赤/ピンク）。前後月・平日は面色。 */
+/** セル背景。前後月・平日は面色、当月の土日祝は共通パレット（土=水色・日祝=赤/ピンク）。 */
 function dayBg(cell: DayCell): string {
   if (!cell.inMonth) return "var(--surface)";
-  if (cell.isSunday || cell.isHoliday) return "var(--sun-bg)";
-  if (cell.isSaturday) return "var(--sat-bg)";
-  return "var(--surface)";
+  return dayBgColor(cell);
 }
 
 function DayCellView({
