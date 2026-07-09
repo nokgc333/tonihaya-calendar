@@ -6,6 +6,7 @@ import { eventsForDay, sortForDay } from "@/domain/event";
 import { dayBgColor, dayTextColor } from "@/components/dayPalette";
 import { WEEKDAY_JA } from "@/components/weekdays";
 import { EventChip } from "@/components/EventChip";
+import { eventColor } from "@/components/eventColors";
 
 // 月は最大6週。年・月によって4〜6週と変動するが、カード高さを一定に保つため
 // 常に6行分の行トラックを確保する（不足週は空トラックで高さのみ担保）。
@@ -120,9 +121,12 @@ function DayCellView({
     );
   }
 
+  // L0（sm）で当月セルにイベントがあれば、番号レイアウトは変えず下端に点（最大3）を重ねる。
+  const showDots = !spacious && cell.inMonth && dayEvents.length > 0;
+
   return (
     <div
-      className={base}
+      className={`relative ${base}`}
       style={{
         ...bgStyle,
         ...zoomStyle,
@@ -133,6 +137,17 @@ function DayCellView({
       {...handlers}
     >
       {cell.isToday ? numberNode : cell.day}
+      {showDots ? (
+        <div className="pointer-events-none absolute bottom-0.5 flex gap-0.5">
+          {dayEvents.slice(0, 3).map((e) => (
+            <span
+              key={e.id}
+              className="h-1 w-1 rounded-full"
+              style={{ background: eventColor(e.colorKey).border }}
+            />
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -258,8 +273,9 @@ export function MonthCard({
               resolved.month === jumpDay.month &&
               cell.day === jumpDay.day;
             // イベントは本物セル（interactive）の当月分のみ。複製オーバーレイには渡さない。
+            // L0(sm)は点、L1(lg)はチップに使うため sm/lg 双方で計算する。
             const dayEvents =
-              interactive && events && spacious && cell.inMonth && resolved
+              interactive && events && cell.inMonth && resolved
                 ? sortForDay(
                     eventsForDay(events, {
                       year: resolved.year,

@@ -8,6 +8,7 @@ import { LevelSwitcher } from "@/components/LevelSwitcher";
 import { SegmentButton } from "@/components/SegmentButton";
 import { MonthCard } from "@/components/MonthCard";
 import { SettingsMenu } from "@/components/SettingsMenu";
+import { useEvents } from "@/hooks/useEvents";
 import { useEffect, useState } from "react";
 
 /** 俯瞰カレンダーの表示レイアウト（3行×4列 / 4行×3列） */
@@ -42,6 +43,7 @@ export function OverviewBody({
 
   const view = buildYearView(year, today, { weekStart });
   const isCurrentYear = today !== null && year === today.year;
+  const { events } = useEvents();
 
   const commitYearDraft = (): void => onYearChange(resolveYearInput(yearDraft, year));
 
@@ -98,6 +100,7 @@ export function OverviewBody({
               weekStart={weekStart}
               viewTransitionName={jumpPivot ? undefined : `month-${m.month}`}
               jumpDay={jumpPivot}
+              events={events}
               onClick={() => onMonthClick(m.month)}
             />
           </div>
