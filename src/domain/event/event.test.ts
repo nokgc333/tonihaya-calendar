@@ -2,9 +2,11 @@ import { describe, expect, it } from "vitest";
 import {
   clipEventToDay,
   eventsForDay,
+  isSafeUrl,
   layoutDayColumns,
   minutesOfDay,
   sortForDay,
+  validateEvent,
   type DaySegment,
 } from "./event";
 import type { CalendarEvent } from "./types";
@@ -119,6 +121,63 @@ describe("layoutDayColumns", () => {
     const out = layoutDayColumns([seg("a", 0, 60), seg("b", 30, 90), seg("c", 200, 260)]);
     expect(out.find((s) => s.event.id === "c")!.columnCount).toBe(1);
     expect(out.find((s) => s.event.id === "a")!.columnCount).toBe(2);
+  });
+});
+
+describe("isSafeUrl", () => {
+  it("http/https は許可、それ以外は拒否", () => {
+    expect(isSafeUrl("https://a.com")).toBe(true);
+    expect(isSafeUrl("http://a.com")).toBe(true);
+    expect(isSafeUrl("javascript:alert(1)")).toBe(false);
+    expect(isSafeUrl("not a url")).toBe(false);
+  });
+});
+
+describe("validateEvent", () => {
+  const okTimed = {
+    title: "x",
+    allDay: false,
+    colorKey: "blue",
+    priority: "normal",
+    start: { date: { year: 2026, month: 7, day: 12 }, time: { hour: 9, minute: 0 } },
+    end: { date: { year: 2026, month: 7, day: 12 }, time: { hour: 10, minute: 0 } },
+  } as const;
+  it("正常な時間イベントはエラー無し", () => {
+    expect(validateEvent(okTimed)).toEqual([]);
+  });
+  it("タイトル空はエラー", () => {
+    expect(validateEvent({ ...okTimed, title: "  " }).length).toBeGreaterThan(0);
+  });
+  it("同日で終了<=開始はエラー", () => {
+    expect(
+      validateEvent({
+        ...okTimed,
+        end: { date: { year: 2026, month: 7, day: 12 }, time: { hour: 9, minute: 0 } },
+      }).length,
+    ).toBeGreaterThan(0);
+  });
+  it("終了日<開始日はエラー", () => {
+    expect(
+      validateEvent({
+        ...okTimed,
+        end: { date: { year: 2026, month: 7, day: 11 }, time: { hour: 10, minute: 0 } },
+      }).length,
+    ).toBeGreaterThan(0);
+  });
+  it("不正URLはエラー", () => {
+    expect(validateEvent({ ...okTimed, url: "javascript:alert(1)" }).length).toBeGreaterThan(0);
+  });
+  it("複数日の終日イベントは正常", () => {
+    expect(
+      validateEvent({
+        title: "trip",
+        allDay: true,
+        colorKey: "green",
+        priority: "normal",
+        start: { date: { year: 2026, month: 7, day: 10 } },
+        end: { date: { year: 2026, month: 7, day: 15 } },
+      }),
+    ).toEqual([]);
   });
 });
 

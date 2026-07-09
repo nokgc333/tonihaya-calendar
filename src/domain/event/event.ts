@@ -3,6 +3,8 @@ import type { CivilDate } from "@/domain/shared/date";
 import type { TimeOfDay } from "@/domain/timecalc";
 import type { CalendarEvent, EventPriority } from "./types";
 
+export type EventDraft = Omit<CalendarEvent, "id" | "createdAt" | "updatedAt">;
+
 export function minutesOfDay(t: TimeOfDay): number {
   return t.hour * 60 + t.minute;
 }
@@ -69,6 +71,32 @@ export function layoutDayColumns(segments: readonly DaySegment[]): readonly Laid
   }
   flush();
   return out;
+}
+
+export function isSafeUrl(url: string): boolean {
+  try {
+    const u = new URL(url);
+    return u.protocol === "http:" || u.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+export function validateEvent(d: EventDraft): readonly string[] {
+  const errors: string[] = [];
+  if (d.title.trim().length === 0) errors.push("タイトルを入力してください");
+  if (d.url && !isSafeUrl(d.url)) errors.push("URLは http/https のみ使用できます");
+  const s = epoch(d.start.date);
+  const e = epoch(d.end.date);
+  if (e < s) errors.push("終了日は開始日以降にしてください");
+  if (!d.allDay) {
+    if (!d.start.time || !d.end.time) {
+      errors.push("時間イベントは開始・終了時刻が必要です");
+    } else if (s === e && minutesOfDay(d.end.time) <= minutesOfDay(d.start.time)) {
+      errors.push("終了時刻は開始時刻より後にしてください");
+    }
+  }
+  return errors;
 }
 
 const PRIORITY_RANK: Record<EventPriority, number> = { high: 0, normal: 1, low: 2 };
