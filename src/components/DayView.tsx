@@ -132,9 +132,9 @@ export function DayView({
         {/* 大きな日付ヘッダー（sticky）。終日行・時間グリッドと同じGRID_COLSのグリッドにし、
             第1セル(時間軸3.5rem)を空け、日付は第2セル(日カラム)内で中央寄せ。これにより
             終日行/時間列と中央軸が揃う。祝日名は終日行に出るのでここには表示しない。
-            高さは 58.5px（L2ヘッダー行の 54.5px より +4px 高く、意図的に L3 のみ調整）。 */}
+            高さは 54.5px（L2ヘッダー行と揃える）。 */}
         <div
-          className="sticky top-0 z-10 grid min-h-[58.5px] shrink-0 items-center pb-1.5"
+          className="sticky top-0 z-10 grid min-h-[54.5px] shrink-0 items-center pb-1.5"
           style={{
             gridTemplateColumns: GRID_COLS,
             background: "var(--surface)",
@@ -156,7 +156,7 @@ export function DayView({
             終日
           </div>
           <div
-            className="min-h-[1.5rem] space-y-0.5 border-l p-0.5 text-[10px]"
+            className="min-h-[33px] space-y-0.5 border-l p-0.5 text-[10px]"
             style={{ borderColor: "var(--border)", background: dayBgColor(d) }}
           >
             {d.holidayName ? (

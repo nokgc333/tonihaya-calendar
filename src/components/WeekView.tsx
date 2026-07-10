@@ -208,7 +208,7 @@ export function WeekView({
             return (
               <div
                 key={`a-${d.month}-${d.day}`}
-                className="min-h-[1.5rem] space-y-0.5 border-l p-0.5 text-[10px]"
+                className="min-h-[33px] space-y-0.5 border-l p-0.5 text-[10px]"
                 style={{ borderColor: "var(--border)", background: dayBgColor(d) }}
               >
                 {d.holidayName ? (
