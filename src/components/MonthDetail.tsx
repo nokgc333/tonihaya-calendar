@@ -10,6 +10,9 @@ import { CountdownChips } from "@/components/CountdownChips";
 import { LevelSwitcher } from "@/components/LevelSwitcher";
 import { SettingsMenu } from "@/components/SettingsMenu";
 import { WEEKDAY_JA } from "@/components/weekdays";
+import { useEvents } from "@/hooks/useEvents";
+import { useEventEditor } from "@/hooks/useEventEditor";
+import { AddEventButton } from "@/components/AddEventButton";
 
 // 幅はラッパー(CalendarApp)側で制御する。ここでは横並び(≥1168px)でカレンダー800/aside320に固定し、
 // それ未満では縦積み（各要素はラッパー幅いっぱい）にする。
@@ -51,6 +54,11 @@ export function MonthDetail({
   }, [onBack]);
 
   const detail = buildMonthDetail(year, month, today, { weekStart });
+  const { events } = useEvents();
+  const { openEdit } = useEventEditor();
+  // L1の「＋予定」既定日: 今日がこの月なら今日、違えば1日。
+  const defaultDate =
+    today && today.year === year && today.month === month ? today : { year, month, day: 1 };
 
   return (
     <div>
@@ -92,6 +100,7 @@ export function MonthDetail({
           </button>
         </div>
         <div className="ml-auto flex items-center gap-3">
+          <AddEventButton date={defaultDate} />
           <LevelSwitcher current="month" onJump={onJump} />
           <SettingsMenu weekStart={weekStart} onWeekStartChange={onWeekStartChange} />
         </div>
@@ -103,7 +112,7 @@ export function MonthDetail({
           className="w-full max-w-[800px] min-[1168px]:w-[800px] min-[1168px]:max-w-none min-[1168px]:shrink-0"
           style={{ viewTransitionName: jumpPivot ? undefined : `month-${month}` }}
         >
-          <MonthCard month={detail.month} year={year} weekStart={weekStart} size="lg" spacious onDayClick={onDayClick} pivotDay={pivotDay} jumpDay={jumpPivot} />
+          <MonthCard month={detail.month} year={year} weekStart={weekStart} size="lg" spacious onDayClick={onDayClick} pivotDay={pivotDay} jumpDay={jumpPivot} events={events} onEventSelect={openEdit} />
         </div>
 
         {/* 遊びセクションは ≤712px のときだけカレンダー直下・aside直上に表示する（幅いっぱい・2行中央）。 */}
