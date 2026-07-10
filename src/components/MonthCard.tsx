@@ -142,7 +142,7 @@ function DayCellView({
     >
       {numberNode}
       {showDots ? (
-        <div className="pointer-events-none absolute bottom-0.5 flex gap-0.5">
+        <div className="pointer-events-none absolute bottom-1 flex gap-0.5">
           {dayEvents.slice(0, 3).map((e) => (
             <span
               key={e.id}
