@@ -53,16 +53,30 @@ export function EventProvider({
           createdAt: now,
           updatedAt: now,
         };
-        await repo().add(event);
+        // 永続化に成功したときだけ楽観更新する。失敗時は write 内で開発ログ済みなので、
+        // ここでは UI へ反映せず未捕捉の Promise 拒否を防ぐ（保存と表示の整合を保つ）。
+        try {
+          await repo().add(event);
+        } catch {
+          return;
+        }
         setEvents((prev) => [...prev, event]);
       },
       async updateEvent(event) {
         const updated = { ...event, updatedAt: Date.now() };
-        await repo().update(updated);
+        try {
+          await repo().update(updated);
+        } catch {
+          return;
+        }
         setEvents((prev) => prev.map((e) => (e.id === updated.id ? updated : e)));
       },
       async removeEvent(id) {
-        await repo().remove(id);
+        try {
+          await repo().remove(id);
+        } catch {
+          return;
+        }
         setEvents((prev) => prev.filter((e) => e.id !== id));
       },
     }),

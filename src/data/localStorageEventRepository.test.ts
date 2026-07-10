@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { LocalStorageEventRepository } from "./localStorageEventRepository";
 import type { CalendarEvent } from "@/domain/event";
 
@@ -13,6 +13,13 @@ class MemStorage {
   }
   removeItem(k: string): void {
     this.m.delete(k);
+  }
+}
+
+// setItem が常に失敗する storage（容量超過・プライベートモードを模す）
+class ThrowingStorage extends MemStorage {
+  override setItem(): void {
+    throw new DOMException("QuotaExceededError");
   }
 }
 
@@ -49,5 +56,12 @@ describe("LocalStorageEventRepository", () => {
     s.setItem("tonihaya.events", "{bad");
     const r = new LocalStorageEventRepository(s as unknown as Storage);
     expect(await r.list()).toEqual([]);
+  });
+  it("保存失敗時は開発ログを出しつつ例外を伝播する（サイレントなデータ欠損を防ぐ）", async () => {
+    const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const r = new LocalStorageEventRepository(new ThrowingStorage() as unknown as Storage);
+    await expect(r.add(ev("a"))).rejects.toThrow();
+    expect(spy).toHaveBeenCalled();
+    spy.mockRestore();
   });
 });

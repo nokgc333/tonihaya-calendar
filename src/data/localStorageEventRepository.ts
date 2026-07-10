@@ -21,7 +21,14 @@ export class LocalStorageEventRepository implements EventRepository {
   }
 
   private write(events: readonly CalendarEvent[]): void {
-    this.storage.setItem(KEY, JSON.stringify(events));
+    try {
+      this.storage.setItem(KEY, JSON.stringify(events));
+    } catch (err) {
+      // 容量超過・プライベートモード等で保存に失敗。握りつぶすと UI 上は保存成功に見え、
+      // リロードで消えるサイレントなデータ欠損になるため、開発ログを残し上位へ伝播させる。
+      console.error(`予定の永続化に失敗しました (key=${KEY})`, err);
+      throw err;
+    }
   }
 
   async list(): Promise<readonly CalendarEvent[]> {
