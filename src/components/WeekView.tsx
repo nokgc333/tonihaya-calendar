@@ -196,7 +196,7 @@ export function WeekView({
           className="grid shrink-0 border-y"
           style={{ gridTemplateColumns: GRID_COLS, borderColor: "var(--border-strong)" }}
         >
-          <div className="p-1 text-right text-[10px]" style={{ color: "var(--text-muted)" }}>
+          <div className="flex items-center justify-end p-1 text-[10px]" style={{ color: "var(--text-muted)" }}>
             終日
           </div>
           {week.days.map((d) => {
