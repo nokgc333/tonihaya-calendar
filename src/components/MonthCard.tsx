@@ -83,17 +83,20 @@ function DayCellView({
         }
       : {};
 
-  const numberNode = cell.isToday ? (
+  // 本日は「塗り円」ではなくセルの濃いめ外枠リングで表現する（番号は太字・日付色）。
+  // これで各セルの番号高さが揃い、L1のチップ開始位置ズレ・L0の点との干渉を防ぐ。
+  const numberNode = (
     <span
-      className={`flex ${s.circle} items-center justify-center rounded-full font-bold`}
-      style={{ background: "var(--today-bg)", color: "var(--today-fg)" }}
-      aria-current="date"
+      className={cell.isToday ? "font-bold" : ""}
+      style={{ color: dayColor(cell) }}
+      {...(cell.isToday ? { "aria-current": "date" as const } : {})}
     >
       {cell.day}
     </span>
-  ) : (
-    <span style={{ color: dayColor(cell) }}>{cell.day}</span>
   );
+  const todayRing = cell.isToday
+    ? { boxShadow: "inset 0 0 0 2px var(--today-bg)" }
+    : {};
 
   // L1（spacious）で当月セルにイベントがあれば、番号の下にチップ（最大3件＋「+N件」）を出す。
   const MAX_CHIPS = 3;
@@ -103,7 +106,7 @@ function DayCellView({
     return (
       <div
         className={`flex h-full flex-col overflow-hidden ${clickable} ${s.dayText} leading-none tabular-nums`}
-        style={{ ...bgStyle, ...zoomStyle }}
+        style={{ ...bgStyle, ...zoomStyle, ...todayRing }}
         {...handlers}
       >
         <div className="flex justify-center pt-1.5">{numberNode}</div>
@@ -130,13 +133,13 @@ function DayCellView({
       style={{
         ...bgStyle,
         ...zoomStyle,
-        ...(cell.isToday ? {} : { color: dayColor(cell) }),
+        ...todayRing,
         opacity: cell.inMonth ? 1 : 0.55,
       }}
       title={cell.holidayName}
       {...handlers}
     >
-      {cell.isToday ? numberNode : cell.day}
+      {numberNode}
       {showDots ? (
         <div className="pointer-events-none absolute bottom-0.5 flex gap-0.5">
           {dayEvents.slice(0, 3).map((e) => (
