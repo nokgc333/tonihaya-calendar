@@ -166,31 +166,29 @@ export function WeekView({
               type="button"
               onClick={() => onDayOpen(d.year, d.month, d.day)}
               className="w-full cursor-pointer p-1 text-center transition-opacity hover:opacity-70"
-              style={
-                isPivot(d)
+              style={{
+                ...(isPivot(d)
                   ? { viewTransitionName: "hour-zoom" }
                   : isJump(d)
                     ? { viewTransitionName: "jump-zoom" }
-                    : undefined
-              }
+                    : {}),
+                // 本日は L0/L1 と同じく塗りではなく外枠リングで表す。
+                ...(d.isToday
+                  ? { boxShadow: "inset 0 0 0 1.5px var(--today-bg)", borderRadius: "0.375rem" }
+                  : {}),
+              }}
               aria-label={`${d.month}月${d.day}日を開く`}
             >
               <div className="text-[11px]" style={{ color: dayTextColor(d) }}>
                 {WEEKDAY_JA[d.weekday]}
               </div>
-              {d.isToday ? (
-                <span
-                  className="mx-auto flex h-7 w-7 items-center justify-center rounded-full text-base font-bold"
-                  style={{ background: "var(--today-bg)", color: "var(--today-fg)" }}
-                  aria-current="date"
-                >
-                  {d.day}
-                </span>
-              ) : (
-                <div className="text-base font-bold tabular-nums" style={{ color: dayTextColor(d) }}>
-                  {d.day}
-                </div>
-              )}
+              <div
+                className="text-base font-bold tabular-nums"
+                style={{ color: dayTextColor(d) }}
+                {...(d.isToday ? { "aria-current": "date" as const } : {})}
+              >
+                {d.day}
+              </div>
             </button>
           ))}
         </div>
