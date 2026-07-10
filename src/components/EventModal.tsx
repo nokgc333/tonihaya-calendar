@@ -192,19 +192,17 @@ export function EventModal({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <label className={labelCls} htmlFor="ev-pri">優先度</label>
-              <select id="ev-pri" value={priority} onChange={(e) => setPriority(e.target.value as EventPriority)} className={inputCls} style={inputStyle}>
-                {PRIORITIES.map((p) => (
-                  <option key={p.value} value={p.value}>{p.label}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className={labelCls} htmlFor="ev-url">URL</label>
-              <input id="ev-url" type="url" value={url} onChange={(e) => setUrl(e.target.value)} className={inputCls} style={inputStyle} placeholder="https://" />
-            </div>
+          <div>
+            <label className={labelCls} htmlFor="ev-pri">優先度</label>
+            <select id="ev-pri" value={priority} onChange={(e) => setPriority(e.target.value as EventPriority)} className={inputCls} style={inputStyle}>
+              {PRIORITIES.map((p) => (
+                <option key={p.value} value={p.value}>{p.label}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className={labelCls} htmlFor="ev-url">URL</label>
+            <input id="ev-url" type="url" value={url} onChange={(e) => setUrl(e.target.value)} className={inputCls} style={inputStyle} placeholder="https://" />
           </div>
 
           <div>
