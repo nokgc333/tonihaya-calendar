@@ -8,6 +8,12 @@ import { LevelSwitcher } from "@/components/LevelSwitcher";
 import { SettingsMenu } from "@/components/SettingsMenu";
 import { dayBgColor, dayTextColor } from "@/components/dayPalette";
 import { WEEKDAY_JA } from "@/components/weekdays";
+import { DayTimedEvents } from "@/components/DayTimedEvents";
+import { AddEventButton } from "@/components/AddEventButton";
+import { useEvents } from "@/hooks/useEvents";
+import { useEventEditor } from "@/hooks/useEventEditor";
+import { eventsForDay } from "@/domain/event";
+import { eventColor } from "@/components/eventColors";
 
 
 const HOUR_HEIGHT = 48; // 1時間あたりの高さ(px)
@@ -41,6 +47,9 @@ export function DayView({
 }) {
   const { day: d } = buildDayView(year, month, day, today);
   const bodyRef = useRef<HTMLDivElement>(null);
+  const { events } = useEvents();
+  const { openEdit } = useEventEditor();
+  const allDayEvents = eventsForDay(events, { year, month, day }).filter((e) => e.allDay);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent): void => {
@@ -108,6 +117,7 @@ export function DayView({
           </button>
         </div>
         <div className="ml-auto flex items-center gap-3">
+          <AddEventButton date={{ year, month, day }} />
           <LevelSwitcher current="day" onJump={onJump} />
           <SettingsMenu weekStart={weekStart} onWeekStartChange={onWeekStartChange} />
         </div>
@@ -122,7 +132,7 @@ export function DayView({
         {/* 大きな日付ヘッダー（sticky）。終日行・時間グリッドと同じGRID_COLSのグリッドにし、
             第1セル(時間軸3.5rem)を空け、日付は第2セル(日カラム)内で中央寄せ。これにより
             終日行/時間列と中央軸が揃う。祝日名は終日行に出るのでここには表示しない。
-            L2ヘッダー行(内容48.5px＋直下pb-1.5=border-box54.5px)と高さを揃える。 */}
+            高さは 54.5px（L2ヘッダー行と揃える）。 */}
         <div
           className="sticky top-0 z-10 grid min-h-[54.5px] shrink-0 items-center pb-1.5"
           style={{
@@ -142,14 +152,34 @@ export function DayView({
           className="grid shrink-0 border-y"
           style={{ gridTemplateColumns: GRID_COLS, borderColor: "var(--border-strong)" }}
         >
-          <div className="p-1 text-right text-[10px]" style={{ color: "var(--text-muted)" }}>
+          <div className="flex items-center justify-end p-1 text-[10px]" style={{ color: "var(--text-muted)" }}>
             終日
           </div>
           <div
-            className="min-h-[1.5rem] border-l p-0.5 text-center text-[10px]"
-            style={{ borderColor: "var(--border)", background: dayBgColor(d), color: "var(--accent-red)" }}
+            className="min-h-[33px] space-y-0.5 border-l p-0.5 text-[10px]"
+            style={{ borderColor: "var(--border)", background: dayBgColor(d) }}
           >
-            {d.holidayName ?? ""}
+            {d.holidayName ? (
+              <div className="text-center" style={{ color: "var(--accent-red)" }}>
+                {d.holidayName}
+              </div>
+            ) : null}
+            {allDayEvents.map((e) => {
+              const c = eventColor(e.colorKey);
+              return (
+                <button
+                  key={e.id}
+                  type="button"
+                  data-event-id={e.id}
+                  onClick={() => openEdit(e.id)}
+                  className="block w-full truncate rounded px-1 text-left leading-tight transition-opacity hover:opacity-90"
+                  style={{ background: c.bg, color: c.fg, border: `1px solid ${c.border}` }}
+                  title={e.title}
+                >
+                  {e.title}
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -170,10 +200,18 @@ export function DayView({
                 />
               </div>
             ))}
+            {/* 時間イベント層（今ラインと同じ relative 親の中に絶対配置） */}
+            <DayTimedEvents
+              date={{ year, month, day }}
+              hourHeight={HOUR_HEIGHT}
+              dayLeft="3.5rem"
+              dayWidth="(100% - 3.5rem)"
+              onSelect={openEdit}
+            />
             {/* 今ライン（今日のみ） */}
             {d.isToday && (
               <div
-                className="pointer-events-none absolute"
+                className="pointer-events-none absolute z-[6]"
                 style={{
                   top: nowOffset,
                   left: "3.5rem",

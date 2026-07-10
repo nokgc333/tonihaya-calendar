@@ -8,6 +8,8 @@ import { LevelSwitcher } from "@/components/LevelSwitcher";
 import { SegmentButton } from "@/components/SegmentButton";
 import { MonthCard } from "@/components/MonthCard";
 import { SettingsMenu } from "@/components/SettingsMenu";
+import { useEvents } from "@/hooks/useEvents";
+import { AddEventButton } from "@/components/AddEventButton";
 import { useEffect, useState } from "react";
 
 /** 俯瞰カレンダーの表示レイアウト（3行×4列 / 4行×3列） */
@@ -42,6 +44,7 @@ export function OverviewBody({
 
   const view = buildYearView(year, today, { weekStart });
   const isCurrentYear = today !== null && year === today.year;
+  const { events } = useEvents();
 
   const commitYearDraft = (): void => onYearChange(resolveYearInput(yearDraft, year));
 
@@ -82,6 +85,7 @@ export function OverviewBody({
             <LayoutButton label="3×4" active={layout === "3x4"} onClick={() => onLayoutChange("3x4")} />
             <LayoutButton label="4×3" active={layout === "4x3"} onClick={() => onLayoutChange("4x3")} />
           </div>
+          <AddEventButton date={isCurrentYear && today ? today : { year, month: 1, day: 1 }} />
           <LevelSwitcher current="overview" onJump={onJump} />
           <SettingsMenu weekStart={weekStart} onWeekStartChange={onWeekStartChange} />
         </div>
@@ -98,6 +102,7 @@ export function OverviewBody({
               weekStart={weekStart}
               viewTransitionName={jumpPivot ? undefined : `month-${m.month}`}
               jumpDay={jumpPivot}
+              events={events}
               onClick={() => onMonthClick(m.month)}
             />
           </div>
