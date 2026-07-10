@@ -3,6 +3,7 @@ import {
   clipEventToDay,
   eventsForDay,
   isSafeUrl,
+  isStoredCalendarEvent,
   layoutDayColumns,
   minutesOfDay,
   sortForDay,
@@ -187,5 +188,44 @@ describe("sortForDay", () => {
     const t8 = timed("t8", [2026, 7, 12], 8, 9);
     const a = allDay("a", [2026, 7, 12], [2026, 7, 12]);
     expect(sortForDay([t9, a, t8]).map((e) => e.id)).toEqual(["a", "t8", "t9"]);
+  });
+});
+
+describe("isStoredCalendarEvent", () => {
+  const validAllDay = allDay("ok", [2026, 7, 12], [2026, 7, 12]);
+  const validTimed = timed("okt", [2026, 7, 12], 9, 10);
+
+  it("正常な終日イベントを通す", () => {
+    expect(isStoredCalendarEvent(validAllDay)).toBe(true);
+  });
+  it("正常な時間イベントを通す", () => {
+    expect(isStoredCalendarEvent(validTimed)).toBe(true);
+  });
+  it("null/非オブジェクトを弾く", () => {
+    expect(isStoredCalendarEvent(null)).toBe(false);
+    expect(isStoredCalendarEvent("x")).toBe(false);
+    expect(isStoredCalendarEvent(42)).toBe(false);
+  });
+  it("id 欠落・空文字を弾く", () => {
+    expect(isStoredCalendarEvent({ ...validAllDay, id: undefined })).toBe(false);
+    expect(isStoredCalendarEvent({ ...validAllDay, id: "" })).toBe(false);
+  });
+  it("start.date の数値欠落を弾く（クラッシュ元）", () => {
+    expect(
+      isStoredCalendarEvent({ ...validAllDay, start: { date: { year: 2026, month: 7 } } }),
+    ).toBe(false);
+    expect(isStoredCalendarEvent({ ...validAllDay, start: undefined })).toBe(false);
+  });
+  it("時間イベントで time 欠落を弾く（clip でのクラッシュ元）", () => {
+    expect(
+      isStoredCalendarEvent({ ...validTimed, start: { date: { year: 2026, month: 7, day: 12 } } }),
+    ).toBe(false);
+  });
+  it("不正な colorKey/priority を弾く", () => {
+    expect(isStoredCalendarEvent({ ...validAllDay, colorKey: "neon" })).toBe(false);
+    expect(isStoredCalendarEvent({ ...validAllDay, priority: "urgent" })).toBe(false);
+  });
+  it("createdAt/updatedAt の非数値を弾く", () => {
+    expect(isStoredCalendarEvent({ ...validAllDay, createdAt: "0" })).toBe(false);
   });
 });

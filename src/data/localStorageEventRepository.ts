@@ -1,3 +1,4 @@
+import { isStoredCalendarEvent } from "@/domain/event";
 import type { CalendarEvent } from "@/domain/event";
 import type { EventRepository } from "./eventRepository";
 
@@ -11,7 +12,8 @@ export class LocalStorageEventRepository implements EventRepository {
       const raw = this.storage.getItem(KEY);
       if (!raw) return [];
       const parsed = JSON.parse(raw);
-      return Array.isArray(parsed) ? (parsed as CalendarEvent[]) : [];
+      // 配列でない・要素が壊れている場合は該当分を除外（1件の破損で全体を壊さない）。
+      return Array.isArray(parsed) ? parsed.filter(isStoredCalendarEvent) : [];
     } catch {
       // 壊れたデータは握りつぶさず空へフォールバック（読み取り不能でアプリを止めない）
       return [];

@@ -1,7 +1,7 @@
 import { toEpochDay } from "@/domain/shared/date";
 import type { CivilDate } from "@/domain/shared/date";
 import type { TimeOfDay } from "@/domain/timecalc";
-import type { CalendarEvent, EventPriority } from "./types";
+import type { CalendarEvent, EventColorKey, EventPoint, EventPriority } from "./types";
 
 export type EventDraft = Omit<CalendarEvent, "id" | "createdAt" | "updatedAt">;
 
@@ -71,6 +71,54 @@ export function layoutDayColumns(segments: readonly DaySegment[]): readonly Laid
   }
   flush();
   return out;
+}
+
+const COLOR_KEYS: readonly EventColorKey[] = [
+  "blue",
+  "green",
+  "teal",
+  "purple",
+  "pink",
+  "amber",
+  "slate",
+  "rose",
+];
+const PRIORITIES: readonly EventPriority[] = ["low", "normal", "high"];
+
+const isObject = (v: unknown): v is Record<string, unknown> =>
+  typeof v === "object" && v !== null;
+
+const isCivilDate = (v: unknown): v is CivilDate =>
+  isObject(v) &&
+  typeof v.year === "number" &&
+  typeof v.month === "number" &&
+  typeof v.day === "number";
+
+const isTimeOfDay = (v: unknown): v is TimeOfDay =>
+  isObject(v) && typeof v.hour === "number" && typeof v.minute === "number";
+
+const isEventPoint = (v: unknown, requireTime: boolean): v is EventPoint => {
+  if (!isObject(v) || !isCivilDate(v.date)) return false;
+  return requireTime ? isTimeOfDay(v.time) : true;
+};
+
+// localStorage から読み込んだ未知の値が CalendarEvent として安全に扱えるか検証する。
+// 破損データ1件で eventsForDay/clipEventToDay がクラッシュするのを防ぐための防御ガード。
+export function isStoredCalendarEvent(v: unknown): v is CalendarEvent {
+  if (!isObject(v)) return false;
+  if (typeof v.id !== "string" || v.id.length === 0) return false;
+  if (typeof v.title !== "string") return false;
+  if (typeof v.allDay !== "boolean") return false;
+  const requireTime = !v.allDay; // 時間イベントは start/end.time が無いと clip でクラッシュする
+  if (!isEventPoint(v.start, requireTime)) return false;
+  if (!isEventPoint(v.end, requireTime)) return false;
+  if (!COLOR_KEYS.includes(v.colorKey as EventColorKey)) return false;
+  if (!PRIORITIES.includes(v.priority as EventPriority)) return false;
+  if (v.url !== undefined && typeof v.url !== "string") return false;
+  if (v.note !== undefined && typeof v.note !== "string") return false;
+  if (typeof v.createdAt !== "number") return false;
+  if (typeof v.updatedAt !== "number") return false;
+  return true;
 }
 
 export function isSafeUrl(url: string): boolean {
