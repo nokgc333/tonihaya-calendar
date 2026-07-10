@@ -128,7 +128,9 @@ body {
     opacity: 0;
   }
 }
-::view-transition-old(day-zoom),
+::view-transition-old(day-zoom) {
+  animation: zoom-source-fade-out 100ms ease-out both;
+}
 ::view-transition-old(hour-zoom) {
   animation: zoom-source-fade-out 140ms ease-out both;
 }
