@@ -172,10 +172,8 @@ export function WeekView({
                   : isJump(d)
                     ? { viewTransitionName: "jump-zoom" }
                     : {}),
-                // 本日は L0/L1 と同じく塗りではなく外枠リングで表す。
-                ...(d.isToday
-                  ? { boxShadow: "inset 0 0 0 1.5px var(--today-bg)", borderRadius: "0.375rem" }
-                  : {}),
+                // 本日は L0/L1 と同じく塗りではなく外枠リングで表す（角丸なし）。
+                ...(d.isToday ? { boxShadow: "inset 0 0 0 1.5px var(--today-bg)" } : {}),
               }}
               aria-label={`${d.month}月${d.day}日を開く`}
             >
