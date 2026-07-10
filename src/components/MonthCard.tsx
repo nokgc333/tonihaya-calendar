@@ -59,7 +59,8 @@ function DayCellView({
   readonly onEventSelect?: (id: string) => void;
 }) {
   const s = SIZE[size];
-  const vAlign = spacious ? "items-start pt-1.5" : "items-center";
+  // L0(sm)も数字を上寄せにし、セル下端の点に余白を作る。
+  const vAlign = spacious ? "items-start pt-1.5" : "items-start pt-1";
   const clickable = onDayClick && cellYear !== undefined && cellMonth !== undefined ? "cursor-pointer hover:brightness-95" : "";
   const base = `flex h-full justify-center ${vAlign} ${clickable} ${s.dayText} leading-none tabular-nums`;
   const bgStyle = { background: dayBg(cell) };
@@ -95,7 +96,7 @@ function DayCellView({
     </span>
   );
   const todayRing = cell.isToday
-    ? { boxShadow: "inset 0 0 0 2px var(--today-bg)" }
+    ? { boxShadow: "inset 0 0 0 1.5px var(--today-bg)" }
     : {};
 
   // L1（spacious）で当月セルにイベントがあれば、番号の下にチップ（最大3件＋「+N件」）を出す。
@@ -110,7 +111,7 @@ function DayCellView({
         {...handlers}
       >
         <div className="flex justify-center pt-1.5">{numberNode}</div>
-        <div className="mt-0.5 min-h-0 space-y-0.5 px-0.5">
+        <div className="mt-1.5 min-h-0 space-y-0.5 px-0.5">
           {dayEvents.slice(0, MAX_CHIPS).map((e) => (
             <EventChip key={e.id} event={e} onSelect={onEventSelect} />
           ))}
