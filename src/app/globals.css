@@ -118,7 +118,15 @@ body {
 /* ズーム遷移（View Transitions API）。非対応・reduced-motion では自動的に無効 */
 ::view-transition-old(root),
 ::view-transition-new(root) {
-  animation-duration: 220ms;
+  animation-duration: 200ms;
+}
+
+/* ズーム要素の位置/サイズのモーフ（group）を root と揃えて 200ms に固定する
+   （未指定だと UA 既定の約250msになり、遷移全体が間延びして見えるため）。 */
+::view-transition-group(day-zoom),
+::view-transition-group(hour-zoom),
+::view-transition-group(jump-zoom) {
+  animation-duration: 200ms;
 }
 
 /* ズーム元（old スナップショット）を早めにフェードアウトさせ、拡大しながら残る違和感を抑える。
@@ -132,7 +140,7 @@ body {
   animation: zoom-source-fade-out 100ms ease-out both;
 }
 ::view-transition-old(hour-zoom) {
-  animation: zoom-source-fade-out 140ms ease-out both;
+  animation: zoom-source-fade-out 100ms ease-out both;
 }
 
 @media (prefers-reduced-motion: reduce) {
