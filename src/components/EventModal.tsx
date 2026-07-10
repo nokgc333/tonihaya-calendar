@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { CalendarEvent, EventColorKey, EventDraft, EventPriority } from "@/domain/event";
-import { validateEvent } from "@/domain/event";
+import { isSafeUrl, validateEvent } from "@/domain/event";
 import type { CivilDate } from "@/domain/shared/date";
 import type { TimeOfDay } from "@/domain/timecalc";
 import { EVENT_COLOR_KEYS, eventColor } from "@/components/eventColors";
@@ -203,6 +203,18 @@ export function EventModal({
           <div>
             <label className={labelCls} htmlFor="ev-url">URL</label>
             <input id="ev-url" type="url" value={url} onChange={(e) => setUrl(e.target.value)} className={inputCls} style={inputStyle} placeholder="https://" />
+            {/* 入力が有効な http/https のときだけ開くリンクを出す（描画時も再検証＝多層防御）。 */}
+            {isSafeUrl(url.trim()) && (
+              <a
+                href={url.trim()}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-1 inline-block max-w-full truncate text-xs underline transition-opacity hover:opacity-70"
+                style={{ color: "var(--ev-blue-fg)" }}
+              >
+                ↗ リンクを開く
+              </a>
+            )}
           </div>
 
           <div>
