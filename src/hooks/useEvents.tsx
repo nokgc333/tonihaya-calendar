@@ -8,9 +8,11 @@ import type { EventRepository } from "@/data/eventRepository";
 interface EventContextValue {
   readonly events: readonly CalendarEvent[];
   readonly loading: boolean;
-  addEvent(draft: EventDraft): Promise<void>;
-  updateEvent(event: CalendarEvent): Promise<void>;
-  removeEvent(id: string): Promise<void>;
+  // 保存成功で true / 保存失敗（容量超過・プライベートモード等）で false を返す。
+  // 呼び出し側（モーダル）が false のときにモーダルを閉じずエラーを表示するために使う。
+  addEvent(draft: EventDraft): Promise<boolean>;
+  updateEvent(event: CalendarEvent): Promise<boolean>;
+  removeEvent(id: string): Promise<boolean>;
 }
 
 const EventContext = createContext<EventContextValue | null>(null);
@@ -58,26 +60,29 @@ export function EventProvider({
         try {
           await repo().add(event);
         } catch {
-          return;
+          return false;
         }
         setEvents((prev) => [...prev, event]);
+        return true;
       },
       async updateEvent(event) {
         const updated = { ...event, updatedAt: Date.now() };
         try {
           await repo().update(updated);
         } catch {
-          return;
+          return false;
         }
         setEvents((prev) => prev.map((e) => (e.id === updated.id ? updated : e)));
+        return true;
       },
       async removeEvent(id) {
         try {
           await repo().remove(id);
         } catch {
-          return;
+          return false;
         }
         setEvents((prev) => prev.filter((e) => e.id !== id));
+        return true;
       },
     }),
     [events, loading],

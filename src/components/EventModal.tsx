@@ -32,6 +32,9 @@ const PRIORITIES: readonly { value: EventPriority; label: string }[] = [
   { value: "high", label: "高" },
 ];
 
+const SAVE_ERROR = "保存できませんでした。ブラウザの空き容量やプライベートモードをご確認ください。";
+const DELETE_ERROR = "削除できませんでした。ブラウザの空き容量やプライベートモードをご確認ください。";
+
 /**
  * 予定の作成/編集モーダル。initial があれば編集（削除可）、無ければ新規。
  * onSubmit は EventDraft を渡す（新規/更新の別は呼び出し側が判断）。
@@ -45,8 +48,9 @@ export function EventModal({
 }: {
   readonly initial: CalendarEvent | null;
   readonly defaultDate: CivilDate;
-  readonly onSubmit: (draft: EventDraft) => void;
-  readonly onDelete?: () => void;
+  // 保存/削除は成否を返し得る（false=失敗）。void（従来）は成功扱い。
+  readonly onSubmit: (draft: EventDraft) => void | Promise<boolean>;
+  readonly onDelete?: () => void | Promise<boolean>;
   readonly onClose: () => void;
 }) {
   const [title, setTitle] = useState(initial?.title ?? "");
@@ -84,14 +88,18 @@ export function EventModal({
     note: note.trim() ? note.trim() : undefined,
   });
 
-  const handleSubmit = (): void => {
+  const handleSubmit = async (): Promise<void> => {
     const draft = buildDraft();
     const errs = validateEvent(draft);
     if (errs.length > 0) {
       setErrors(errs);
       return;
     }
-    onSubmit(draft);
+    setErrors([]);
+    // 保存に失敗（false）したらモーダルは閉じず（閉じるのは呼び出し側の成功時のみ）、
+    // 入力を残したままエラーを表示して再試行できるようにする。
+    const ok = await onSubmit(draft);
+    if (ok === false) setErrors([SAVE_ERROR]);
   };
 
   const labelCls = "block text-xs font-medium";
@@ -234,8 +242,10 @@ export function EventModal({
           {initial && onDelete ? (
             <button
               type="button"
-              onClick={() => {
-                if (window.confirm("この予定を削除しますか？")) onDelete();
+              onClick={async () => {
+                if (!window.confirm("この予定を削除しますか？")) return;
+                const ok = await onDelete();
+                if (ok === false) setErrors([DELETE_ERROR]);
               }}
               className="rounded-md px-3 py-1.5 text-sm transition-opacity hover:opacity-70"
               style={{ color: "var(--accent-red)" }}
