@@ -14,9 +14,13 @@ export function SettingsMenu({
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!open) return;
+    // 開いたらポップオーバー内の最初のフォーカス可能要素へ移す（キーボード操作性）。
+    dialogRef.current?.querySelector<HTMLElement>("button")?.focus();
     const onDown = (e: MouseEvent): void => {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
     };
@@ -25,6 +29,8 @@ export function SettingsMenu({
         // ポップオーバーを閉じるだけに留め、各ビューの Escape→戻る を発火させない。
         e.stopPropagation();
         setOpen(false);
+        // キーボードで閉じたときはトリガーへフォーカスを戻す（外側クリック時は戻さない）。
+        triggerRef.current?.focus();
       }
     };
     document.addEventListener("mousedown", onDown);
@@ -38,9 +44,11 @@ export function SettingsMenu({
   return (
     <div ref={ref} className="relative">
       <button
+        ref={triggerRef}
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-label="設定"
+        aria-haspopup="dialog"
         aria-expanded={open}
         className="flex h-8 w-8 items-center justify-center rounded-lg border transition-opacity hover:opacity-70"
         style={{ borderColor: "var(--border)", background: "var(--surface-2)", color: "var(--text)" }}
@@ -62,6 +70,7 @@ export function SettingsMenu({
       </button>
       {open && (
         <div
+          ref={dialogRef}
           role="dialog"
           aria-label="設定"
           className="absolute right-0 z-20 mt-1 rounded-lg border p-3 shadow-lg"
