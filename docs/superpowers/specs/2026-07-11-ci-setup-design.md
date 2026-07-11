@@ -5,18 +5,18 @@
 | 作成日 | 2026-07-11 |
 | ステータス | 草案（レビュー待ち） |
 | 対象 | tonihaya-calendar / 継続的インテグレーション基盤 |
-| 関連 | 3点セット（vitest / tsc / next build）、`next lint`、`scripts/lighthouse.mjs`（手元計測・本番URL用）、`engines.node >=22` |
+| 関連 | 3点セット（vitest / tsc / next build）、`scripts/lighthouse.mjs`（手元計測・本番URL用）、`engines.node >=22` |
 | 決定経緯 | 案B（正しさゲート＋サイズ予算ブロック・スコアはwarn）× 案ア（PR＋develop/mainのpush）× 案①（ガードレール＝ベースライン×1.15） |
 
 > 本書はブレインストーミング（案B / 案ア / 案①）で確定した方針を仕様化したもの。予算の実数値は実装時に `out/` の実測（LHCIの転送バイト）で確定する。
 
 ## 1. 目的とスコープ
 
-**目的**: 変更ごとに「正しさ（テスト・型・ビルド・lint）」と「速度（バンドルサイズ回帰）」を自動検証し、以降の機能追加（複数日バー等）で品質・速度が劣化しない安全網を張る。プロダクト軸「とにかく速い」を機械的にガードする。
+**目的**: 変更ごとに「正しさ（テスト・型・ビルド）」と「速度（バンドルサイズ回帰）」を自動検証し、以降の機能追加（複数日バー等）で品質・速度が劣化しない安全網を張る。プロダクト軸「とにかく速い」を機械的にガードする。
 
 **スコープ（入れる）**
 - GitHub Actions ワークフロー1本（`ci.yml`）／2ジョブ（`verify` / `lighthouse`）
-- `verify`（ブロッキング）: lint → type-check → test → build → `out/` を artifact 化
+- `verify`（ブロッキング）: type-check → test → build → `out/` を artifact 化
 - `lighthouse`（`needs: verify`）: LHCI で `out/` を計測
   - サイズ予算アサーション = **error（ブロッキング）**
   - Performance スコア = **warn（非ブロッキング・可視化のみ）**
@@ -28,7 +28,7 @@
 - CD（デプロイは既存の Vercel GitHub 連携が担う。CI はデプロイしない）
 - E2E（Playwright）の CI 実行（現状は手元 MCP 運用。将来 C 系で別途検討）
 - 依存脆弱性スキャン（Dependabot 等）・カバレッジレポートのアップロード
-- `next lint` の ESLint ルール強化（既存設定のまま使う）
+- **ESLint / `next lint` の CI 実行**（現状 ESLint 設定・依存が未導入で、`next lint` は対話セットアップを要求し CI で動かないため今回は除外）。ESLint 導入は別タスク `chore/eslint-setup` として独立 PR で行う（既存コードへの違反修正がスコープを膨らませ得るため切り離す）
 
 ## 2. 全体構成
 
@@ -36,7 +36,7 @@
 .github/workflows/ci.yml   （1ワークフロー・2ジョブ）
 ├─ job: verify        正しさゲート（ブロッキング）
 │    checkout → setup-node(22, cache:npm) → npm ci
-│    → lint → type-check → test → build → upload-artifact(out/)
+│    → type-check → test → build → upload-artifact(out/)
 └─ job: lighthouse    速度（needs: verify）
      checkout → setup-node → npm ci → download-artifact(out/)
      → npx lhci autorun（.lighthouserc.json / staticDistDir=out）
@@ -71,13 +71,12 @@ concurrency:
 1. `actions/checkout@v4`
 2. `actions/setup-node@v4`（node-version: 22 / cache: npm）
 3. `npm ci`
-4. `npm run lint`（= `next lint`）
-5. `npm run type-check`（= `tsc --noEmit`）
-6. `npm run test`（= `vitest run`）
-7. `npm run build`（= `next build`。`output: "export"` により `out/` を生成）
-8. `actions/upload-artifact@v4`（name: `out`, path: `out/`, retention: 1日）
+4. `npm run type-check`（= `tsc --noEmit`）
+5. `npm run test`（= `vitest run`）
+6. `npm run build`（= `next build`。`output: "export"` により `out/` を生成）
+7. `actions/upload-artifact@v4`（name: `out`, path: `out/`, retention: 1日）
 
-> 手元の3点セット（`npx vitest run && npx tsc --noEmit && npx next build`）に `lint` を加えた構成。順序は「速く落ちるもの順」ではなく「lint→型→テスト→ビルド」の理解しやすい順とする（各ステップは十分速い）。
+> 手元の3点セット（`npx vitest run && npx tsc --noEmit && npx next build`）をそのまま CI 化した構成。順序は「型→テスト→ビルド」の理解しやすい順とする（各ステップは十分速い）。lint は ESLint 未導入のため今回は含めない（§1 スコープ外参照）。
 
 ## 5. job: lighthouse（needs: verify）
 
