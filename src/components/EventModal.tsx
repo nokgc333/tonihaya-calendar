@@ -2,7 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { CalendarEvent, EventColorKey, EventDraft, EventPriority } from "@/domain/event";
-import { isSafeUrl, validateEvent } from "@/domain/event";
+import {
+  isSafeUrl,
+  validateEvent,
+  NOTE_MAX_LENGTH,
+  TITLE_MAX_LENGTH,
+  URL_MAX_LENGTH,
+} from "@/domain/event";
 import type { CivilDate } from "@/domain/shared/date";
 import type { TimeOfDay } from "@/domain/timecalc";
 import { EVENT_COLOR_KEYS, eventColor } from "@/components/eventColors";
@@ -136,6 +142,7 @@ export function EventModal({
               ref={titleRef}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
+              maxLength={TITLE_MAX_LENGTH}
               className={inputCls}
               style={inputStyle}
               placeholder="例: 打合せ"
@@ -202,7 +209,7 @@ export function EventModal({
           </div>
           <div>
             <label className={labelCls} htmlFor="ev-url">URL</label>
-            <input id="ev-url" type="url" value={url} onChange={(e) => setUrl(e.target.value)} className={inputCls} style={inputStyle} placeholder="https://" />
+            <input id="ev-url" type="url" value={url} onChange={(e) => setUrl(e.target.value)} maxLength={URL_MAX_LENGTH} className={inputCls} style={inputStyle} placeholder="https://" />
             {/* 入力が有効な http/https のときだけ開くリンクを出す（描画時も再検証＝多層防御）。 */}
             {isSafeUrl(url.trim()) && (
               <a
@@ -219,7 +226,7 @@ export function EventModal({
 
           <div>
             <label className={labelCls} htmlFor="ev-note">備考</label>
-            <textarea id="ev-note" value={note} onChange={(e) => setNote(e.target.value)} rows={2} className={inputCls} style={inputStyle} />
+            <textarea id="ev-note" value={note} onChange={(e) => setNote(e.target.value)} maxLength={NOTE_MAX_LENGTH} rows={2} className={inputCls} style={inputStyle} />
           </div>
         </div>
 
