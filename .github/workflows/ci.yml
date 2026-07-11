@@ -20,7 +20,11 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
-      - run: npm ci
+      # macOS で生成した package-lock.json は Linux 固有の optional ネイティブ依存
+      # (@emnapi/* や *-linux-x64-gnu 等) を記録できず、厳格な `npm ci` が Linux で
+      # 「lock 不整合」で落ちる。`npm install` はそのランナーの OS に合わせて optional を
+      # 解決し自己修復するため、クロスプラットフォームな optional 依存に強い。
+      - run: npm install --no-audit --no-fund
       - run: npm run type-check
       - run: npm run test
       - run: npm run build
@@ -40,7 +44,11 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
-      - run: npm ci
+      # macOS で生成した package-lock.json は Linux 固有の optional ネイティブ依存
+      # (@emnapi/* や *-linux-x64-gnu 等) を記録できず、厳格な `npm ci` が Linux で
+      # 「lock 不整合」で落ちる。`npm install` はそのランナーの OS に合わせて optional を
+      # 解決し自己修復するため、クロスプラットフォームな optional 依存に強い。
+      - run: npm install --no-audit --no-fund
       - uses: actions/download-artifact@v4
         with:
           name: out
