@@ -8,6 +8,9 @@ import {
   minutesOfDay,
   sortForDay,
   validateEvent,
+  NOTE_MAX_LENGTH,
+  TITLE_MAX_LENGTH,
+  URL_MAX_LENGTH,
   type DaySegment,
 } from "./event";
 import type { CalendarEvent } from "./types";
@@ -179,6 +182,19 @@ describe("validateEvent", () => {
         end: { date: { year: 2026, month: 7, day: 15 } },
       }),
     ).toEqual([]);
+  });
+  it("タイトルが上限超過はエラー", () => {
+    expect(validateEvent({ ...okTimed, title: "あ".repeat(TITLE_MAX_LENGTH + 1) }).length).toBeGreaterThan(0);
+  });
+  it("タイトルが上限ちょうどは正常", () => {
+    expect(validateEvent({ ...okTimed, title: "あ".repeat(TITLE_MAX_LENGTH) })).toEqual([]);
+  });
+  it("備考が上限超過はエラー", () => {
+    expect(validateEvent({ ...okTimed, note: "n".repeat(NOTE_MAX_LENGTH + 1) }).length).toBeGreaterThan(0);
+  });
+  it("URLが上限超過はエラー", () => {
+    const longUrl = "https://example.com/" + "a".repeat(URL_MAX_LENGTH);
+    expect(validateEvent({ ...okTimed, url: longUrl }).length).toBeGreaterThan(0);
   });
 });
 

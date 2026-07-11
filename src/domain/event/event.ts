@@ -130,10 +130,19 @@ export function isSafeUrl(url: string): boolean {
   }
 }
 
+// 入力の上限長。UI（maxLength）と検証の両方で使い、巨大文字列による localStorage 肥大・
+// 描画コスト増を防ぐ（多層防御）。
+export const TITLE_MAX_LENGTH = 200;
+export const NOTE_MAX_LENGTH = 2000;
+export const URL_MAX_LENGTH = 2048;
+
 export function validateEvent(d: EventDraft): readonly string[] {
   const errors: string[] = [];
   if (d.title.trim().length === 0) errors.push("タイトルを入力してください");
+  if (d.title.length > TITLE_MAX_LENGTH) errors.push(`タイトルは${TITLE_MAX_LENGTH}文字以内にしてください`);
+  if (d.note && d.note.length > NOTE_MAX_LENGTH) errors.push(`備考は${NOTE_MAX_LENGTH}文字以内にしてください`);
   if (d.url && !isSafeUrl(d.url)) errors.push("URLは http/https のみ使用できます");
+  if (d.url && d.url.length > URL_MAX_LENGTH) errors.push(`URLは${URL_MAX_LENGTH}文字以内にしてください`);
   const s = epoch(d.start.date);
   const e = epoch(d.end.date);
   if (e < s) errors.push("終了日は開始日以降にしてください");
