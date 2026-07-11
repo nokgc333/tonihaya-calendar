@@ -28,7 +28,8 @@
 - CD（デプロイは既存の Vercel GitHub 連携が担う。CI はデプロイしない）
 - E2E（Playwright）の CI 実行（現状は手元 MCP 運用。将来 C 系で別途検討）
 - 依存脆弱性スキャン（Dependabot 等）・カバレッジレポートのアップロード
-- **ESLint / `next lint` の CI 実行**（現状 ESLint 設定・依存が未導入で、`next lint` は対話セットアップを要求し CI で動かないため今回は除外）。ESLint 導入は別タスク `chore/eslint-setup` として独立 PR で行う（既存コードへの違反修正がスコープを膨らませ得るため切り離す）
+- **ESLint / `next lint` の CI 実行**（現状 ESLint 設定・依存が未導入で、`next lint` は対話セットアップを要求し CI で動かないため今回は除外）。当初は別タスク `chore/eslint-setup` として独立 PR で行う想定だった。
+  - **【2026-07-11 後日決定】ESLint 導入自体を見送り確定（決着済み）**。理由: `tsc`(strict)＋Prettier フック＋vitest＋console.log 警告フック＋LHCI で実害はカバー済みで緊急性ゼロ。ESLint 唯一の独自価値 `react-hooks/exhaustive-deps` は、本アプリの VT/zoom 系 `useEffect` の**意図的な依存手調整**と衝突し `eslint-disable` 乱立の摩擦になる。既存違反の修正でスコープも膨らむ。**覆す条件**: hooks 依存漏れ由来のバグが実発生／2人目の開発者が参加／Supabase 等で規模が動的化。
 
 ## 2. 全体構成
 
