@@ -32,3 +32,4 @@ bin/
 
 # Lighthouse レポート出力
 .lighthouse/
+.lighthouseci/
