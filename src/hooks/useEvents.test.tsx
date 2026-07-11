@@ -1,4 +1,5 @@
 // @vitest-environment happy-dom
+import { useState } from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect } from "vitest";
@@ -52,12 +53,14 @@ const seeded = (title: string): CalendarEvent => ({
 // useEvents を読み、操作ボタンと状態を露出する検証用ハーネス。
 function Harness() {
   const { events, loading, addEvent, updateEvent, removeEvent } = useEvents();
+  const [result, setResult] = useState<string>("");
   return (
     <div>
       <span data-testid="loading">{String(loading)}</span>
       <span data-testid="count">{events.length}</span>
       <span data-testid="titles">{events.map((e) => e.title).join(",")}</span>
-      <button onClick={() => addEvent(draft("新規"))}>add</button>
+      <span data-testid="result">{result}</span>
+      <button onClick={async () => setResult(String(await addEvent(draft("新規"))))}>add</button>
       <button onClick={() => events[0] && updateEvent({ ...events[0], title: "更新後" })}>update</button>
       <button onClick={() => events[0] && removeEvent(events[0].id)}>remove</button>
     </div>
@@ -78,7 +81,7 @@ describe("useEvents", () => {
     expect(screen.getByTestId("count")).toHaveTextContent("1");
   });
 
-  it("addEvent で楽観更新しリポジトリにも保存される", async () => {
+  it("addEvent で楽観更新しリポジトリにも保存され、true を返す", async () => {
     const repo = new FakeRepo();
     const user = userEvent.setup();
     renderWith(repo);
@@ -87,6 +90,7 @@ describe("useEvents", () => {
     await waitFor(() => expect(screen.getByTestId("count")).toHaveTextContent("1"));
     expect(repo.store).toHaveLength(1);
     expect(repo.store[0].id).toBeTruthy();
+    expect(screen.getByTestId("result")).toHaveTextContent("true");
   });
 
   it("updateEvent で該当予定が置換される", async () => {
@@ -113,8 +117,9 @@ describe("useEvents", () => {
     renderWith(repo);
     await waitFor(() => expect(screen.getByTestId("loading")).toHaveTextContent("false"));
     await user.click(screen.getByRole("button", { name: "add" }));
-    // add は失敗し握られる。保存も表示も増えない。
-    await waitFor(() => expect(repo.store).toHaveLength(0));
+    // add は失敗し握られる。保存も表示も増えず、false を返す。
+    await waitFor(() => expect(screen.getByTestId("result")).toHaveTextContent("false"));
+    expect(repo.store).toHaveLength(0);
     expect(screen.getByTestId("count")).toHaveTextContent("0");
   });
 });

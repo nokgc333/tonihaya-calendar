@@ -89,6 +89,18 @@ describe("EventModal", () => {
     expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ title: "会議", allDay: true }));
   });
 
+  it("保存に失敗（onSubmitがfalse）するとエラーを表示する", async () => {
+    const onSubmit = vi.fn().mockResolvedValue(false);
+    const user = userEvent.setup();
+    render(
+      <EventModal initial={null} defaultDate={defaultDate} onSubmit={onSubmit} onClose={vi.fn()} />,
+    );
+    await user.type(screen.getByLabelText("タイトル"), "会議");
+    await user.click(screen.getByRole("button", { name: "保存" }));
+    expect(onSubmit).toHaveBeenCalledTimes(1);
+    expect(await screen.findByText(/保存できませんでした/)).toBeInTheDocument();
+  });
+
   it("編集時に削除すると確認後 onDelete が呼ばれる", async () => {
     const onDelete = vi.fn();
     const user = userEvent.setup();

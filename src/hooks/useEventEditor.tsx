@@ -48,15 +48,18 @@ export function EventEditorProvider({ children }: { readonly children: React.Rea
           initial={editing}
           defaultDate={state.defaultDate}
           onSubmit={async (draft) => {
-            if (editing) await updateEvent({ ...editing, ...draft });
-            else await addEvent(draft);
-            close();
+            const ok = editing
+              ? await updateEvent({ ...editing, ...draft })
+              : await addEvent(draft);
+            if (ok) close();
+            return ok;
           }}
           onDelete={
             editing
               ? async () => {
-                  await removeEvent(editing.id);
-                  close();
+                  const ok = await removeEvent(editing.id);
+                  if (ok) close();
+                  return ok;
                 }
               : undefined
           }
