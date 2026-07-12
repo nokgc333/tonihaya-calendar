@@ -10,6 +10,7 @@ import { MonthCard } from "@/components/MonthCard";
 import { SettingsMenu } from "@/components/SettingsMenu";
 import { useEvents } from "@/hooks/useEvents";
 import { AddEventButton } from "@/components/AddEventButton";
+import { HolidayList } from "@/components/HolidayList";
 import { useEffect, useState } from "react";
 
 /** 俯瞰カレンダーの表示レイアウト（3行×4列 / 4行×3列） */
@@ -91,22 +92,32 @@ export function OverviewBody({
         </div>
       </nav>
 
-      {/* カードは305×242pxで固定。幅に応じて折り返し、余りは中央寄せの余白にする。
-          4×3選択かつ≥1288pxではzoomで拡大し3列に。 */}
-      <div className="flex flex-wrap justify-center gap-3">
-        {view.months.map((m) => (
-          <div key={m.month} className={`w-[305px] ${zoomClass}`}>
-            <MonthCard
-              month={m}
-              year={year}
-              weekStart={weekStart}
-              viewTransitionName={jumpPivot ? undefined : `month-${m.month}`}
-              jumpDay={jumpPivot}
-              events={events}
-              onClick={() => onMonthClick(m.month)}
-            />
+      {/* ≥1600px では [グリッド固定1256px] + [祝日一覧] の横並び。
+          未満ではグリッドが幅いっぱいを使い（従来どおり列数を可変で折り返し）、祝日一覧は非表示。 */}
+      <div className="flex gap-6">
+        <div className="w-full min-[1600px]:w-[1256px] min-[1600px]:shrink-0">
+          {/* カードは305×242pxで固定。幅に応じて折り返し、余りは中央寄せの余白にする。
+              4×3選択かつ≥1288pxではzoomで拡大し3列に。 */}
+          <div className="flex flex-wrap justify-center gap-3">
+            {view.months.map((m) => (
+              <div key={m.month} className={`w-[305px] ${zoomClass}`}>
+                <MonthCard
+                  month={m}
+                  year={year}
+                  weekStart={weekStart}
+                  viewTransitionName={jumpPivot ? undefined : `month-${m.month}`}
+                  jumpDay={jumpPivot}
+                  events={events}
+                  onClick={() => onMonthClick(m.month)}
+                />
+              </div>
+            ))}
           </div>
-        ))}
+        </div>
+        {/* ≥1600px: 右サイドに祝日一覧（縦1列）。<1600px は非表示。 */}
+        <aside className="hidden min-w-[280px] flex-1 min-[1600px]:block">
+          <HolidayList year={year} today={today} onMonthClick={onMonthClick} />
+        </aside>
       </div>
     </>
   );

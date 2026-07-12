@@ -241,10 +241,12 @@ function CalendarAppInner() {
 
   return (
     // min-w で375px以下はレイアウトを固定（それ未満は横スクロールで切り捨て）。
-    <main className="mx-auto min-w-[375px] max-w-[1400px] px-4 py-5">
+    // L0は祝日一覧サイドを右に持つため上限1600px。L1(月)は内側で1256pxに絞り従来の見た目を維持する。
+    <main className="mx-auto min-w-[375px] max-w-[1600px] px-4 py-5">
       {zoom.level === "overview" || zoom.month === undefined ? (
-        // L0もヘッダー・ナビ・カード群を4列ぶん(1256px)の最大幅ラッパーに入れ左右余白を統一。
-        <div className="mx-auto w-full max-w-[1256px]">
+        // L0: <1600px はヘッダー・ナビ・グリッドをカード4列幅(1256px)で中央寄せに揃える。
+        //     ≥1600px は1600pxへ広げ、右に祝日一覧サイドを持たせる。
+        <div className="mx-auto w-full max-w-[1256px] min-[1600px]:max-w-[1600px]">
           <TodayHeader today={today} countdowns={countdowns} />
           <OverviewBody
             year={zoom.year}
