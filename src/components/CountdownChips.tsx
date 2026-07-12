@@ -1,7 +1,7 @@
 import type { Countdown } from "@/domain/countdown";
 
 /**
- * 本日基準の遊びセクション（土曜/月末/四半期末/年末まで）。
+ * 本日基準の遊びセクション（土曜/月末/残り営業日/年末まで）。
  * 既定は1行のチップ群。block=true では幅いっぱいのグリッドで各項目を2行中央表示する。
  */
 export function CountdownChips({
@@ -14,7 +14,7 @@ export function CountdownChips({
   const items = [
     { label: "土曜まで", value: countdowns.toSaturday },
     { label: "月末まで", value: countdowns.toMonthEnd },
-    { label: "四半期末まで", value: countdowns.toQuarterEnd },
+    { label: "残り営業日", value: countdowns.remainingBusinessDays },
     { label: "年末まで", value: countdowns.toYearEnd },
   ] as const;
 
