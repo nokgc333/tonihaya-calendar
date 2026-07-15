@@ -147,7 +147,7 @@ export function WeekView({
       {/* 外枠は共有要素を持たず root クロスフェードで現れる。ズームは日ヘッダー
           （day-zoom/hour-zoom/jump-zoom）が「その日」を狙って担う。 */}
       <div
-        className="flex min-h-0 flex-1 flex-col overflow-x-auto rounded-md border"
+        className="mx-auto w-full max-w-[1256px] flex min-h-0 flex-1 flex-col overflow-x-auto rounded-md border"
         style={{ borderColor: "var(--border)" }}
       >
         {/* 曜日+日付ヘッダー（sticky）。L0/L1の曜日行に合わせ外枠なし・面色#fbfbfb。 */}

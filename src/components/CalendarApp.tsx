@@ -160,8 +160,8 @@ function CalendarAppInner() {
 
   if (zoom.level === "day" && zoom.month !== undefined && zoom.day !== undefined) {
     return (
-      <main className="mx-auto flex h-dvh min-w-[375px] max-w-[1400px] flex-col px-4 py-5">
-        <div className="mx-auto flex min-h-0 w-full max-w-[1256px] flex-1 flex-col">
+      <main className="mx-auto flex h-dvh min-w-[375px] max-w-[1600px] flex-col px-4 py-5">
+        <div className="flex min-h-0 w-full flex-1 flex-col">
           <TodayHeader today={today} countdowns={countdowns} />
           <div className="min-h-0 flex-1">
             <DayView
@@ -196,9 +196,9 @@ function CalendarAppInner() {
 
   if (zoom.level === "week" && zoom.month !== undefined && zoom.day !== undefined) {
     return (
-      <main className="mx-auto flex h-dvh min-w-[375px] max-w-[1400px] flex-col px-4 py-5">
-        {/* L0/L1と左右余白・最大幅(1256px)を統一する。 */}
-        <div className="mx-auto flex min-h-0 w-full max-w-[1256px] flex-1 flex-col">
+      <main className="mx-auto flex h-dvh min-w-[375px] max-w-[1600px] flex-col px-4 py-5">
+        {/* header/nav は全レベル共通でフル幅(main幅)。本体(WeekView)側で1256pxに絞る。 */}
+        <div className="flex min-h-0 w-full flex-1 flex-col">
           <TodayHeader today={today} countdowns={countdowns} />
           <div className="min-h-0 flex-1">
             <WeekView
@@ -268,8 +268,8 @@ function CalendarAppInner() {
           />
         </div>
       ) : (
-        // L1もL0と同じ最大幅(1256px)ラッパーに入れ、ヘッダー・ナビ・本体の左右余白をL0と統一する。
-        <div className="mx-auto w-full max-w-[1256px]">
+        // header/nav は全レベル共通でフル幅(main幅)。本体(MonthDetail)側で1256pxに絞る。
+        <div className="w-full">
           <TodayHeader today={today} countdowns={countdowns} />
           <MonthDetail
             year={zoom.year}
