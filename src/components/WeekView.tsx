@@ -100,6 +100,13 @@ export function WeekView({
 
   const first = week.days[0];
   const last = week.days[6];
+  // 週範囲ラベル。末尾の「西暦年」は、年が変わる場合のみ付ける。
+  const endNeedsPrefix = first.year !== last.year;
+  const weekRangeLabel =
+    `${first.year}年 ${first.month}月${first.day}日 〜 ` +
+    (endNeedsPrefix
+      ? `${last.year}年 ${last.month}月${last.day}日`
+      : `${last.month}月${last.day}日`);
   const nowOffset =
     todayIndex >= 0
       ? minutesToOffset(
@@ -130,9 +137,8 @@ export function WeekView({
           >
             ‹
           </button>
-          <span className="min-w-[13rem] text-center text-xl font-bold tabular-nums">
-            {first.year}年{first.month}月{first.day}日 〜 {last.month}月
-            {last.day}日
+          <span className="min-w-[15rem] text-center text-xl font-bold tabular-nums">
+            {weekRangeLabel}
           </span>
           <button
             type="button"
