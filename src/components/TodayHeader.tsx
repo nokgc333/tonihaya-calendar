@@ -1,5 +1,6 @@
 import type { Countdown } from "@/domain/countdown";
 import type { CivilDate } from "@/domain/shared/date";
+import { formatYearWithEra } from "@/domain/era";
 import { CountdownChips } from "@/components/CountdownChips";
 import { WEEKDAY_JA } from "@/components/weekdays";
 
@@ -22,7 +23,9 @@ export function TodayHeader({
           tonihaya-calendar
         </p>
         <h1 className="mt-1 text-2xl font-bold tabular-nums" suppressHydrationWarning>
-          {today ? `${today.year}年${today.month}月${today.day}日(${weekdayJa(today)})` : ""}
+          {today
+            ? `${formatYearWithEra(today)} ${today.month}月${today.day}日 ${weekdayJa(today)}曜日`
+            : ""}
         </h1>
       </div>
       {/* 遊びセクションは狭幅(≤712px)では単月ビュー内に移すため、ここでは非表示にする */}
