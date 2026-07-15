@@ -134,7 +134,7 @@ export function DayView({
             終日行/時間列と中央軸が揃う。祝日名は終日行に出るのでここには表示しない。
             高さは 54.5px（L2ヘッダー行と揃える）。 */}
         <div
-          className="sticky top-0 z-10 grid min-h-[54.5px] shrink-0 items-center pb-1.5"
+          className="sticky top-0 z-10 grid min-h-[54.5px] shrink-0 items-center py-1.5"
           style={{
             gridTemplateColumns: GRID_COLS,
             background: "var(--surface)",

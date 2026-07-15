@@ -152,7 +152,7 @@ export function WeekView({
       >
         {/* 曜日+日付ヘッダー（sticky）。L0/L1の曜日行に合わせ外枠なし・面色#fbfbfb。 */}
         <div
-          className="sticky top-0 z-10 grid shrink-0 pb-1.5"
+          className="sticky top-0 z-10 grid shrink-0"
           style={{
             gridTemplateColumns: GRID_COLS,
             background: "var(--surface)",
@@ -165,7 +165,7 @@ export function WeekView({
               key={`h-${d.month}-${d.day}`}
               type="button"
               onClick={() => onDayOpen(d.year, d.month, d.day)}
-              className="w-full cursor-pointer p-1 text-center transition-opacity hover:opacity-70"
+              className="w-full cursor-pointer px-1 py-[7px] text-center transition-opacity hover:opacity-70"
               style={{
                 ...(isPivot(d)
                   ? { viewTransitionName: "hour-zoom" }
