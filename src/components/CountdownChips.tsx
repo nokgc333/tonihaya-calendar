@@ -13,8 +13,8 @@ export function CountdownChips({
 }) {
   const items = [
     { label: "土曜まで", value: countdowns.toSaturday },
-    { label: "月末まで", value: countdowns.toMonthEnd },
     { label: "残り営業日", value: countdowns.remainingBusinessDays },
+    { label: "月末まで", value: countdowns.toMonthEnd },
     { label: "年末まで", value: countdowns.toYearEnd },
   ] as const;
 
