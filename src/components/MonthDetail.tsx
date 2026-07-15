@@ -88,8 +88,8 @@ export function MonthDetail({
           >
             ‹
           </button>
-          <span className="min-w-[7rem] text-center text-xl font-bold tabular-nums">
-            {year}年{month}月
+          <span className="min-w-[8rem] text-center text-xl font-bold tabular-nums">
+            {year}年 {month}月
           </span>
           <button
             type="button"
