@@ -18,8 +18,12 @@ import { DayView } from "@/components/DayView";
 const LAYOUT_STORAGE_KEY = "tonihaya.overviewLayout";
 const WEEKSTART_STORAGE_KEY = "tonihaya.weekStart";
 
-const LEVEL_ORDER: Record<JumpLevel, number> = { overview: 0, month: 1, week: 2, day: 3 };
-
+const LEVEL_ORDER: Record<JumpLevel, number> = {
+  overview: 0,
+  month: 1,
+  week: 2,
+  day: 3,
+};
 
 export function CalendarApp() {
   return (
@@ -78,7 +82,10 @@ function CalendarAppInner() {
   }, [zoom.level, zoom.year, zoom.month, zoom.day]);
   // 週を開いたときのL1の文脈月（＝画面に表示していた月）。前月/翌月のグレーセルを
   // 押したときでも「戻る」で実日付の月ではなく文脈月へ戻すために保持する。
-  const [weekOrigin, setWeekOrigin] = useState<{ year: number; month: number } | null>(null);
+  const [weekOrigin, setWeekOrigin] = useState<{
+    year: number;
+    month: number;
+  } | null>(null);
   const openDayWeek = (y: number, m: number, d: number): void => {
     const day: CivilDate = { year: clampYear(y), month: m, day: d };
     const origin =
@@ -90,7 +97,10 @@ function CalendarAppInner() {
       setWeekOrigin(origin);
       setJumpPivot(null);
     });
-    navigate({ level: "week", year: day.year, month: day.month, day: day.day }, "push");
+    navigate(
+      { level: "week", year: day.year, month: day.month, day: day.day },
+      "push",
+    );
   };
   // L1から週以外へ移動する際は、遷移キャプチャ前にピボットを消して day-zoom セルの
   // 取り残し（対応先なしのチラつき）を防ぐ。
@@ -117,7 +127,10 @@ function CalendarAppInner() {
       setDayPivot(target);
       setJumpPivot(null);
     });
-    navigate({ level: "day", year: target.year, month: target.month, day: target.day }, "push");
+    navigate(
+      { level: "day", year: target.year, month: target.month, day: target.day },
+      "push",
+    );
   };
 
   // 年/月/週/日セグメントからのジャンプ。距離で分岐し、隣接は既存モーフを流用する。
@@ -158,82 +171,100 @@ function CalendarAppInner() {
     navigate(target, "push");
   };
 
-  if (zoom.level === "day" && zoom.month !== undefined && zoom.day !== undefined) {
+  if (
+    zoom.level === "day" &&
+    zoom.month !== undefined &&
+    zoom.day !== undefined
+  ) {
     return (
       <main className="mx-auto flex h-dvh min-w-[375px] max-w-[1600px] flex-col px-4 py-5">
         <div className="flex min-h-0 w-full flex-1 flex-col">
           <TodayHeader today={today} countdowns={countdowns} />
-          <div className="min-h-0 flex-1">
-            <DayView
-              year={zoom.year}
-              month={zoom.month}
-              day={zoom.day}
-              today={today}
-              onBack={() => {
-                flushSync(() => setJumpPivot(null));
-                navigate(
-                  { level: "week", year: zoom.year, month: zoom.month!, day: zoom.day! },
-                  "push",
-                );
-              }}
-              onDayChange={(y, m, dd) => {
-                // L3内で日送りしたら、戻り時のモーフが現在表示日の列に着地するよう
-                // ピボットも追従させる（古い日の列へ hour-zoom が残るのを防ぐ）。
-                setJumpPivot(null);
-                setDayPivot({ year: clampYear(y), month: m, day: dd });
-                navigate({ level: "day", year: clampYear(y), month: m, day: dd }, "replace");
-              }}
-              onJump={jumpTo}
-              weekStart={weekStart}
-              onWeekStartChange={changeWeekStart}
-              jumpPivot={jumpPivot}
-            />
-          </div>
+          <DayView
+            year={zoom.year}
+            month={zoom.month}
+            day={zoom.day}
+            today={today}
+            onBack={() => {
+              flushSync(() => setJumpPivot(null));
+              navigate(
+                {
+                  level: "week",
+                  year: zoom.year,
+                  month: zoom.month!,
+                  day: zoom.day!,
+                },
+                "push",
+              );
+            }}
+            onDayChange={(y, m, dd) => {
+              // L3内で日送りしたら、戻り時のモーフが現在表示日の列に着地するよう
+              // ピボットも追従させる（古い日の列へ hour-zoom が残るのを防ぐ）。
+              setJumpPivot(null);
+              setDayPivot({ year: clampYear(y), month: m, day: dd });
+              navigate(
+                { level: "day", year: clampYear(y), month: m, day: dd },
+                "replace",
+              );
+            }}
+            onJump={jumpTo}
+            weekStart={weekStart}
+            onWeekStartChange={changeWeekStart}
+            jumpPivot={jumpPivot}
+          />
         </div>
       </main>
     );
   }
 
-  if (zoom.level === "week" && zoom.month !== undefined && zoom.day !== undefined) {
+  if (
+    zoom.level === "week" &&
+    zoom.month !== undefined &&
+    zoom.day !== undefined
+  ) {
     return (
       <main className="mx-auto flex h-dvh min-w-[375px] max-w-[1600px] flex-col px-4 py-5">
         {/* header/nav は全レベル共通でフル幅(main幅)。本体(WeekView)側で1256pxに絞る。 */}
         <div className="flex min-h-0 w-full flex-1 flex-col">
           <TodayHeader today={today} countdowns={countdowns} />
-          <div className="min-h-0 flex-1">
-            <WeekView
-              year={zoom.year}
-              month={zoom.month}
-              day={zoom.day}
-              today={today}
-              onBack={() => {
-                flushSync(() => {
-                  setDayPivot(null);
-                  setJumpPivot(null);
-                });
-                // 実日付の月ではなく、週を開いた文脈月へ戻す（グレーセル経由でもズレない）。
-                const o = weekOrigin ?? { year: zoom.year, month: zoom.month! };
-                navigate({ level: "month", year: o.year, month: o.month }, "push");
-              }}
-              onWeekChange={(y, m, d) => {
-                flushSync(() => {
-                  setDayPivot(null);
-                  setJumpPivot(null);
-                  // 週送り後は「戻る」で文脈月へ戻る（別週）。起点週が定まらないので
-                  // pivotDay を掃除し、以降の月への戻り/ジャンプは day-zoom なしのクロスフェードにする。
-                  setPivotDay(null);
-                });
-                navigate({ level: "week", year: clampYear(y), month: m, day: d }, "replace");
-              }}
-              onDayOpen={openDay}
-              dayPivot={dayPivot}
-              pivotDay={pivotDay}
-              onJump={jumpTo}
-              weekStart={weekStart}
-              onWeekStartChange={changeWeekStart}
-              jumpPivot={jumpPivot}
-            />
-          </div>
+          <WeekView
+            year={zoom.year}
+            month={zoom.month}
+            day={zoom.day}
+            today={today}
+            onBack={() => {
+              flushSync(() => {
+                setDayPivot(null);
+                setJumpPivot(null);
+              });
+              // 実日付の月ではなく、週を開いた文脈月へ戻す（グレーセル経由でもズレない）。
+              const o = weekOrigin ?? { year: zoom.year, month: zoom.month! };
+              navigate(
+                { level: "month", year: o.year, month: o.month },
+                "push",
+              );
+            }}
+            onWeekChange={(y, m, d) => {
+              flushSync(() => {
+                setDayPivot(null);
+                setJumpPivot(null);
+                // 週送り後は「戻る」で文脈月へ戻る（別週）。起点週が定まらないので
+                // pivotDay を掃除し、以降の月への戻り/ジャンプは day-zoom なしのクロスフェードにする。
+                setPivotDay(null);
+              });
+              navigate(
+                { level: "week", year: clampYear(y), month: m, day: d },
+                "replace",
+              );
+            }}
+            onDayOpen={openDay}
+            dayPivot={dayPivot}
+            pivotDay={pivotDay}
+            onJump={jumpTo}
+            weekStart={weekStart}
+            onWeekStartChange={changeWeekStart}
+            jumpPivot={jumpPivot}
+          />
         </div>
       </main>
     );
@@ -277,11 +308,16 @@ function CalendarAppInner() {
             today={today}
             countdowns={countdowns}
             onBack={() =>
-              clearPivotThen(() => navigate({ level: "overview", year: zoom.year }, "push"))
+              clearPivotThen(() =>
+                navigate({ level: "overview", year: zoom.year }, "push"),
+              )
             }
             onMonthChange={(y, m) =>
               clearPivotThen(() =>
-                navigate({ level: "month", year: clampYear(y), month: m }, "replace"),
+                navigate(
+                  { level: "month", year: clampYear(y), month: m },
+                  "replace",
+                ),
               )
             }
             onDayClick={openDayWeek}
