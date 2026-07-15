@@ -1,7 +1,12 @@
 "use client";
 
 import { Fragment, useEffect, useRef } from "react";
-import { buildWeekView, minutesToOffset, type JumpLevel, type WeekDay } from "@/domain/view";
+import {
+  buildWeekView,
+  minutesToOffset,
+  type JumpLevel,
+  type WeekDay,
+} from "@/domain/view";
 import { fromEpochDay, toEpochDay, type CivilDate } from "@/domain/shared/date";
 import type { WeekStart } from "@/domain/calendar";
 import { LevelSwitcher } from "@/components/LevelSwitcher";
@@ -15,12 +20,10 @@ import { useEventEditor } from "@/hooks/useEventEditor";
 import { eventsForDay } from "@/domain/event";
 import { eventColor } from "@/components/eventColors";
 
-
 const HOUR_HEIGHT = 48; // 1時間あたりの高さ(px)
 const HOURS = Array.from({ length: 24 }, (_, h) => h);
 const GRID_COLS = "3.5rem repeat(7, minmax(4.5rem, 1fr))";
 const SCROLL_LEAD_HOURS = 2;
-
 
 export function WeekView({
   year,
@@ -68,7 +71,8 @@ export function WeekView({
     jumpPivot.day === d.day;
   // L1↔L2 遷移中は、押下日セルを「週ヘッダー行全体」へモーフさせる（day-zoom）。
   // pivotDay は L2↔L3 遷移後も残存し得るため、dayPivot/jumpPivot が null のときに限定する。
-  const isDayZoom = pivotDay !== null && dayPivot === null && jumpPivot === null;
+  const isDayZoom =
+    pivotDay !== null && dayPivot === null && jumpPivot === null;
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent): void => {
@@ -98,11 +102,14 @@ export function WeekView({
   const last = week.days[6];
   const nowOffset =
     todayIndex >= 0
-      ? minutesToOffset(new Date().getHours() * 60 + new Date().getMinutes(), HOUR_HEIGHT)
+      ? minutesToOffset(
+          new Date().getHours() * 60 + new Date().getMinutes(),
+          HOUR_HEIGHT,
+        )
       : 0;
 
   return (
-    <div className="flex h-full flex-col">
+    <>
       <nav className="mb-5 flex min-h-10 shrink-0 flex-wrap items-center gap-2">
         <button
           type="button"
@@ -124,7 +131,8 @@ export function WeekView({
             ‹
           </button>
           <span className="min-w-[13rem] text-center text-xl font-bold tabular-nums">
-            {first.year}年{first.month}月{first.day}日 〜 {last.month}月{last.day}日
+            {first.year}年{first.month}月{first.day}日 〜 {last.month}月
+            {last.day}日
           </span>
           <button
             type="button"
@@ -139,7 +147,10 @@ export function WeekView({
         <div className="ml-auto flex items-center gap-3">
           <AddEventButton date={{ year, month, day }} />
           <LevelSwitcher current="week" onJump={onJump} />
-          <SettingsMenu weekStart={weekStart} onWeekStartChange={onWeekStartChange} />
+          <SettingsMenu
+            weekStart={weekStart}
+            onWeekStartChange={onWeekStartChange}
+          />
         </div>
       </nav>
 
@@ -173,7 +184,9 @@ export function WeekView({
                     ? { viewTransitionName: "jump-zoom" }
                     : {}),
                 // 本日は L0/L1 と同じく塗りではなく外枠リングで表す（角丸なし）。
-                ...(d.isToday ? { boxShadow: "inset 0 0 0 1.5px var(--today-bg)" } : {}),
+                ...(d.isToday
+                  ? { boxShadow: "inset 0 0 0 1.5px var(--today-bg)" }
+                  : {}),
               }}
               aria-label={`${d.month}月${d.day}日を開く`}
             >
@@ -194,9 +207,15 @@ export function WeekView({
         {/* 終日行（祝日名） */}
         <div
           className="grid shrink-0 border-y"
-          style={{ gridTemplateColumns: GRID_COLS, borderColor: "var(--border-strong)" }}
+          style={{
+            gridTemplateColumns: GRID_COLS,
+            borderColor: "var(--border-strong)",
+          }}
         >
-          <div className="flex items-center justify-end p-1 text-[10px]" style={{ color: "var(--text-muted)" }}>
+          <div
+            className="flex items-center justify-end p-1 text-[10px]"
+            style={{ color: "var(--text-muted)" }}
+          >
             終日
           </div>
           {week.days.map((d) => {
@@ -209,10 +228,16 @@ export function WeekView({
               <div
                 key={`a-${d.month}-${d.day}`}
                 className="min-h-[33px] space-y-0.5 border-l p-0.5 text-[10px]"
-                style={{ borderColor: "var(--border)", background: dayBgColor(d) }}
+                style={{
+                  borderColor: "var(--border)",
+                  background: dayBgColor(d),
+                }}
               >
                 {d.holidayName ? (
-                  <div className="text-center" style={{ color: "var(--accent-red)" }}>
+                  <div
+                    className="text-center"
+                    style={{ color: "var(--accent-red)" }}
+                  >
                     {d.holidayName}
                   </div>
                 ) : null}
@@ -225,7 +250,11 @@ export function WeekView({
                       data-event-id={e.id}
                       onClick={() => openEdit(e.id)}
                       className="block w-full truncate rounded px-1 text-left leading-tight transition-opacity hover:opacity-90"
-                      style={{ background: c.bg, color: c.fg, border: `1px solid ${c.border}` }}
+                      style={{
+                        background: c.bg,
+                        color: c.fg,
+                        border: `1px solid ${c.border}`,
+                      }}
                       title={e.title}
                     >
                       {e.title}
@@ -239,12 +268,19 @@ export function WeekView({
 
         {/* 時間グリッド本体（縦スクロール） */}
         <div ref={bodyRef} className="min-h-0 flex-1 overflow-y-auto">
-          <div className="relative grid" style={{ gridTemplateColumns: GRID_COLS }}>
+          <div
+            className="relative grid"
+            style={{ gridTemplateColumns: GRID_COLS }}
+          >
             {HOURS.map((h) => (
               <Fragment key={h}>
                 <div
                   className="border-t pr-1 text-right text-[10px]"
-                  style={{ height: HOUR_HEIGHT, borderColor: "var(--border)", color: "var(--text-muted)" }}
+                  style={{
+                    height: HOUR_HEIGHT,
+                    borderColor: "var(--border)",
+                    color: "var(--text-muted)",
+                  }}
                 >
                   {h}:00
                 </div>
@@ -256,7 +292,11 @@ export function WeekView({
                     aria-hidden="true"
                     onClick={() => onDayOpen(d.year, d.month, d.day)}
                     className="w-full cursor-pointer border-t border-l transition-opacity hover:opacity-80"
-                    style={{ height: HOUR_HEIGHT, borderColor: "var(--border)", background: dayBgColor(d) }}
+                    style={{
+                      height: HOUR_HEIGHT,
+                      borderColor: "var(--border)",
+                      background: dayBgColor(d),
+                    }}
                   />
                 ))}
               </Fragment>
@@ -287,6 +327,6 @@ export function WeekView({
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
