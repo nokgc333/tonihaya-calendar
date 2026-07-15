@@ -58,10 +58,12 @@ export function MonthDetail({
   const { openEdit } = useEventEditor();
   // L1の「＋予定」既定日: 今日がこの月なら今日、違えば1日。
   const defaultDate =
-    today && today.year === year && today.month === month ? today : { year, month, day: 1 };
+    today && today.year === year && today.month === month
+      ? today
+      : { year, month, day: 1 };
 
   return (
-    <div>
+    <>
       <nav className="mb-5 flex min-h-10 flex-wrap items-center gap-2">
         <button
           type="button"
@@ -76,7 +78,9 @@ export function MonthDetail({
           <button
             type="button"
             onClick={() =>
-              month === 1 ? onMonthChange(year - 1, 12) : onMonthChange(year, month - 1)
+              month === 1
+                ? onMonthChange(year - 1, 12)
+                : onMonthChange(year, month - 1)
             }
             className="rounded-md border px-2 py-1 text-sm transition-opacity hover:opacity-70"
             style={{ borderColor: "var(--border)", color: "var(--text)" }}
@@ -90,7 +94,9 @@ export function MonthDetail({
           <button
             type="button"
             onClick={() =>
-              month === 12 ? onMonthChange(year + 1, 1) : onMonthChange(year, month + 1)
+              month === 12
+                ? onMonthChange(year + 1, 1)
+                : onMonthChange(year, month + 1)
             }
             className="rounded-md border px-2 py-1 text-sm transition-opacity hover:opacity-70"
             style={{ borderColor: "var(--border)", color: "var(--text)" }}
@@ -102,18 +108,36 @@ export function MonthDetail({
         <div className="ml-auto flex items-center gap-3">
           <AddEventButton date={defaultDate} />
           <LevelSwitcher current="month" onJump={onJump} />
-          <SettingsMenu weekStart={weekStart} onWeekStartChange={onWeekStartChange} />
+          <SettingsMenu
+            weekStart={weekStart}
+            onWeekStartChange={onWeekStartChange}
+          />
         </div>
       </nav>
 
       {/* 収まる幅では [カレンダー | aside] 横並び。収まらない幅では aside をカレンダー下へ。
           header/nav はフル幅・本体はここで1256pxに絞り中央寄せ（L0俯瞰と幅を統一）。 */}
-      <div className={`mx-auto w-full max-w-[1256px] flex flex-col gap-4 ${SIDE_BY_SIDE}`}>
+      <div
+        className={`mx-auto w-full max-w-[1256px] flex flex-col gap-4 ${SIDE_BY_SIDE}`}
+      >
         <div
           className="w-full max-w-[800px] min-[1168px]:w-[800px] min-[1168px]:max-w-none min-[1168px]:shrink-0"
-          style={{ viewTransitionName: jumpPivot ? undefined : `month-${month}` }}
+          style={{
+            viewTransitionName: jumpPivot ? undefined : `month-${month}`,
+          }}
         >
-          <MonthCard month={detail.month} year={year} weekStart={weekStart} size="lg" spacious onDayClick={onDayClick} pivotDay={pivotDay} jumpDay={jumpPivot} events={events} onEventSelect={openEdit} />
+          <MonthCard
+            month={detail.month}
+            year={year}
+            weekStart={weekStart}
+            size="lg"
+            spacious
+            onDayClick={onDayClick}
+            pivotDay={pivotDay}
+            jumpDay={jumpPivot}
+            events={events}
+            onEventSelect={openEdit}
+          />
         </div>
 
         {/* 遊びセクションは ≤712px のときだけカレンダー直下・aside直上に表示する（幅いっぱい・2行中央）。 */}
@@ -127,7 +151,10 @@ export function MonthDetail({
             横並び時はラッパー右端まで広げ、ヘッダーと左右余白を揃える。 */}
         <aside
           className="w-full max-w-[800px] rounded-xl border p-4 min-[1168px]:w-auto min-[1168px]:max-w-none min-[1168px]:flex-1"
-          style={{ borderColor: "var(--border)", background: "var(--surface-2)" }}
+          style={{
+            borderColor: "var(--border)",
+            background: "var(--surface-2)",
+          }}
         >
           <div className="mb-3 flex items-baseline gap-2">
             <span className="text-2xl font-bold">{detail.month.labelJa}</span>
@@ -139,9 +166,16 @@ export function MonthDetail({
             <Stat label="祝日" value={detail.holidayCount} unit="日" />
             <Stat label="総日数" value={detail.dayCount} unit="日" />
             <Stat label="営業日" value={detail.businessDayCount} unit="日" />
-            <Stat label="営業日残" value={detail.businessDaysRemaining} unit="日" />
+            <Stat
+              label="営業日残"
+              value={detail.businessDaysRemaining}
+              unit="日"
+            />
           </div>
-          <h2 className="mb-2 text-xs font-semibold" style={{ color: "var(--text-muted)" }}>
+          <h2
+            className="mb-2 text-xs font-semibold"
+            style={{ color: "var(--text-muted)" }}
+          >
             祝日
           </h2>
           {detail.holidays.length === 0 ? (
@@ -155,10 +189,24 @@ export function MonthDetail({
                   key={`${h.date.month}-${h.date.day}-${h.name}`}
                   className="grid grid-cols-[4.75rem_1fr] items-baseline gap-2 text-sm"
                 >
-                  <span className="tabular-nums" style={{ color: "var(--accent-red)" }}>
+                  <span
+                    className="tabular-nums"
+                    style={{ color: "var(--accent-red)" }}
+                  >
                     {h.date.month}/{h.date.day}
-                    <span className="ml-1 text-[10px]" style={{ color: "var(--text-muted)" }}>
-                      ({WEEKDAY_JA[new Date(Date.UTC(h.date.year, h.date.month - 1, h.date.day)).getUTCDay()]})
+                    <span
+                      className="ml-1 text-[10px]"
+                      style={{ color: "var(--text-muted)" }}
+                    >
+                      (
+                      {
+                        WEEKDAY_JA[
+                          new Date(
+                            Date.UTC(h.date.year, h.date.month - 1, h.date.day),
+                          ).getUTCDay()
+                        ]
+                      }
+                      )
                     </span>
                   </span>
                   <span>{h.name}</span>
@@ -168,7 +216,7 @@ export function MonthDetail({
           )}
         </aside>
       </div>
-    </div>
+    </>
   );
 }
 
@@ -188,7 +236,10 @@ function Stat({
       </span>
       <span className="text-lg font-bold leading-none tabular-nums">
         {value}
-        <span className="ml-0.5 text-[10px] font-normal" style={{ color: "var(--text-muted)" }}>
+        <span
+          className="ml-0.5 text-[10px] font-normal"
+          style={{ color: "var(--text-muted)" }}
+        >
           {unit}
         </span>
       </span>

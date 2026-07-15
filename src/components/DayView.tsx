@@ -15,12 +15,10 @@ import { useEventEditor } from "@/hooks/useEventEditor";
 import { eventsForDay } from "@/domain/event";
 import { eventColor } from "@/components/eventColors";
 
-
 const HOUR_HEIGHT = 48; // 1時間あたりの高さ(px)
 const HOURS = Array.from({ length: 24 }, (_, h) => h);
 const GRID_COLS = "3.5rem 1fr";
 const SCROLL_LEAD_HOURS = 2;
-
 
 export function DayView({
   year,
@@ -49,7 +47,9 @@ export function DayView({
   const bodyRef = useRef<HTMLDivElement>(null);
   const { events } = useEvents();
   const { openEdit } = useEventEditor();
-  const allDayEvents = eventsForDay(events, { year, month, day }).filter((e) => e.allDay);
+  const allDayEvents = eventsForDay(events, { year, month, day }).filter(
+    (e) => e.allDay,
+  );
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent): void => {
@@ -76,13 +76,16 @@ export function DayView({
   };
 
   const nowOffset = d.isToday
-    ? minutesToOffset(new Date().getHours() * 60 + new Date().getMinutes(), HOUR_HEIGHT)
+    ? minutesToOffset(
+        new Date().getHours() * 60 + new Date().getMinutes(),
+        HOUR_HEIGHT,
+      )
     : 0;
 
   return (
     // nav はL2週ビューと同じ全幅・左寄せのまま（L2↔L3でナビバーが連続して見える）。
     // 中央寄せ・狭幅にするのはカレンダー枠(hour-zoom)だけに留める。
-    <div className="flex h-full flex-col">
+    <>
       <nav className="mb-5 flex min-h-10 shrink-0 flex-wrap items-center gap-2">
         <button
           type="button"
@@ -119,7 +122,10 @@ export function DayView({
         <div className="ml-auto flex items-center gap-3">
           <AddEventButton date={{ year, month, day }} />
           <LevelSwitcher current="day" onJump={onJump} />
-          <SettingsMenu weekStart={weekStart} onWeekStartChange={onWeekStartChange} />
+          <SettingsMenu
+            weekStart={weekStart}
+            onWeekStartChange={onWeekStartChange}
+          />
         </div>
       </nav>
 
@@ -127,7 +133,10 @@ export function DayView({
           外枠は多段ジャンプ時のみ jump-zoom を持つ（通常は root クロスフェード）。 */}
       <div
         className="mx-auto flex w-full min-h-0 max-w-2xl flex-1 flex-col rounded-md border"
-        style={{ borderColor: "var(--border)", viewTransitionName: jumpPivot ? "jump-zoom" : undefined }}
+        style={{
+          borderColor: "var(--border)",
+          viewTransitionName: jumpPivot ? "jump-zoom" : undefined,
+        }}
       >
         {/* 大きな日付ヘッダー（sticky）。終日行・時間グリッドと同じGRID_COLSのグリッドにし、
             第1セル(時間軸3.5rem)を空け、日付は第2セル(日カラム)内で中央寄せ。これにより
@@ -142,7 +151,10 @@ export function DayView({
           }}
         >
           <div />
-          <div className="text-center text-lg font-bold tabular-nums" style={{ color: dayTextColor(d) }}>
+          <div
+            className="text-center text-lg font-bold tabular-nums"
+            style={{ color: dayTextColor(d) }}
+          >
             {year}年{month}月{day}日（{WEEKDAY_JA[d.weekday]}）
           </div>
         </div>
@@ -150,9 +162,15 @@ export function DayView({
         {/* 終日行 */}
         <div
           className="grid shrink-0 border-y"
-          style={{ gridTemplateColumns: GRID_COLS, borderColor: "var(--border-strong)" }}
+          style={{
+            gridTemplateColumns: GRID_COLS,
+            borderColor: "var(--border-strong)",
+          }}
         >
-          <div className="flex items-center justify-end p-1 text-[10px]" style={{ color: "var(--text-muted)" }}>
+          <div
+            className="flex items-center justify-end p-1 text-[10px]"
+            style={{ color: "var(--text-muted)" }}
+          >
             終日
           </div>
           <div
@@ -160,7 +178,10 @@ export function DayView({
             style={{ borderColor: "var(--border)", background: dayBgColor(d) }}
           >
             {d.holidayName ? (
-              <div className="text-center" style={{ color: "var(--accent-red)" }}>
+              <div
+                className="text-center"
+                style={{ color: "var(--accent-red)" }}
+              >
                 {d.holidayName}
               </div>
             ) : null}
@@ -173,7 +194,11 @@ export function DayView({
                   data-event-id={e.id}
                   onClick={() => openEdit(e.id)}
                   className="block w-full truncate rounded px-1 text-left leading-tight transition-opacity hover:opacity-90"
-                  style={{ background: c.bg, color: c.fg, border: `1px solid ${c.border}` }}
+                  style={{
+                    background: c.bg,
+                    color: c.fg,
+                    border: `1px solid ${c.border}`,
+                  }}
                   title={e.title}
                 >
                   {e.title}
@@ -185,18 +210,29 @@ export function DayView({
 
         {/* 時間グリッド本体（縦スクロール） */}
         <div ref={bodyRef} className="min-h-0 flex-1 overflow-y-auto">
-          <div className="relative grid" style={{ gridTemplateColumns: GRID_COLS }}>
+          <div
+            className="relative grid"
+            style={{ gridTemplateColumns: GRID_COLS }}
+          >
             {HOURS.map((h) => (
               <div key={h} className="contents">
                 <div
                   className="border-t pr-1 text-right text-[10px]"
-                  style={{ height: HOUR_HEIGHT, borderColor: "var(--border)", color: "var(--text-muted)" }}
+                  style={{
+                    height: HOUR_HEIGHT,
+                    borderColor: "var(--border)",
+                    color: "var(--text-muted)",
+                  }}
                 >
                   {h}:00
                 </div>
                 <div
                   className="border-t border-l"
-                  style={{ height: HOUR_HEIGHT, borderColor: "var(--border)", background: dayBgColor(d) }}
+                  style={{
+                    height: HOUR_HEIGHT,
+                    borderColor: "var(--border)",
+                    background: dayBgColor(d),
+                  }}
                 />
               </div>
             ))}
@@ -223,6 +259,6 @@ export function DayView({
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
