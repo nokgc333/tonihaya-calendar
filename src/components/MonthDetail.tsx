@@ -106,8 +106,9 @@ export function MonthDetail({
         </div>
       </nav>
 
-      {/* 収まる幅では [カレンダー | aside] 横並び。収まらない幅では aside をカレンダー下へ。 */}
-      <div className={`flex flex-col gap-4 ${SIDE_BY_SIDE}`}>
+      {/* 収まる幅では [カレンダー | aside] 横並び。収まらない幅では aside をカレンダー下へ。
+          header/nav はフル幅・本体はここで1256pxに絞り中央寄せ（L0俯瞰と幅を統一）。 */}
+      <div className={`mx-auto w-full max-w-[1256px] flex flex-col gap-4 ${SIDE_BY_SIDE}`}>
         <div
           className="w-full max-w-[800px] min-[1168px]:w-[800px] min-[1168px]:max-w-none min-[1168px]:shrink-0"
           style={{ viewTransitionName: jumpPivot ? undefined : `month-${month}` }}
