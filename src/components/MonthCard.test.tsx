@@ -77,7 +77,8 @@ describe("MonthCard", () => {
         onEventSelect={vi.fn()}
       />,
     );
-    // ドットは非セマンティックな span（h-1 w-1 rounded-full）。L0 では他に rounded-full 要素は無い。
-    expect(container.querySelectorAll("span.rounded-full")).toHaveLength(2);
+    // ドットは非セマンティックな span（h-1 w-1 rounded-full）。祝日の丸マーカーも rounded-full を
+    // 使う（h-[1.5em]）ため、ドットだけを h-1 w-1 で厳密に数える。
+    expect(container.querySelectorAll("span.h-1.w-1.rounded-full")).toHaveLength(2);
   });
 });
