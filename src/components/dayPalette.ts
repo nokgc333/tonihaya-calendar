@@ -9,16 +9,17 @@ interface DayLike {
   readonly isHoliday: boolean;
 }
 
-/** 文字色: 日祝=赤 / 土=青 / 平日=標準。 */
+/** 文字色: 祝日=オレンジ / 日=赤 / 土=青 / 平日=標準。祝日は日曜と差別化する。 */
 export function dayTextColor(d: DayLike): string {
-  if (d.isSunday || d.isHoliday) return "var(--accent-red)";
+  if (d.isHoliday) return "var(--holiday-text)";
+  if (d.isSunday) return "var(--accent-red)";
   if (d.isSaturday) return "var(--accent-sat)";
   return "var(--text)";
 }
 
-/** 背景色: 日祝=赤系 / 土=青系 / 平日=面色。 */
+/** 背景色: 日=赤系 / 土=青系 / 平日=面色。祝日は赤トーンを敷かず、数字の丸マーカーで示す。 */
 export function dayBgColor(d: DayLike): string {
-  if (d.isSunday || d.isHoliday) return "var(--sun-bg)";
+  if (d.isSunday) return "var(--sun-bg)";
   if (d.isSaturday) return "var(--sat-bg)";
   return "var(--surface)";
 }

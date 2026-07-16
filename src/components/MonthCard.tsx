@@ -60,7 +60,7 @@ function DayCellView({
 }) {
   const s = SIZE[size];
   // L0(sm)も数字を上寄せにし、セル下端の点に余白を作る。
-  const vAlign = spacious ? "items-start pt-1.5" : "items-start pt-1";
+  const vAlign = spacious ? "items-start pt-[7px]" : "items-start pt-[5px]";
   const clickable = onDayClick && cellYear !== undefined && cellMonth !== undefined ? "cursor-pointer hover:brightness-95" : "";
   const base = `flex h-full justify-center ${vAlign} ${clickable} ${s.dayText} leading-none tabular-nums`;
   const bgStyle = { background: dayBg(cell) };
@@ -86,13 +86,28 @@ function DayCellView({
 
   // 本日は「塗り円」ではなくセルの濃いめ外枠リングで表現する（番号は太字・日付色）。
   // これで各セルの番号高さが揃い、L1のチップ開始位置ズレ・L0の点との干渉を防ぐ。
+  // 祝日は数字の背後に丸オレンジを敷いて日曜(赤トーン)と差別化する。円は絶対配置で
+  // レイアウト（番号高さ）に影響させない。
   const numberNode = (
-    <span
-      className={cell.isToday ? "font-bold" : ""}
-      style={{ color: dayColor(cell) }}
-      {...(cell.isToday ? { "aria-current": "date" as const } : {})}
-    >
-      {cell.day}
+    <span className="relative inline-flex items-center justify-center">
+      {cell.isHoliday ? (
+        <span
+          aria-hidden
+          className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full"
+          style={{
+            background: "var(--holiday-disc)",
+            width: "calc(1.5em + 1px)",
+            height: "calc(1.5em + 1px)",
+          }}
+        />
+      ) : null}
+      <span
+        className={`relative ${cell.isToday ? "font-bold" : ""}`}
+        style={{ color: dayColor(cell) }}
+        {...(cell.isToday ? { "aria-current": "date" as const } : {})}
+      >
+        {cell.day}
+      </span>
     </span>
   );
   const todayRing = cell.isToday
@@ -110,7 +125,7 @@ function DayCellView({
         style={{ ...bgStyle, ...zoomStyle, ...todayRing }}
         {...handlers}
       >
-        <div className="flex justify-center pt-1.5">{numberNode}</div>
+        <div className="flex justify-center pt-[7px]">{numberNode}</div>
         <div className="mt-1.5 min-h-0 space-y-0.5 px-0.5">
           {dayEvents.slice(0, MAX_CHIPS).map((e) => (
             <EventChip key={e.id} event={e} onSelect={onEventSelect} />
@@ -125,8 +140,15 @@ function DayCellView({
     );
   }
 
-  // L0（sm）で当月セルにイベントがあれば、番号レイアウトは変えず下端に点（最大3）を重ねる。
+  // L0（sm）でイベントがあれば、番号の「直右」に点を「下(↓)→右(→)」で並べる。
+  // 2列×3行=最大6個。2列分の幅を予約し、点数が増えても位置がぶれない。超過は「＋」。
+  // 数字中央から十分右に置き、祝日の丸マーカー（数字背後）と重ならないようにする。
   const showDots = !spacious && cell.inMonth && dayEvents.length > 0;
+  const MAX_DOTS = 6;
+  const dotOverflow = dayEvents.length > MAX_DOTS;
+  const shownDots = dotOverflow
+    ? dayEvents.slice(0, MAX_DOTS - 1)
+    : dayEvents.slice(0, MAX_DOTS);
 
   return (
     <div
@@ -142,14 +164,27 @@ function DayCellView({
     >
       {numberNode}
       {showDots ? (
-        <div className="pointer-events-none absolute bottom-1 flex gap-0.5">
-          {dayEvents.slice(0, 3).map((e) => (
+        <div
+          className="pointer-events-none absolute grid grid-flow-col grid-rows-3 justify-end gap-x-[1px] gap-y-[2px]"
+          // 番号中央の右側。2列分(9px)を予約し、丸マーカーの右端をかわす位置に置く。
+          // 列間(x)は詰め、1列のみのときは justify-end で右寄せにする。
+          style={{ top: "5px", left: "calc(50% + 9px)", width: "9px" }}
+        >
+          {shownDots.map((e) => (
             <span
               key={e.id}
               className="h-1 w-1 rounded-full"
               style={{ background: eventColor(e.colorKey).border }}
             />
           ))}
+          {dotOverflow ? (
+            <span
+              className="relative flex h-1 w-1 items-center justify-center text-[8px] leading-none"
+              style={{ color: "var(--text-muted)", top: "0.5px" }}
+            >
+              ＋
+            </span>
+          ) : null}
         </div>
       ) : null}
     </div>

@@ -199,12 +199,28 @@ export function WeekView({
               <div className="text-[11px]" style={{ color: dayTextColor(d) }}>
                 {WEEKDAY_JA[d.weekday]}
               </div>
-              <div
-                className="text-base font-bold tabular-nums"
-                style={{ color: dayTextColor(d) }}
-                {...(d.isToday ? { "aria-current": "date" as const } : {})}
-              >
-                {d.day}
+              <div className="text-base font-bold tabular-nums">
+                {/* 祝日は数字の背後に丸オレンジ（日曜=赤トーンと差別化）。円は絶対配置で高さ不変。 */}
+                <span className="relative inline-flex items-center justify-center">
+                  {d.isHoliday ? (
+                    <span
+                      aria-hidden
+                      className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full"
+                      style={{
+                        background: "var(--holiday-disc)",
+                        width: "calc(1.5em + 1px)",
+                        height: "calc(1.5em + 1px)",
+                      }}
+                    />
+                  ) : null}
+                  <span
+                    className="relative"
+                    style={{ color: dayTextColor(d) }}
+                    {...(d.isToday ? { "aria-current": "date" as const } : {})}
+                  >
+                    {d.day}
+                  </span>
+                </span>
               </div>
             </button>
           ))}

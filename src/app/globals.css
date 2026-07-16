@@ -18,6 +18,10 @@
   --accent-sat: #3f5573; /* 土曜（控えめ寒色） */
   --today-bg: #171717; /* 本日 */
   --today-fg: #ffffff;
+  /* 祝日マーカー（丸形・薄黄緑）。日曜(赤トーン)と差別化しつつ、日曜に重なっても
+     赤と補色寄りで視認性を保つ。数字は読みやすい濃い緑。color-mixで light/dark 自動追従。 */
+  --holiday-disc: color-mix(in srgb, #a3e635 45%, var(--surface));
+  --holiday-text: color-mix(in srgb, #3f6212 88%, var(--text));
 
   /* イベント8色（やや濃いめ）。bg/border は --surface、fg は --text との color-mix で
      light/dark を自動追従する（既存の --sat-bg/--sun-bg と同じ方式）。 */
