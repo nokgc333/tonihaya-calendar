@@ -54,8 +54,14 @@ function baseHolidays(year: number): Holiday[] {
 const epochOf = (h: Holiday): number => toEpochDay(h.date.year, h.date.month, h.date.day);
 const holidayAt = (epoch: number, name: string): Holiday => ({ name, date: fromEpochDay(epoch) });
 
-/** 指定年の全祝日（振替・国民の休日を含む・日付昇順） */
-function computeYearHolidays(year: number): Holiday[] {
+// 年ごとの祝日は決定的なので一度計算したらキャッシュする。buildYearView がセル毎に
+// getHoliday を呼ぶ（1年で約500回）ため、キャッシュ無しだと同じ年を何百回も再構築していた。
+const yearHolidayCache = new Map<number, readonly Holiday[]>();
+
+/** 指定年の全祝日（振替・国民の休日を含む・日付昇順）。年キャッシュ付き。 */
+function computeYearHolidays(year: number): readonly Holiday[] {
+  const cached = yearHolidayCache.get(year);
+  if (cached !== undefined) return cached;
   const base = baseHolidays(year);
   const baseEpochs = new Set(base.map(epochOf));
   const extra: Holiday[] = [];
@@ -85,9 +91,11 @@ function computeYearHolidays(year: number): Holiday[] {
     claimed.add(next);
   }
 
-  return [...base, ...extra]
+  const result: readonly Holiday[] = [...base, ...extra]
     .filter((h) => h.date.year === year)
     .sort((a, b) => epochOf(a) - epochOf(b));
+  yearHolidayCache.set(year, result);
+  return result;
 }
 
 /** 指定日の祝日を返す（なければ null） */
@@ -104,9 +112,9 @@ export function isHoliday(year: number, month: number, day: number): boolean {
   return getHoliday(year, month, day) !== null;
 }
 
-/** 指定年の祝日一覧（振替含む・日付昇順） */
+/** 指定年の祝日一覧（振替含む・日付昇順）。キャッシュを壊さないようコピーを返す。 */
 export function getHolidaysInYear(year: number): Holiday[] {
-  return computeYearHolidays(year);
+  return [...computeYearHolidays(year)];
 }
 
 /** 指定年月の祝日一覧（振替含む・日付昇順） */
