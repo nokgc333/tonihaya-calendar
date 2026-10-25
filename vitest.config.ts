@@ -4,9 +4,10 @@ import { fileURLToPath } from "node:url";
 export default defineConfig({
   // JSX は自動ランタイム（react/jsx-runtime）で変換する。これで各 .tsx で React の
   // 明示 import が不要になる（domain の .ts テストには影響しない）。
-  esbuild: { jsx: "automatic" },
+  oxc: { jsx: { runtime: "automatic" } },
   test: {
     globals: true,
+    unstubGlobals: true,
     // 既定は node（domain 用・高速）。UI 層の .test.tsx は各ファイル先頭の
     // `// @vitest-environment happy-dom` ドックブロックで DOM 環境に切替える。
     environment: "node",

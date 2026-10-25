@@ -104,7 +104,7 @@ describe("EventModal", () => {
   it("編集時に削除すると確認後 onDelete が呼ばれる", async () => {
     const onDelete = vi.fn();
     const user = userEvent.setup();
-    vi.spyOn(window, "confirm").mockReturnValue(true);
+    vi.stubGlobal("confirm", vi.fn(() => true));
     render(
       <EventModal
         initial={existing()}
