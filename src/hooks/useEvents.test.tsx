@@ -7,7 +7,6 @@ import { EventProvider, useEvents } from "@/hooks/useEvents";
 import type { EventRepository } from "@/data/eventRepository";
 import type { CalendarEvent, EventDraft } from "@/domain/event";
 
-// 注入用の in-memory リポジトリ（localStorage に依存しない＝決定論的）。
 class FakeRepo implements EventRepository {
   store: CalendarEvent[];
   constructor(seed: CalendarEvent[] = []) {
@@ -27,7 +26,6 @@ class FakeRepo implements EventRepository {
   }
 }
 
-// add が必ず失敗するリポジトリ（error path 用）。
 class ThrowingAddRepo extends FakeRepo {
   async add(): Promise<void> {
     throw new Error("save failed");
@@ -50,7 +48,6 @@ const seeded = (title: string): CalendarEvent => ({
   updatedAt: 0,
 });
 
-// useEvents を読み、操作ボタンと状態を露出する検証用ハーネス。
 function Harness() {
   const { events, loading, addEvent, updateEvent, removeEvent } = useEvents();
   const [result, setResult] = useState<string>("");
@@ -60,8 +57,8 @@ function Harness() {
       <span data-testid="count">{events.length}</span>
       <span data-testid="titles">{events.map((e) => e.title).join(",")}</span>
       <span data-testid="result">{result}</span>
-      <button onClick={async () => setResult(String(await addEvent(draft("新規"))))}>add</button>
-      <button onClick={() => events[0] && updateEvent({ ...events[0], title: "更新後" })}>update</button>
+      <button onClick={async () => setResult(String(await addEvent(draft("New event"))))}>add</button>
+      <button onClick={() => events[0] && updateEvent({ ...events[0], title: "Updated" })}>update</button>
       <button onClick={() => events[0] && removeEvent(events[0].id)}>remove</button>
     </div>
   );
@@ -75,13 +72,13 @@ const renderWith = (repo: EventRepository) =>
   );
 
 describe("useEvents", () => {
-  it("初期化時にリポジトリの一覧を読み込み loading を解除する", async () => {
+  it("loads the repository list on init and clears loading", async () => {
     renderWith(new FakeRepo([seeded("A")]));
     await waitFor(() => expect(screen.getByTestId("loading")).toHaveTextContent("false"));
     expect(screen.getByTestId("count")).toHaveTextContent("1");
   });
 
-  it("addEvent で楽観更新しリポジトリにも保存され、true を返す", async () => {
+  it("updates optimistically with addEvent, saves to the repository and returns true", async () => {
     const repo = new FakeRepo();
     const user = userEvent.setup();
     renderWith(repo);
@@ -93,16 +90,16 @@ describe("useEvents", () => {
     expect(screen.getByTestId("result")).toHaveTextContent("true");
   });
 
-  it("updateEvent で該当予定が置換される", async () => {
+  it("updateEvent replaces the matching event", async () => {
     const repo = new FakeRepo([seeded("A")]);
     const user = userEvent.setup();
     renderWith(repo);
     await waitFor(() => expect(screen.getByTestId("count")).toHaveTextContent("1"));
     await user.click(screen.getByRole("button", { name: "update" }));
-    await waitFor(() => expect(screen.getByTestId("titles")).toHaveTextContent("更新後"));
+    await waitFor(() => expect(screen.getByTestId("titles")).toHaveTextContent("Updated"));
   });
 
-  it("removeEvent で該当予定が除外される", async () => {
+  it("removeEvent removes the matching event", async () => {
     const repo = new FakeRepo([seeded("A")]);
     const user = userEvent.setup();
     renderWith(repo);
@@ -111,13 +108,12 @@ describe("useEvents", () => {
     await waitFor(() => expect(screen.getByTestId("count")).toHaveTextContent("0"));
   });
 
-  it("保存が失敗したときは楽観更新せず状態を変えない", async () => {
+  it("does not update optimistically and leaves state unchanged when saving fails", async () => {
     const repo = new ThrowingAddRepo();
     const user = userEvent.setup();
     renderWith(repo);
     await waitFor(() => expect(screen.getByTestId("loading")).toHaveTextContent("false"));
     await user.click(screen.getByRole("button", { name: "add" }));
-    // add は失敗し握られる。保存も表示も増えず、false を返す。
     await waitFor(() => expect(screen.getByTestId("result")).toHaveTextContent("false"));
     expect(repo.store).toHaveLength(0);
     expect(screen.getByTestId("count")).toHaveTextContent("0");

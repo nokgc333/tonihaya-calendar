@@ -15,7 +15,7 @@ export type EventPriority = "low" | "normal" | "high";
 
 export interface EventPoint {
   readonly date: CivilDate;
-  readonly time?: TimeOfDay; // 時間イベント時のみ
+  readonly time?: TimeOfDay;
 }
 
 export interface CalendarEvent {

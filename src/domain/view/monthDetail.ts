@@ -6,7 +6,6 @@ import { buildMonthView, type MonthView, type YearViewSettings } from "./yearVie
 const SUNDAY = 0;
 const SATURDAY = 6;
 
-/** 平日（土日でない）かつ祝日でないか */
 function isBusinessDay(year: number, month: number, day: number): boolean {
   const weekday = weekdayOf(year, month, day);
   const isWeekend = weekday === SUNDAY || weekday === SATURDAY;
@@ -19,13 +18,10 @@ export interface MonthDetail {
   readonly holidays: readonly Holiday[];
   readonly dayCount: number;
   readonly holidayCount: number;
-  /** 営業日数（平日 − 平日に当たる祝日） */
   readonly businessDayCount: number;
-  /** 営業日残（本日以降の残り営業日。本日含む。本日不明時は全営業日） */
   readonly businessDaysRemaining: number;
 }
 
-/** その月の営業日数（土日・祝日を除く平日）を数える */
 function countBusinessDays(year: number, month: number, dayCount: number): number {
   let count = 0;
   for (let day = 1; day <= dayCount; day++) {
@@ -36,7 +32,6 @@ function countBusinessDays(year: number, month: number, dayCount: number): numbe
   return count;
 }
 
-/** 本日（含む）以降の残り営業日を数える。本日不明時は全営業日。 */
 function countBusinessDaysRemaining(
   year: number,
   month: number,

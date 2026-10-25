@@ -29,7 +29,6 @@ export default function RootLayout({
     <html lang="ja">
       <body>
         {children}
-        {/* 本番(Vercel)で実ユーザーのWeb Vitals(RUM)を収集。要ダッシュボードで有効化。 */}
         <SpeedInsights />
       </body>
     </html>

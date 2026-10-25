@@ -2,7 +2,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { LocalStorageEventRepository } from "./localStorageEventRepository";
 import type { CalendarEvent } from "@/domain/event";
 
-// 最小のインメモリ storage
 class MemStorage {
   private m = new Map<string, string>();
   getItem(k: string): string | null {
@@ -16,7 +15,6 @@ class MemStorage {
   }
 }
 
-// setItem が常に失敗する storage（容量超過・プライベートモードを模す）
 class ThrowingStorage extends MemStorage {
   override setItem(): void {
     throw new DOMException("QuotaExceededError");
@@ -40,24 +38,24 @@ describe("LocalStorageEventRepository", () => {
   beforeEach(() => {
     repo = new LocalStorageEventRepository(new MemStorage() as unknown as Storage);
   });
-  it("add→list で往復する", async () => {
+  it("round-trips through add and list", async () => {
     await repo.add(ev("a"));
     expect((await repo.list()).map((e) => e.id)).toEqual(["a"]);
   });
-  it("update で置換、remove で削除", async () => {
+  it("replaces with update and deletes with remove", async () => {
     await repo.add(ev("a"));
     await repo.update({ ...ev("a"), title: "renamed" });
     expect((await repo.list())[0].title).toBe("renamed");
     await repo.remove("a");
     expect(await repo.list()).toEqual([]);
   });
-  it("壊れたJSONは空配列にフォールバック", async () => {
+  it("falls back to an empty array for broken JSON", async () => {
     const s = new MemStorage();
     s.setItem("tonihaya.events", "{bad");
     const r = new LocalStorageEventRepository(s as unknown as Storage);
     expect(await r.list()).toEqual([]);
   });
-  it("保存失敗時は開発ログを出しつつ例外を伝播する（サイレントなデータ欠損を防ぐ）", async () => {
+  it("logs for development and propagates the exception when saving fails (prevents silent data loss)", async () => {
     const spy = vi.spyOn(console, "error").mockImplementation(() => {});
     const r = new LocalStorageEventRepository(new ThrowingStorage() as unknown as Storage);
     await expect(r.add(ev("a"))).rejects.toThrow();

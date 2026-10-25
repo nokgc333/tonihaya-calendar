@@ -15,7 +15,7 @@ import { useEventEditor } from "@/hooks/useEventEditor";
 import { eventsForDay } from "@/domain/event";
 import { eventColor } from "@/components/eventColors";
 
-const HOUR_HEIGHT = 48; // 1時間あたりの高さ(px)
+const HOUR_HEIGHT = 48;
 const HOURS = Array.from({ length: 24 }, (_, h) => h);
 const GRID_COLS = "3.5rem 1fr";
 const SCROLL_LEAD_HOURS = 2;
@@ -59,7 +59,6 @@ export function DayView({
     return () => window.removeEventListener("keydown", onKey);
   }, [onBack]);
 
-  // 今日を開いているときのみ現在時刻付近へ自動スクロール
   useEffect(() => {
     if (!bodyRef.current || !d.isToday) return;
     const now = new Date();
@@ -83,8 +82,6 @@ export function DayView({
     : 0;
 
   return (
-    // nav はL2週ビューと同じ全幅・左寄せのまま（L2↔L3でナビバーが連続して見える）。
-    // 中央寄せ・狭幅にするのはカレンダー枠(hour-zoom)だけに留める。
     <>
       <nav className="mb-5 flex min-h-10 shrink-0 flex-wrap items-center gap-2">
         <button
@@ -129,8 +126,6 @@ export function DayView({
         </div>
       </nav>
 
-      {/* 時間グリッドの外枠。中央寄せ・狭幅はここだけ。hour-zoom は日付ヘッダーバーが担い、
-          外枠は多段ジャンプ時のみ jump-zoom を持つ（通常は root クロスフェード）。 */}
       <div
         className="mx-auto flex w-full min-h-0 max-w-2xl flex-1 flex-col rounded-md border"
         style={{
@@ -138,10 +133,6 @@ export function DayView({
           viewTransitionName: jumpPivot ? "jump-zoom" : undefined,
         }}
       >
-        {/* 大きな日付ヘッダー（sticky）。終日行・時間グリッドと同じGRID_COLSのグリッドにし、
-            第1セル(時間軸3.5rem)を空け、日付は第2セル(日カラム)内で中央寄せ。これにより
-            終日行/時間列と中央軸が揃う。祝日名は終日行に出るのでここには表示しない。
-            高さは 54.5px（L2ヘッダー行と揃える）。 */}
         <div
           className="sticky top-0 z-10 grid min-h-[54.5px] shrink-0 items-center py-1.5"
           style={{
@@ -159,7 +150,6 @@ export function DayView({
           </div>
         </div>
 
-        {/* 終日行 */}
         <div
           className="grid shrink-0 border-y"
           style={{
@@ -208,7 +198,6 @@ export function DayView({
           </div>
         </div>
 
-        {/* 時間グリッド本体（縦スクロール） */}
         <div ref={bodyRef} className="min-h-0 flex-1 overflow-y-auto">
           <div
             className="relative grid"
@@ -236,7 +225,6 @@ export function DayView({
                 />
               </div>
             ))}
-            {/* 時間イベント層（今ラインと同じ relative 親の中に絶対配置） */}
             <DayTimedEvents
               date={{ year, month, day }}
               hourHeight={HOUR_HEIGHT}
@@ -244,7 +232,6 @@ export function DayView({
               dayWidth="(100% - 3.5rem)"
               onSelect={openEdit}
             />
-            {/* 今ライン（今日のみ） */}
             {d.isToday && (
               <div
                 className="pointer-events-none absolute z-[6]"

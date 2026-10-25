@@ -1,9 +1,5 @@
 import type { Countdown } from "@/domain/countdown";
 
-/**
- * 本日基準の遊びセクション（土曜/月末/残り営業日/年末まで）。
- * 既定は1行のチップ群。block=true では幅いっぱいのグリッドで各項目を2行中央表示する。
- */
 export function CountdownChips({
   countdowns,
   block = false,
@@ -37,7 +33,6 @@ export function CountdownChips({
   );
 }
 
-/** 1行チップ（ヘッダー用）: ラベル＋数値を横に並べる */
 function CountdownChip({ label, value }: { readonly label: string; readonly value: number }) {
   return (
     <div
@@ -55,7 +50,6 @@ function CountdownChip({ label, value }: { readonly label: string; readonly valu
   );
 }
 
-/** 2行中央チップ（狭幅の単月ビュー用）: ラベルを上、数値を下に中央表示する */
 function BlockChip({ label, value }: { readonly label: string; readonly value: number }) {
   return (
     <div
