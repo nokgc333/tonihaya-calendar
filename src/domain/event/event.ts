@@ -43,8 +43,6 @@ export interface LaidOutSegment extends DaySegment {
   readonly columnCount: number;
 }
 
-// 重なる時間イベントを、重なりクラスタ単位で列（レーン）に割り当てる。
-// columnIndex/columnCount から幅=100%/columnCount・左=columnIndex分 を算出して横並び表示する。
 export function layoutDayColumns(segments: readonly DaySegment[]): readonly LaidOutSegment[] {
   const sorted = [...segments].sort((a, b) => a.startMin - b.startMin || a.endMin - b.endMin);
   const out: LaidOutSegment[] = [];
@@ -59,7 +57,6 @@ export function layoutDayColumns(segments: readonly DaySegment[]): readonly Laid
   };
 
   for (const s of sorted) {
-    // 現クラスタのどれとも重ならない（開始が全終了以降）なら、クラスタを確定して次へ。
     if (cluster.length > 0 && s.startMin >= clusterMaxEnd) flush();
     const occupied = new Set(
       cluster.filter((c) => c.endMin > s.startMin).map((c) => c.columnIndex),
@@ -102,14 +99,12 @@ const isEventPoint = (v: unknown, requireTime: boolean): v is EventPoint => {
   return requireTime ? isTimeOfDay(v.time) : true;
 };
 
-// localStorage から読み込んだ未知の値が CalendarEvent として安全に扱えるか検証する。
-// 破損データ1件で eventsForDay/clipEventToDay がクラッシュするのを防ぐための防御ガード。
 export function isStoredCalendarEvent(v: unknown): v is CalendarEvent {
   if (!isObject(v)) return false;
   if (typeof v.id !== "string" || v.id.length === 0) return false;
   if (typeof v.title !== "string") return false;
   if (typeof v.allDay !== "boolean") return false;
-  const requireTime = !v.allDay; // 時間イベントは start/end.time が無いと clip でクラッシュする
+  const requireTime = !v.allDay;
   if (!isEventPoint(v.start, requireTime)) return false;
   if (!isEventPoint(v.end, requireTime)) return false;
   if (!COLOR_KEYS.includes(v.colorKey as EventColorKey)) return false;
@@ -130,8 +125,6 @@ export function isSafeUrl(url: string): boolean {
   }
 }
 
-// 入力の上限長。UI（maxLength）と検証の両方で使い、巨大文字列による localStorage 肥大・
-// 描画コスト増を防ぐ（多層防御）。
 export const TITLE_MAX_LENGTH = 200;
 export const NOTE_MAX_LENGTH = 2000;
 export const URL_MAX_LENGTH = 2048;
@@ -160,7 +153,7 @@ const PRIORITY_RANK: Record<EventPriority, number> = { high: 0, normal: 1, low: 
 
 export function sortForDay(events: readonly CalendarEvent[]): readonly CalendarEvent[] {
   return [...events].sort((a, b) => {
-    if (a.allDay !== b.allDay) return a.allDay ? -1 : 1; // 終日を先に
+    if (a.allDay !== b.allDay) return a.allDay ? -1 : 1;
     if (!a.allDay && !b.allDay) {
       const am = minutesOfDay(a.start.time!);
       const bm = minutesOfDay(b.start.time!);

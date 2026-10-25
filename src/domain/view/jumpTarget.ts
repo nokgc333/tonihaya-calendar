@@ -3,11 +3,6 @@ import type { ZoomState } from "./zoom";
 
 export type JumpLevel = "overview" | "month" | "week" | "day";
 
-/**
- * ジャンプ先のズーム状態を決める。今ある文脈(year/month/day)は保持し、
- * 足りない細かいフィールドは today で補完する。day は対象月の日数でクランプ。
- * today=null のときは month=1 / day=1 にフォールバック。
- */
 export function resolveJumpTarget(
   target: JumpLevel,
   zoom: ZoomState,

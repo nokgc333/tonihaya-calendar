@@ -1,6 +1,5 @@
 import { fromEpochDay, toEpochDay, weekdayOf, type CivilDate } from "../shared/date";
 
-/** 祝日 */
 export interface Holiday {
   readonly name: string;
   readonly date: CivilDate;
@@ -9,24 +8,20 @@ export interface Holiday {
 const MONDAY = 1;
 const SUNDAY = 0;
 
-/** その月の第n・指定曜日の「日」を返す（weekday: 0=日 … 6=土） */
 function nthWeekday(year: number, month: number, weekday: number, n: number): number {
   const firstWeekday = weekdayOf(year, month, 1);
   const offset = (weekday - firstWeekday + 7) % 7;
   return 1 + offset + (n - 1) * 7;
 }
 
-/** 春分の日（1980年基準の近似式・実用範囲は概ね1980–2099） */
 function shunbunDay(year: number): number {
   return Math.floor(20.8431 + 0.242194 * (year - 1980) - Math.floor((year - 1980) / 4));
 }
 
-/** 秋分の日（同上） */
 function shubunDay(year: number): number {
   return Math.floor(23.2488 + 0.242194 * (year - 1980) - Math.floor((year - 1980) / 4));
 }
 
-/** 振替・国民の休日を除いた基本の国民の祝日 */
 function baseHolidays(year: number): Holiday[] {
   const list: Holiday[] = [];
   const add = (month: number, day: number, name: string): void => {
@@ -54,11 +49,8 @@ function baseHolidays(year: number): Holiday[] {
 const epochOf = (h: Holiday): number => toEpochDay(h.date.year, h.date.month, h.date.day);
 const holidayAt = (epoch: number, name: string): Holiday => ({ name, date: fromEpochDay(epoch) });
 
-// 年ごとの祝日は決定的なので一度計算したらキャッシュする。buildYearView がセル毎に
-// getHoliday を呼ぶ（1年で約500回）ため、キャッシュ無しだと同じ年を何百回も再構築していた。
 const yearHolidayCache = new Map<number, readonly Holiday[]>();
 
-/** 指定年の全祝日（振替・国民の休日を含む・日付昇順）。年キャッシュ付き。 */
 function computeYearHolidays(year: number): readonly Holiday[] {
   const cached = yearHolidayCache.get(year);
   if (cached !== undefined) return cached;
@@ -67,7 +59,6 @@ function computeYearHolidays(year: number): readonly Holiday[] {
   const extra: Holiday[] = [];
   const claimed = new Set(baseEpochs);
 
-  // 国民の休日: 祝日に挟まれた平日（日曜以外）
   for (const holiday of base) {
     const candidate = epochOf(holiday) + 1;
     const { year: y, month: m, day: d } = fromEpochDay(candidate);
@@ -81,7 +72,6 @@ function computeYearHolidays(year: number): readonly Holiday[] {
     }
   }
 
-  // 振替休日: 祝日が日曜 → その後の最初の非祝日
   for (const holiday of base) {
     const { year: y, month: m, day: d } = holiday.date;
     if (weekdayOf(y, m, d) !== SUNDAY) continue;
@@ -98,7 +88,6 @@ function computeYearHolidays(year: number): readonly Holiday[] {
   return result;
 }
 
-/** 指定日の祝日を返す（なければ null） */
 export function getHoliday(year: number, month: number, day: number): Holiday | null {
   return (
     computeYearHolidays(year).find(
@@ -107,17 +96,14 @@ export function getHoliday(year: number, month: number, day: number): Holiday | 
   );
 }
 
-/** 指定日が祝日か */
 export function isHoliday(year: number, month: number, day: number): boolean {
   return getHoliday(year, month, day) !== null;
 }
 
-/** 指定年の祝日一覧（振替含む・日付昇順）。キャッシュを壊さないようコピーを返す。 */
 export function getHolidaysInYear(year: number): Holiday[] {
   return [...computeYearHolidays(year)];
 }
 
-/** 指定年月の祝日一覧（振替含む・日付昇順） */
 export function getHolidaysInMonth(year: number, month: number): Holiday[] {
   return getHolidaysInYear(year).filter((h) => h.date.month === month);
 }

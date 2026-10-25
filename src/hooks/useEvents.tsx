@@ -8,8 +8,6 @@ import type { EventRepository } from "@/data/eventRepository";
 interface EventContextValue {
   readonly events: readonly CalendarEvent[];
   readonly loading: boolean;
-  // 保存成功で true / 保存失敗（容量超過・プライベートモード等）で false を返す。
-  // 呼び出し側（モーダル）が false のときにモーダルを閉じずエラーを表示するために使う。
   addEvent(draft: EventDraft): Promise<boolean>;
   updateEvent(event: CalendarEvent): Promise<boolean>;
   removeEvent(id: string): Promise<boolean>;
@@ -26,7 +24,6 @@ export function EventProvider({
 }) {
   const [events, setEvents] = useState<readonly CalendarEvent[]>([]);
   const [loading, setLoading] = useState(true);
-  // repository はクライアントでのみ生成（静的化/SSR では window 不在）。
   const repoRef = useRef<EventRepository | null>(repository ?? null);
   const repo = (): EventRepository => {
     if (!repoRef.current) repoRef.current = new LocalStorageEventRepository();
@@ -55,8 +52,6 @@ export function EventProvider({
           createdAt: now,
           updatedAt: now,
         };
-        // 永続化に成功したときだけ楽観更新する。失敗時は write 内で開発ログ済みなので、
-        // ここでは UI へ反映せず未捕捉の Promise 拒否を防ぐ（保存と表示の整合を保つ）。
         try {
           await repo().add(event);
         } catch {
@@ -93,6 +88,6 @@ export function EventProvider({
 
 export function useEvents(): EventContextValue {
   const ctx = useContext(EventContext);
-  if (!ctx) throw new Error("useEvents は EventProvider の内側で使用してください");
+  if (!ctx) throw new Error("useEvents must be used inside EventProvider");
   return ctx;
 }

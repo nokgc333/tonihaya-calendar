@@ -24,7 +24,6 @@ export interface WeekViewModel {
   readonly days: readonly WeekDay[];
 }
 
-/** 基準日を含む週（週開始曜日から7日）を組み立てる。 */
 export function buildWeekView(
   year: number,
   month: number,
@@ -61,7 +60,6 @@ export function buildWeekView(
   return { days };
 }
 
-/** 0時からの経過分を、1時間=hourHeightPx としたときの縦オフセット(px)へ変換。 */
 export function minutesToOffset(minutes: number, hourHeightPx: number): number {
   return (minutes / MINUTES_PER_HOUR) * hourHeightPx;
 }

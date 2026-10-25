@@ -10,7 +10,6 @@ export interface DayViewModel {
   readonly day: WeekDay;
 }
 
-/** 単一日の表示モデルを組み立てる（祝日・土日・today を判定）。 */
 export function buildDayView(
   year: number,
   month: number,

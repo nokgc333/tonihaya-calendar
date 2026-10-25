@@ -35,10 +35,6 @@ const PRIORITIES: readonly { value: EventPriority; label: string }[] = [
 const SAVE_ERROR = "保存できませんでした。ブラウザの空き容量やプライベートモードをご確認ください。";
 const DELETE_ERROR = "削除できませんでした。ブラウザの空き容量やプライベートモードをご確認ください。";
 
-/**
- * 予定の作成/編集モーダル。initial があれば編集（削除可）、無ければ新規。
- * onSubmit は EventDraft を渡す（新規/更新の別は呼び出し側が判断）。
- */
 export function EventModal({
   initial,
   defaultDate,
@@ -48,7 +44,6 @@ export function EventModal({
 }: {
   readonly initial: CalendarEvent | null;
   readonly defaultDate: CivilDate;
-  // 保存/削除は成否を返し得る（false=失敗）。void（従来）は成功扱い。
   readonly onSubmit: (draft: EventDraft) => void | Promise<boolean>;
   readonly onDelete?: () => void | Promise<boolean>;
   readonly onClose: () => void;
@@ -96,8 +91,6 @@ export function EventModal({
       return;
     }
     setErrors([]);
-    // 保存に失敗（false）したらモーダルは閉じず（閉じるのは呼び出し側の成功時のみ）、
-    // 入力を残したままエラーを表示して再試行できるようにする。
     const ok = await onSubmit(draft);
     if (ok === false) setErrors([SAVE_ERROR]);
   };
@@ -218,7 +211,6 @@ export function EventModal({
           <div>
             <label className={labelCls} htmlFor="ev-url">URL</label>
             <input id="ev-url" type="url" value={url} onChange={(e) => setUrl(e.target.value)} maxLength={URL_MAX_LENGTH} className={inputCls} style={inputStyle} placeholder="https://" />
-            {/* 入力が有効な http/https のときだけ開くリンクを出す（描画時も再検証＝多層防御）。 */}
             {isSafeUrl(url.trim()) && (
               <a
                 href={url.trim()}

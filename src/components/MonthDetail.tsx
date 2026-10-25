@@ -14,8 +14,6 @@ import { useEvents } from "@/hooks/useEvents";
 import { useEventEditor } from "@/hooks/useEventEditor";
 import { AddEventButton } from "@/components/AddEventButton";
 
-// 幅はラッパー(CalendarApp)側で制御する。ここでは横並び(≥1168px)でカレンダー800/aside320に固定し、
-// それ未満では縦積み（各要素はラッパー幅いっぱい）にする。
 const SIDE_BY_SIDE = "min-[1168px]:flex-row min-[1168px]:items-start";
 
 export function MonthDetail({
@@ -56,7 +54,6 @@ export function MonthDetail({
   const detail = buildMonthDetail(year, month, today, { weekStart });
   const { events } = useEvents();
   const { openEdit } = useEventEditor();
-  // L1の「＋予定」既定日: 今日がこの月なら今日、違えば1日。
   const defaultDate =
     today && today.year === year && today.month === month
       ? today
@@ -115,8 +112,6 @@ export function MonthDetail({
         </div>
       </nav>
 
-      {/* 収まる幅では [カレンダー | aside] 横並び。収まらない幅では aside をカレンダー下へ。
-          header/nav はフル幅・本体はここで1256pxに絞り中央寄せ（L0俯瞰と幅を統一）。 */}
       <div
         className={`mx-auto w-full max-w-[1256px] flex flex-col gap-4 ${SIDE_BY_SIDE}`}
       >
@@ -140,15 +135,12 @@ export function MonthDetail({
           />
         </div>
 
-        {/* 遊びセクションは ≤712px のときだけカレンダー直下・aside直上に表示する（幅いっぱい・2行中央）。 */}
         {countdowns && (
           <div className="w-full max-w-[800px] min-[713px]:hidden">
             <CountdownChips countdowns={countdowns} block />
           </div>
         )}
 
-        {/* aside はカードUIを維持しつつ背景を少し明るく(--surface-2)してカレンダーと区別する。
-            横並び時はラッパー右端まで広げ、ヘッダーと左右余白を揃える。 */}
         <aside
           className="w-full max-w-[800px] rounded-xl border p-4 min-[1168px]:w-auto min-[1168px]:max-w-none min-[1168px]:flex-1"
           style={{

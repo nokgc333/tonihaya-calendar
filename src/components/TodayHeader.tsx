@@ -28,7 +28,6 @@ export function TodayHeader({
             : ""}
         </h1>
       </div>
-      {/* 遊びセクションは狭幅(≤712px)では単月ビュー内に移すため、ここでは非表示にする */}
       {countdowns && (
         <div className="max-[712px]:hidden" suppressHydrationWarning>
           <CountdownChips countdowns={countdowns} />

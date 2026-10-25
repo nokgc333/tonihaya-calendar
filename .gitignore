@@ -30,6 +30,6 @@ bin/
 .superpowers/
 .vercel
 
-# Lighthouse レポート出力
+# Lighthouse report output
 .lighthouse/
 .lighthouseci/

@@ -3,7 +3,6 @@ import { eventColor } from "@/components/eventColors";
 
 const pad = (n: number): string => String(n).padStart(2, "0");
 
-/** L1月ビュー等の小さな1件チップ。時間イベントは時刻付き、終日は名称のみ。 */
 export function EventChip({
   event,
   onSelect,

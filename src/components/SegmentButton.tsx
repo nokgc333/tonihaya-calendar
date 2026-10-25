@@ -2,11 +2,6 @@
 
 import type { ComponentPropsWithoutRef } from "react";
 
-/**
- * セグメント型コントロールの共通ボタン装飾。LevelSwitcher と LayoutButton が共有する。
- * active で font-bold＋border-strong＋surface背景に。disabled/aria/追加classは呼び出し側が
- * ネイティブ button props（...rest）と className で渡す（例: aria-current, aria-pressed, cursor-default）。
- */
 export function SegmentButton({
   label,
   active,

@@ -13,7 +13,6 @@ import { AddEventButton } from "@/components/AddEventButton";
 import { HolidayList } from "@/components/HolidayList";
 import { useEffect, useState } from "react";
 
-/** 俯瞰カレンダーの表示レイアウト（3行×4列 / 4行×3列） */
 export type OverviewLayout = "3x4" | "4x3";
 
 
@@ -49,7 +48,6 @@ export function OverviewBody({
 
   const commitYearDraft = (): void => onYearChange(resolveYearInput(yearDraft, year));
 
-  // 4行×3列のときは ≥1288px でのみカードを拡大し、3列で幅いっぱいを埋める（縦横比保持）。
   const zoomClass = layout === "4x3" ? "min-[1288px]:[zoom:1.34]" : "";
 
   return (
@@ -74,9 +72,6 @@ export function OverviewBody({
         <NavButton onClick={() => onYearChange(today?.year ?? new Date().getFullYear())} label="今年" disabled={isCurrentYear} className="ml-1" suppressHydrationWarning />
         <span className="ml-2 text-[11px]" style={{ color: "var(--text-faint)" }}>{MIN_YEAR}–{MAX_YEAR}</span>
 
-        {/* 右クラスタ: レイアウト切替（≥1288pxのみ）＋レベル切替（常時・右端）。
-            レベル切替はL1/L2/L3でも右端にあるため、L0でも右端に置いて位置を統一する
-            （レイアウト切替をその左に）。レベル切替のボックスは LevelSwitcher 自体が持つ。 */}
         <div className="ml-auto flex items-center gap-3">
           <div
             className="hidden items-center gap-1 rounded-lg border px-2 py-1 min-[1288px]:flex"
@@ -92,12 +87,8 @@ export function OverviewBody({
         </div>
       </nav>
 
-      {/* ≥1600px では [グリッド固定1256px] + [祝日一覧] の横並び。
-          未満ではグリッドが幅いっぱいを使い（従来どおり列数を可変で折り返し）、祝日一覧は非表示。 */}
       <div className="flex gap-6">
         <div className="w-full min-[1600px]:w-[1256px] min-[1600px]:shrink-0">
-          {/* カードは305×242pxで固定。幅に応じて折り返し、余りは中央寄せの余白にする。
-              4×3選択かつ≥1288pxではzoomで拡大し3列に。 */}
           <div className="flex flex-wrap justify-center gap-3">
             {view.months.map((m) => (
               <div key={m.month} className={`w-[305px] ${zoomClass}`}>
@@ -114,7 +105,6 @@ export function OverviewBody({
             ))}
           </div>
         </div>
-        {/* ≥1600px: 右サイドに祝日一覧（縦1列）。<1600px は非表示。 */}
         <aside className="hidden min-w-[280px] flex-1 min-[1600px]:block">
           <HolidayList year={year} today={today} onMonthClick={onMonthClick} />
         </aside>

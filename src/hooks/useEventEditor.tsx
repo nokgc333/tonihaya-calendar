@@ -6,14 +6,12 @@ import { useEvents } from "@/hooks/useEvents";
 import { EventModal } from "@/components/EventModal";
 
 interface EditorState {
-  readonly editingId: string | null; // null=新規, string=編集
+  readonly editingId: string | null;
   readonly defaultDate: CivilDate;
 }
 
 interface EventEditorValue {
-  /** 新規作成モーダルを開く（省略時は今日/表示日を既定に）。 */
   openCreate(defaultDate: CivilDate): void;
-  /** 既存イベントを編集で開く。 */
   openEdit(id: string): void;
 }
 
@@ -72,6 +70,6 @@ export function EventEditorProvider({ children }: { readonly children: React.Rea
 
 export function useEventEditor(): EventEditorValue {
   const ctx = useContext(EventEditorContext);
-  if (!ctx) throw new Error("useEventEditor は EventEditorProvider の内側で使用してください");
+  if (!ctx) throw new Error("useEventEditor must be used inside EventEditorProvider");
   return ctx;
 }
