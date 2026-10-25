@@ -20,7 +20,7 @@ import { useEventEditor } from "@/hooks/useEventEditor";
 import { eventsForDay } from "@/domain/event";
 import { eventColor } from "@/components/eventColors";
 
-const HOUR_HEIGHT = 48; // 1時間あたりの高さ(px)
+const HOUR_HEIGHT = 48;
 const HOURS = Array.from({ length: 24 }, (_, h) => h);
 const GRID_COLS = "3.5rem repeat(7, minmax(4.5rem, 1fr))";
 const SCROLL_LEAD_HOURS = 2;
@@ -69,8 +69,6 @@ export function WeekView({
     jumpPivot.year === d.year &&
     jumpPivot.month === d.month &&
     jumpPivot.day === d.day;
-  // L1↔L2 遷移中は、押下日セルを「週ヘッダー行全体」へモーフさせる（day-zoom）。
-  // pivotDay は L2↔L3 遷移後も残存し得るため、dayPivot/jumpPivot が null のときに限定する。
   const isDayZoom =
     pivotDay !== null && dayPivot === null && jumpPivot === null;
 
@@ -82,7 +80,6 @@ export function WeekView({
     return () => window.removeEventListener("keydown", onKey);
   }, [onBack]);
 
-  // 今日が週内なら現在時刻付近へ自動スクロール
   useEffect(() => {
     if (!bodyRef.current || todayIndex < 0) return;
     const now = new Date();
@@ -100,7 +97,6 @@ export function WeekView({
 
   const first = week.days[0];
   const last = week.days[6];
-  // 週範囲ラベル。末尾の「西暦年」は、年が変わる場合のみ付ける。
   const endNeedsPrefix = first.year !== last.year;
   const weekRangeLabel =
     `${first.year}年 ${first.month}月${first.day}日 〜 ` +
@@ -160,14 +156,10 @@ export function WeekView({
         </div>
       </nav>
 
-      {/* スクロール横断の外枠。列幅を保つため横スクロール可 */}
-      {/* 外枠は共有要素を持たず root クロスフェードで現れる。ズームは日ヘッダー
-          （day-zoom/hour-zoom/jump-zoom）が「その日」を狙って担う。 */}
       <div
         className="mx-auto w-full max-w-[1256px] flex min-h-0 flex-1 flex-col overflow-x-auto rounded-md border"
         style={{ borderColor: "var(--border)" }}
       >
-        {/* 曜日+日付ヘッダー（sticky）。L0/L1の曜日行に合わせ外枠なし・面色#fbfbfb。 */}
         <div
           className="sticky top-0 z-10 grid shrink-0"
           style={{
@@ -189,7 +181,6 @@ export function WeekView({
                   : isJump(d)
                     ? { viewTransitionName: "jump-zoom" }
                     : {}),
-                // 本日は L0/L1 と同じく塗りではなく外枠リングで表す（角丸なし）。
                 ...(d.isToday
                   ? { boxShadow: "inset 0 0 0 1.5px var(--today-bg)" }
                   : {}),
@@ -200,7 +191,6 @@ export function WeekView({
                 {WEEKDAY_JA[d.weekday]}
               </div>
               <div className="text-base font-bold tabular-nums">
-                {/* 祝日は数字の背後に丸オレンジ（日曜=赤トーンと差別化）。円は絶対配置で高さ不変。 */}
                 <span className="relative inline-flex items-center justify-center">
                   {d.isHoliday ? (
                     <span
@@ -226,7 +216,6 @@ export function WeekView({
           ))}
         </div>
 
-        {/* 終日行（祝日名） */}
         <div
           className="grid shrink-0 border-y"
           style={{
@@ -288,7 +277,6 @@ export function WeekView({
           })}
         </div>
 
-        {/* 時間グリッド本体（縦スクロール） */}
         <div ref={bodyRef} className="min-h-0 flex-1 overflow-y-auto">
           <div
             className="relative grid"
@@ -323,7 +311,6 @@ export function WeekView({
                 ))}
               </Fragment>
             ))}
-            {/* 各日の時間イベント層（今ラインと同じ relative 親の中に絶対配置） */}
             {week.days.map((d, i) => (
               <DayTimedEvents
                 key={`ev-${d.month}-${d.day}`}
@@ -334,7 +321,6 @@ export function WeekView({
                 onSelect={openEdit}
               />
             ))}
-            {/* 今ライン（今日の列のみ） */}
             {todayIndex >= 0 && (
               <div
                 className="pointer-events-none absolute z-[6]"

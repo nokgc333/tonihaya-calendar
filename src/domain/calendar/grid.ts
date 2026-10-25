@@ -1,15 +1,12 @@
 import { weekdayOf } from "../shared/date";
 import type { CalendarDay, CalendarWeek, WeekStart } from "./types";
 
-/** うるう年判定（グレゴリオ暦） */
 export function isLeapYear(year: number): boolean {
   return year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
 }
 
-/** 各月の日数（平年）。インデックス0=1月 */
 const DAYS_IN_MONTH_COMMON = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
-/** 指定年月の日数（月は1–12） */
 export function daysInMonth(year: number, month: number): number {
   if (month === 2 && isLeapYear(year)) {
     return 29;
@@ -18,13 +15,8 @@ export function daysInMonth(year: number, month: number): number {
 }
 
 const DAYS_PER_WEEK = 7;
-/** 月グリッドの固定週数（月は最大6週。高さ固定のため常に6週で返す） */
 const WEEKS_PER_MONTH_GRID = 6;
 
-/**
- * 指定年月のカレンダーグリッドを週配列で返す。
- * 前後月の埋め日は inMonth=false。週の開始曜日は weekStart で切替。
- */
 export function getMonthGrid(
   year: number,
   month: number,
@@ -33,8 +25,6 @@ export function getMonthGrid(
   const startOffset = weekStart === "sun" ? 0 : 1;
   const firstWeekday = weekdayOf(year, month, 1);
   const leadingCount = (firstWeekday - startOffset + DAYS_PER_WEEK) % DAYS_PER_WEEK;
-  // カード高さを一定に保つため、月の週数(4〜6)に依らず常に6週で返す。
-  // 不足分は前後月の日で埋める（UI側で淡色表示）。
   const cellCount = WEEKS_PER_MONTH_GRID * DAYS_PER_WEEK;
 
   const days: CalendarDay[] = [];

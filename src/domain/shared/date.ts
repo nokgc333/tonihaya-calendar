@@ -1,23 +1,19 @@
 const MS_PER_DAY = 86_400_000;
 
-/** 暦日（年・月・日）。アプリ全体で共有する基本値型。 */
 export interface CivilDate {
   readonly year: number;
   readonly month: number;
   readonly day: number;
 }
 
-/** 曜日（0=日曜 … 6=土曜）。UTC基準でタイムゾーン影響を排除 */
 export function weekdayOf(year: number, month: number, day: number): number {
   return new Date(Date.UTC(year, month - 1, day)).getUTCDay();
 }
 
-/** 通日（epoch day）。UTC基準で日付差の計算に使う */
 export function toEpochDay(year: number, month: number, day: number): number {
   return Math.floor(Date.UTC(year, month - 1, day) / MS_PER_DAY);
 }
 
-/** 通日から暦日（year/month/day）へ復元 */
 export function fromEpochDay(epochDay: number): {
   year: number;
   month: number;
@@ -31,7 +27,6 @@ export function fromEpochDay(epochDay: number): {
   };
 }
 
-/** 指定した年月の日数（翌月0日=当月末日をUTC基準で算出）。 */
 export function daysInMonth(year: number, month: number): number {
   return new Date(Date.UTC(year, month, 0)).getUTCDate();
 }

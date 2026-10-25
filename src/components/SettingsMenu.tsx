@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import type { WeekStart } from "@/domain/calendar";
 import { SegmentButton } from "@/components/SegmentButton";
 
-/** 歯車→設定ポップオーバー。現状は週開始(日/月)のみ。外側クリック/Escで閉じる。 */
 export function SettingsMenu({
   weekStart,
   onWeekStartChange,
@@ -19,17 +18,14 @@ export function SettingsMenu({
 
   useEffect(() => {
     if (!open) return;
-    // 開いたらポップオーバー内の最初のフォーカス可能要素へ移す（キーボード操作性）。
     dialogRef.current?.querySelector<HTMLElement>("button")?.focus();
     const onDown = (e: MouseEvent): void => {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
     };
     const onKey = (e: KeyboardEvent): void => {
       if (e.key === "Escape") {
-        // ポップオーバーを閉じるだけに留め、各ビューの Escape→戻る を発火させない。
         e.stopPropagation();
         setOpen(false);
-        // キーボードで閉じたときはトリガーへフォーカスを戻す（外側クリック時は戻さない）。
         triggerRef.current?.focus();
       }
     };

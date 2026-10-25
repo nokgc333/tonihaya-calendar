@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { getHoliday, getHolidaysInYear, isHoliday } from "./holiday";
 
-describe("固定祝日（2024年）", () => {
+describe("fixed holidays (2024)", () => {
   test.each([
     [1, 1, "元日"],
     [2, 11, "建国記念の日"],
@@ -13,60 +13,60 @@ describe("固定祝日（2024年）", () => {
     [8, 11, "山の日"],
     [11, 3, "文化の日"],
     [11, 23, "勤労感謝の日"],
-  ])("%d/%d は %s", (m, d, name) => {
+  ])("%d/%d is %s", (m, d, name) => {
     expect(getHoliday(2024, m, d)?.name).toBe(name);
   });
 });
 
-describe("ハッピーマンデー（2024年）", () => {
+describe("Happy Monday holidays (2024)", () => {
   test.each([
     [1, 8, "成人の日"],
     [7, 15, "海の日"],
     [9, 16, "敬老の日"],
     [10, 14, "スポーツの日"],
-  ])("%d/%d は %s", (m, d, name) => {
+  ])("%d/%d is %s", (m, d, name) => {
     expect(getHoliday(2024, m, d)?.name).toBe(name);
   });
 });
 
-describe("春分・秋分（2024年）", () => {
-  test("3/20 は春分の日", () => {
+describe("spring and autumn equinoxes (2024)", () => {
+  test("3/20 is the Vernal Equinox Day", () => {
     expect(getHoliday(2024, 3, 20)?.name).toBe("春分の日");
   });
-  test("9/22 は秋分の日", () => {
+  test("9/22 is the Autumnal Equinox Day", () => {
     expect(getHoliday(2024, 9, 22)?.name).toBe("秋分の日");
   });
 });
 
-describe("振替休日（2024年）", () => {
+describe("substitute holidays (2024)", () => {
   test.each([
-    [2, 12], // 建国記念の日(2/11 日) の振替
-    [5, 6], // こどもの日(5/5 日) の振替
-    [8, 12], // 山の日(8/11 日) の振替
-    [9, 23], // 秋分の日(9/22 日) の振替
-    [11, 4], // 文化の日(11/3 日) の振替
-  ])("%d/%d は振替休日", (m, d) => {
+    [2, 12],
+    [5, 6],
+    [8, 12],
+    [9, 23],
+    [11, 4],
+  ])("%d/%d is a substitute holiday", (m, d) => {
     expect(getHoliday(2024, m, d)?.name).toBe("振替休日");
   });
 });
 
-describe("国民の休日（2026年）", () => {
-  test("9/22 は国民の休日（敬老9/21と秋分9/23に挟まれる）", () => {
+describe("citizens' holidays (2026)", () => {
+  test("9/22 is a citizens' holiday (between Respect for the Aged Day 9/21 and the autumnal equinox 9/23)", () => {
     expect(getHoliday(2026, 9, 22)?.name).toBe("国民の休日");
   });
 });
 
-describe("非祝日", () => {
-  test("2024-01-02 は祝日でない", () => {
+describe("non-holidays", () => {
+  test("2024-01-02 is not a holiday", () => {
     expect(isHoliday(2024, 1, 2)).toBe(false);
   });
 });
 
 describe("getHolidaysInYear", () => {
-  test("2024年は21日の祝日（振替含む）", () => {
+  test("2024 has 21 holidays (including substitutes)", () => {
     expect(getHolidaysInYear(2024)).toHaveLength(21);
   });
-  test("日付昇順で返る", () => {
+  test("returns holidays in ascending date order", () => {
     const list = getHolidaysInYear(2024);
     const keys = list.map((h) => h.date.month * 100 + h.date.day);
     expect(keys).toEqual([...keys].sort((a, b) => a - b));
@@ -76,12 +76,12 @@ describe("getHolidaysInYear", () => {
 import { getHolidaysInMonth } from "./holiday";
 
 describe("getHolidaysInMonth", () => {
-  test("5月(2026)は全て month===5", () => {
+  test("every holiday in May (2026) has month===5", () => {
     const list = getHolidaysInMonth(2026, 5);
     expect(list.length).toBeGreaterThan(0);
     expect(list.every((h) => h.date.month === 5)).toBe(true);
   });
-  test("6月(2026)は祝日なし", () => {
+  test("June (2026) has no holidays", () => {
     expect(getHolidaysInMonth(2026, 6)).toHaveLength(0);
   });
 });

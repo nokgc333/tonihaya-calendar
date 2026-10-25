@@ -6,10 +6,8 @@ import { MonthCard } from "@/components/MonthCard";
 import { buildMonthView } from "@/domain/view";
 import type { CalendarEvent } from "@/domain/event";
 
-// 2026年7月の月ビュー（today なし = isToday は常に false）。
 const july = buildMonthView(2026, 7, null, "sun");
 
-// 指定日の終日イベント（createdAt でソート順を固定）。
 const allDayOn = (day: number, id: string, createdAt: number): CalendarEvent => ({
   id,
   title: id,
@@ -23,7 +21,7 @@ const allDayOn = (day: number, id: string, createdAt: number): CalendarEvent => 
 });
 
 describe("MonthCard", () => {
-  it("L1(月カード)は同日4件でチップ3件と「+1件」を表示する", () => {
+  it("L1 (month card) shows 3 chips and \"+1\" for 4 events on the same day", () => {
     const events = [
       allDayOn(15, "e1", 1),
       allDayOn(15, "e2", 2),
@@ -41,12 +39,11 @@ describe("MonthCard", () => {
         onEventSelect={vi.fn()}
       />,
     );
-    // セル・カードは button 化していない（onClick/onDayClick 未指定）ので button = チップのみ。
     expect(screen.getAllByRole("button")).toHaveLength(3);
     expect(screen.getByText("+1件")).toBeInTheDocument();
   });
 
-  it("L1のチップをクリックすると onEventSelect が id で呼ばれる", async () => {
+  it("L1 calls onEventSelect with the id when a chip is clicked", async () => {
     const onEventSelect = vi.fn();
     const user = userEvent.setup();
     const events = [allDayOn(15, "e1", 1), allDayOn(15, "e2", 2)];
@@ -65,7 +62,7 @@ describe("MonthCard", () => {
     expect(onEventSelect).toHaveBeenCalledWith("e1");
   });
 
-  it("L0(俯瞰)はイベント数だけドットを表示する（最大3）", () => {
+  it("L0 (overview) shows one dot per event (max 3)", () => {
     const events = [allDayOn(15, "e1", 1), allDayOn(15, "e2", 2)];
     const { container } = render(
       <MonthCard
@@ -77,8 +74,6 @@ describe("MonthCard", () => {
         onEventSelect={vi.fn()}
       />,
     );
-    // ドットは非セマンティックな span（h-1 w-1 rounded-full）。祝日の丸マーカーも rounded-full を
-    // 使う（h-[1.5em]）ため、ドットだけを h-1 w-1 で厳密に数える。
     expect(container.querySelectorAll("span.h-1.w-1.rounded-full")).toHaveLength(2);
   });
 });

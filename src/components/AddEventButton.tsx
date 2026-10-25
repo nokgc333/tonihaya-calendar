@@ -3,7 +3,6 @@
 import { useEventEditor } from "@/hooks/useEventEditor";
 import type { CivilDate } from "@/domain/shared/date";
 
-/** 「＋予定」作成ボタン。押すと date を既定にした新規モーダルを開く。 */
 export function AddEventButton({ date }: { readonly date: CivilDate }) {
   const { openCreate } = useEventEditor();
   return (

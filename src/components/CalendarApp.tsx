@@ -41,7 +41,6 @@ function CalendarAppInner() {
     ? getCountdowns(today.year, today.month, today.day)
     : null;
 
-  // 俯瞰レイアウト（3行×4列 / 4行×3列）。localStorage に保存し次回以降も維持。
   const [overviewLayout, setOverviewLayout] = useState<OverviewLayout>("3x4");
   useEffect(() => {
     const saved = localStorage.getItem(LAYOUT_STORAGE_KEY);
@@ -52,7 +51,6 @@ function CalendarAppInner() {
     localStorage.setItem(LAYOUT_STORAGE_KEY, next);
   };
 
-  // 週開始（日/月）。localStorage に保存し次回以降も維持。全ビューに反映する。
   const [weekStart, setWeekStart] = useState<WeekStart>("sun");
   useEffect(() => {
     const saved = localStorage.getItem(WEEKSTART_STORAGE_KEY);
@@ -63,15 +61,8 @@ function CalendarAppInner() {
     localStorage.setItem(WEEKSTART_STORAGE_KEY, next);
   };
 
-  // L1⇄L2ズームの起点となる「ピボット日」。前進(日クリック)時にflushSyncで確定し、
-  // 遷移キャプチャ前にL1へ view-transition-name を反映させる。後退時も同じ日を保持して
-  // 週グリッド→日セルへ対称にモーフィングさせる。
   const [pivotDay, setPivotDay] = useState<CivilDate | null>(null);
-  // 多段ジャンプ（2レベル以上）のズーム起点。全ビューが「その日」の要素に jump-zoom を張る。
   const [jumpPivot, setJumpPivot] = useState<CivilDate | null>(null);
-  // jumpPivot はジャンプ遷移の1レンダーだけ保持したい。ジャンプ直後は justJumped で残し、
-  // 次の任意の遷移（ドリル/前後/戻る=popstate含む）で必ず掃除する。個別ハンドラの掃除に加え、
-  // popstate はハンドラを通らないためこの監視が最終保険になる。
   const justJumpedRef = useRef(false);
   useEffect(() => {
     if (justJumpedRef.current) {
@@ -80,8 +71,6 @@ function CalendarAppInner() {
     }
     setJumpPivot(null);
   }, [zoom.level, zoom.year, zoom.month, zoom.day]);
-  // 週を開いたときのL1の文脈月（＝画面に表示していた月）。前月/翌月のグレーセルを
-  // 押したときでも「戻る」で実日付の月ではなく文脈月へ戻すために保持する。
   const [weekOrigin, setWeekOrigin] = useState<{
     year: number;
     month: number;
@@ -102,8 +91,6 @@ function CalendarAppInner() {
       "push",
     );
   };
-  // L1から週以外へ移動する際は、遷移キャプチャ前にピボットを消して day-zoom セルの
-  // 取り残し（対応先なしのチラつき）を防ぐ。
   const clearPivotThen = (run: () => void): void => {
     flushSync(() => {
       setPivotDay(null);
@@ -112,12 +99,7 @@ function CalendarAppInner() {
     run();
   };
 
-  // L2⇄L3ズームの起点となる「日ピボット」。日クリック時にflushSyncで確定し、
-  // 遷移キャプチャ前にL2の当該日ヘッダー列へ hour-zoom を反映させる。
   const [dayPivot, setDayPivot] = useState<CivilDate | null>(null);
-  // L2/L3の外に出たら（overview/month）ピボットを掃除し、次のL1⇄L2ズームに
-  // 古いdayPivotが残って day-zoom を誤って無効化しないようにする。
-  // ブラウザ戻る(popstate)経由でも確実にクリアされるようzoom.levelを監視する。
   useEffect(() => {
     if (zoom.level !== "week" && zoom.level !== "day") setDayPivot(null);
   }, [zoom.level]);
@@ -133,9 +115,6 @@ function CalendarAppInner() {
     );
   };
 
-  // 年/月/週/日セグメントからのジャンプ。距離で分岐し、隣接は既存モーフを流用する。
-  // 隣接 L1↔L2=day-zoom(pivotDay) / L2↔L3=hour-zoom(dayPivot) / L0↔L1=month-N(無条件)。
-  // 多段は Task2 で jump-zoom を張る（現時点ではクロスフェード）。
   const jumpTo = (level: JumpLevel): void => {
     const target = resolveJumpTarget(level, zoom, today);
     const dist = Math.abs(LEVEL_ORDER[target.level] - LEVEL_ORDER[zoom.level]);
@@ -145,24 +124,19 @@ function CalendarAppInner() {
 
     flushSync(() => {
       if (dist >= 2) {
-        // 多段: 日アンカー jump-zoom。他ピボットは掃除。ジャンプ直後1レンダーだけ保持する印。
         setPivotDay(null);
         setDayPivot(null);
         setJumpPivot(anchorDay);
         justJumpedRef.current = true;
       } else if (levels.has("week") && levels.has("day")) {
-        // 隣接 L2↔L3: hour-zoom
         setPivotDay(null);
         setDayPivot(anchorDay);
         setJumpPivot(null);
       } else if (levels.has("month") && levels.has("week")) {
-        // 隣接 L1↔L2: day-zoom（進む・戻る両方向）。着地側の穴は MonthCard 側で
-        // 「本物の週は root に残し、複製オーバーレイに day-zoom を張る」ことで防ぐ。
         setDayPivot(null);
         setPivotDay(anchorDay);
         setJumpPivot(null);
       } else {
-        // 隣接 L0↔L1: month-N（無条件）
         setPivotDay(null);
         setDayPivot(null);
         setJumpPivot(null);
@@ -198,8 +172,6 @@ function CalendarAppInner() {
               );
             }}
             onDayChange={(y, m, dd) => {
-              // L3内で日送りしたら、戻り時のモーフが現在表示日の列に着地するよう
-              // ピボットも追従させる（古い日の列へ hour-zoom が残るのを防ぐ）。
               setJumpPivot(null);
               setDayPivot({ year: clampYear(y), month: m, day: dd });
               navigate(
@@ -224,7 +196,6 @@ function CalendarAppInner() {
   ) {
     return (
       <main className="mx-auto flex h-dvh min-w-[375px] max-w-[1600px] flex-col px-4 py-5">
-        {/* header/nav は全レベル共通でフル幅(main幅)。本体(WeekView)側で1256pxに絞る。 */}
         <div className="flex min-h-0 w-full flex-1 flex-col">
           <TodayHeader today={today} countdowns={countdowns} />
           <WeekView
@@ -237,7 +208,6 @@ function CalendarAppInner() {
                 setDayPivot(null);
                 setJumpPivot(null);
               });
-              // 実日付の月ではなく、週を開いた文脈月へ戻す（グレーセル経由でもズレない）。
               const o = weekOrigin ?? { year: zoom.year, month: zoom.month! };
               navigate(
                 { level: "month", year: o.year, month: o.month },
@@ -248,8 +218,6 @@ function CalendarAppInner() {
               flushSync(() => {
                 setDayPivot(null);
                 setJumpPivot(null);
-                // 週送り後は「戻る」で文脈月へ戻る（別週）。起点週が定まらないので
-                // pivotDay を掃除し、以降の月への戻り/ジャンプは day-zoom なしのクロスフェードにする。
                 setPivotDay(null);
               });
               navigate(
@@ -271,12 +239,8 @@ function CalendarAppInner() {
   }
 
   return (
-    // min-w で375px以下はレイアウトを固定（それ未満は横スクロールで切り捨て）。
-    // L0は祝日一覧サイドを右に持つため上限1600px。L1(月)は内側で1256pxに絞り従来の見た目を維持する。
     <main className="mx-auto min-w-[375px] max-w-[1600px] px-4 py-5">
       {zoom.level === "overview" || zoom.month === undefined ? (
-        // L0: <1600px はヘッダー・ナビ・グリッドをカード4列幅(1256px)で中央寄せに揃える。
-        //     ≥1600px は1600pxへ広げ、右に祝日一覧サイドを持たせる。
         <div className="mx-auto w-full max-w-[1256px] min-[1600px]:max-w-[1600px]">
           <TodayHeader today={today} countdowns={countdowns} />
           <OverviewBody
@@ -299,7 +263,6 @@ function CalendarAppInner() {
           />
         </div>
       ) : (
-        // header/nav は全レベル共通でフル幅(main幅)。本体(MonthDetail)側で1256pxに絞る。
         <div className="w-full">
           <TodayHeader today={today} countdowns={countdowns} />
           <MonthDetail

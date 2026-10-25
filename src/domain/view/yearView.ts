@@ -18,7 +18,6 @@ const MONTH_LABELS_WAFU = [
 
 const MONTHS_PER_YEAR = 12;
 
-/** 描画用の1日セル */
 export interface DayCell {
   readonly day: number;
   readonly weekday: number;
@@ -30,7 +29,6 @@ export interface DayCell {
   readonly isSunday: boolean;
 }
 
-/** 描画用の月ビュー */
 export interface MonthView {
   readonly month: number;
   readonly labelJa: string;
@@ -39,7 +37,6 @@ export interface MonthView {
   readonly weeks: readonly (readonly DayCell[])[];
 }
 
-/** 描画用の年ビュー */
 export interface YearView {
   readonly year: number;
   readonly months: readonly MonthView[];
@@ -85,7 +82,6 @@ export function buildMonthView(
   };
 }
 
-/** 指定年の描画用ビューモデルを組み立てる */
 export function buildYearView(
   year: number,
   today: CivilDate | null,
@@ -94,7 +90,6 @@ export function buildYearView(
   const months = Array.from({ length: MONTHS_PER_YEAR }, (_, i) =>
     buildMonthView(year, i + 1, today, settings.weekStart),
   );
-  // 遊びセクションは本日基準の事実。表示年に依らず常に算出する
   const countdowns =
     today !== null ? getCountdowns(today.year, today.month, today.day) : null;
   return { year, months, countdowns };

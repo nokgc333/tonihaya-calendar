@@ -1,12 +1,7 @@
-/** 遊びセクションの残日数 */
 export interface Countdown {
-  /** 次の土曜まで（本日が土曜なら0） */
   readonly toSaturday: number;
-  /** 月末まで */
   readonly toMonthEnd: number;
-  /** 今月末までの残り営業日（本日を含めず・土日＋祝日を除外） */
   readonly remainingBusinessDays: number;
-  /** 年末まで */
   readonly toYearEnd: number;
 }
 
@@ -17,7 +12,6 @@ import { toEpochDay, weekdayOf } from "../shared/date";
 const SATURDAY = 6;
 const SUNDAY = 0;
 
-/** 本日を含めず、翌日以降〜今月末までの営業日数（土日＋祝日を除外） */
 function countRemainingBusinessDays(year: number, month: number, day: number): number {
   const lastDay = daysInMonth(year, month);
   let count = 0;
@@ -31,7 +25,6 @@ function countRemainingBusinessDays(year: number, month: number, day: number): n
   return count;
 }
 
-/** 指定日の各残日数を返す */
 export function getCountdowns(
   year: number,
   month: number,

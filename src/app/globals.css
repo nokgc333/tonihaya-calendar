@@ -1,12 +1,9 @@
 @import "tailwindcss";
 
-/* ── デザイントークン（モノクロ基調 × 意味の最小アクセント） ── */
 :root {
   --bg: #ffffff;
   --surface: #fbfbfb;
-  /* aside 用の面色。--surface より少し明るく（浮いて見える）してカレンダーと区別する。 */
   --surface-2: #ffffff;
-  /* 単月カレンダーの土曜=水色・日祝=赤/ピンクの薄い背景。テーマに応じて自動調整。 */
   --sat-bg: color-mix(in srgb, #3b82f6 13%, var(--surface));
   --sun-bg: color-mix(in srgb, #ef4444 11%, var(--surface));
   --border: #ececec;
@@ -14,17 +11,13 @@
   --text: #171717;
   --text-muted: #6b7280;
   --text-faint: #c4c7cc;
-  --accent-red: #cc1a2b; /* 日曜・祝日 */
-  --accent-sat: #3f5573; /* 土曜（控えめ寒色） */
-  --today-bg: #171717; /* 本日 */
+  --accent-red: #cc1a2b;
+  --accent-sat: #3f5573;
+  --today-bg: #171717;
   --today-fg: #ffffff;
-  /* 祝日マーカー（丸形・薄黄緑）。日曜(赤トーン)と差別化しつつ、日曜に重なっても
-     赤と補色寄りで視認性を保つ。数字は読みやすい濃い緑。color-mixで light/dark 自動追従。 */
   --holiday-disc: color-mix(in srgb, #a3e635 45%, var(--surface));
   --holiday-text: color-mix(in srgb, #3f6212 88%, var(--text));
 
-  /* イベント8色（やや濃いめ）。bg/border は --surface、fg は --text との color-mix で
-     light/dark を自動追従する（既存の --sat-bg/--sun-bg と同じ方式）。 */
   --ev-blue-bg: color-mix(in srgb, #3b82f6 23%, var(--surface));
   --ev-blue-border: color-mix(in srgb, #3b82f6 50%, var(--surface));
   --ev-blue-fg: color-mix(in srgb, #3b82f6 85%, var(--text));
@@ -108,7 +101,7 @@ body {
   font-family:
     ui-sans-serif, system-ui, -apple-system, "Hiragino Kaku Gothic ProN",
     "Noto Sans JP", Meiryo, sans-serif;
-  font-feature-settings: "tnum" 1; /* 等幅数字で桁揃え */
+  font-feature-settings: "tnum" 1;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -119,22 +112,17 @@ body {
   }
 }
 
-/* ズーム遷移（View Transitions API）。非対応・reduced-motion では自動的に無効 */
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation-duration: 200ms;
 }
 
-/* ズーム要素の位置/サイズのモーフ（group）を root と揃えて 200ms に固定する
-   （未指定だと UA 既定の約250msになり、遷移全体が間延びして見えるため）。 */
 ::view-transition-group(day-zoom),
 ::view-transition-group(hour-zoom),
 ::view-transition-group(jump-zoom) {
   animation-duration: 200ms;
 }
 
-/* ズーム元（old スナップショット）を早めにフェードアウトさせ、拡大しながら残る違和感を抑える。
-   day-zoom（L1⇄L2）/hour-zoom（L2⇄L3）が対象。グループのモーフと new のフェードインは既定のまま。 */
 @keyframes zoom-source-fade-out {
   to {
     opacity: 0;

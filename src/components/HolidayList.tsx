@@ -9,10 +9,6 @@ function weekdayIndex(date: CivilDate): number {
   return new Date(Date.UTC(date.year, date.month - 1, date.day)).getUTCDay();
 }
 
-/**
- * 表示中の年の祝日一覧（広い画面 ≥1600px の右サイド用・縦1列・sticky）。
- * 当年なら過去の祝日をトーンダウンし、当月の祝日を強調する。各行クリックでその月へジャンプする。
- */
 export function HolidayList({
   year,
   today,

@@ -4,13 +4,13 @@ import { buildYearView } from "./yearView";
 const DEFAULT_SETTINGS = { weekStart: "sun" as const };
 
 describe("buildYearView", () => {
-  test("12ヶ月分を返す", () => {
+  test("returns 12 months", () => {
     const view = buildYearView(2024, null, DEFAULT_SETTINGS);
     expect(view.year).toBe(2024);
     expect(view.months).toHaveLength(12);
   });
 
-  test("月ラベル（数字・英語・和風）が正しい", () => {
+  test("month labels (number, English, Japanese) are correct", () => {
     const jan = buildYearView(2024, null, DEFAULT_SETTINGS).months[0];
     expect(jan.labelJa).toBe("1月");
     expect(jan.labelEn).toBe("January");
@@ -19,7 +19,7 @@ describe("buildYearView", () => {
     expect(dec.labelWafu).toBe("師走");
   });
 
-  test("元日(2024-01-01)は祝日フラグ付き", () => {
+  test("New Year's Day (2024-01-01) has the holiday flag", () => {
     const jan = buildYearView(2024, null, DEFAULT_SETTINGS).months[0];
     const cell = jan.weeks.flat().find((c) => c.inMonth && c.day === 1)!;
     expect(cell.isHoliday).toBe(true);
@@ -27,7 +27,7 @@ describe("buildYearView", () => {
     expect(cell.isSunday).toBe(false);
   });
 
-  test("本日フラグは today 指定日にのみ立つ", () => {
+  test("the today flag is set only on the given today", () => {
     const view = buildYearView(2024, { year: 2024, month: 7, day: 4 }, DEFAULT_SETTINGS);
     const jul = view.months[6];
     const today = jul.weeks.flat().find((c) => c.inMonth && c.day === 4)!;
@@ -36,8 +36,7 @@ describe("buildYearView", () => {
     expect(other.isToday).toBe(false);
   });
 
-  test("本日フラグは年間で1セルのみ（隣月のパディング日には立たない）", () => {
-    // 2026-07-04 は6月カードの翌月パディングにも現れるが、本日は在月セルのみ
+  test("the today flag is set on exactly one cell in the year (not on adjacent-month padding days)", () => {
     const view = buildYearView(2026, { year: 2026, month: 7, day: 4 }, DEFAULT_SETTINGS);
     const todayCells = view.months
       .flatMap((m) => m.weeks.flat())
@@ -46,7 +45,7 @@ describe("buildYearView", () => {
     expect(todayCells[0].inMonth).toBe(true);
   });
 
-  test("土日フラグ（2024-01-06 土 / 2024-01-07 日）", () => {
+  test("weekend flags (2024-01-06 Sat / 2024-01-07 Sun)", () => {
     const jan = buildYearView(2024, null, DEFAULT_SETTINGS).months[0];
     const sat = jan.weeks.flat().find((c) => c.inMonth && c.day === 6)!;
     const sun = jan.weeks.flat().find((c) => c.inMonth && c.day === 7)!;
@@ -54,16 +53,15 @@ describe("buildYearView", () => {
     expect(sun.isSunday).toBe(true);
   });
 
-  test("today が既知なら表示年に依らず countdowns を含む（本日基準・常時表示）", () => {
+  test("includes countdowns regardless of the displayed year when today is known (today-based, always shown)", () => {
     const sameYear = buildYearView(2024, { year: 2024, month: 7, day: 4 }, DEFAULT_SETTINGS);
     const otherYear = buildYearView(2025, { year: 2024, month: 7, day: 4 }, DEFAULT_SETTINGS);
     expect(sameYear.countdowns).not.toBeNull();
     expect(otherYear.countdowns).not.toBeNull();
-    // 本日基準なので表示年が変わっても値は同じ
     expect(otherYear.countdowns).toEqual(sameYear.countdowns);
   });
 
-  test("today が null なら countdowns は null", () => {
+  test("countdowns is null when today is null", () => {
     expect(buildYearView(2024, null, DEFAULT_SETTINGS).countdowns).toBeNull();
   });
 });

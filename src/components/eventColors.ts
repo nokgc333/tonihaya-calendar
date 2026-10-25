@@ -11,7 +11,6 @@ export const EVENT_COLOR_KEYS: readonly EventColorKey[] = [
   "rose",
 ];
 
-/** イベント色キーを CSSトークンへ解決する（bg/fg/border）。 */
 export function eventColor(key: EventColorKey): {
   readonly bg: string;
   readonly fg: string;
