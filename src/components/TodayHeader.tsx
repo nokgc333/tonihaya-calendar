@@ -4,6 +4,8 @@ import { formatYearWithEra } from "@/domain/era";
 import { CountdownChips } from "@/components/CountdownChips";
 import { WEEKDAY_JA } from "@/components/weekdays";
 
+const PLACEHOLDER = "2026年(令和8年) 12月30日 水曜日";
+
 function weekdayJa(date: CivilDate): string {
   return WEEKDAY_JA[
     new Date(Date.UTC(date.year, date.month - 1, date.day)).getUTCDay()
@@ -30,9 +32,13 @@ export function TodayHeader({
           className="mt-1 text-2xl font-bold tabular-nums"
           suppressHydrationWarning
         >
-          {today
-            ? `${formatYearWithEra(today)} ${today.month}月${today.day}日 ${weekdayJa(today)}曜日`
-            : ""}
+          {today ? (
+            `${formatYearWithEra(today)} ${today.month}月${today.day}日 ${weekdayJa(today)}曜日`
+          ) : (
+            <span aria-hidden className="invisible">
+              {PLACEHOLDER}
+            </span>
+          )}
         </h1>
       </div>
       {countdowns && (
