@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { createServer } from "node:http";
+import { brotliCompressSync, gzipSync } from "node:zlib";
 import { readFileSync } from "node:fs";
 import { readFile, stat } from "node:fs/promises";
 import { extname, join, normalize, resolve } from "node:path";
@@ -43,6 +44,18 @@ async function fileFor(root, requestUrl) {
   return null;
 }
 
+const COMPRESSIBLE = /^(text\/|application\/json|image\/svg)/;
+
+function encodeBody(body, contentType, acceptEncoding = "") {
+  if (!COMPRESSIBLE.test(contentType)) return { body, encoding: null };
+  const accepted = acceptEncoding.split(",").map((e) => e.trim().split(";")[0]);
+  if (accepted.includes("br"))
+    return { body: brotliCompressSync(body), encoding: "br" };
+  if (accepted.includes("gzip"))
+    return { body: gzipSync(body), encoding: "gzip" };
+  return { body, encoding: null };
+}
+
 export function headersFromConfig(config) {
   const rules = config.headers ?? [];
   for (const rule of rules) {
@@ -70,11 +83,20 @@ export function createStaticServer(root, headers = {}) {
       res.end(notFound ? await readFile(notFound) : "Not found");
       return;
     }
+    const type = TYPES[extname(file)] ?? "application/octet-stream";
+    const { body, encoding } = encodeBody(
+      await readFile(file),
+      type,
+      req.headers["accept-encoding"],
+    );
     res.writeHead(200, {
       ...headers,
-      "Content-Type": TYPES[extname(file)] ?? "application/octet-stream",
+      "Content-Type": type,
+      Vary: "Accept-Encoding",
+      ...(encoding ? { "Content-Encoding": encoding } : {}),
+      "Content-Length": body.length,
     });
-    res.end(req.method === "HEAD" ? undefined : await readFile(file));
+    res.end(req.method === "HEAD" ? undefined : body);
   });
 }
 
