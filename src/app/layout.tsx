@@ -1,22 +1,43 @@
 import type { Metadata, Viewport } from "next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
+import {
+  OG_IMAGE,
+  SITE_DESCRIPTION,
+  SITE_NAME,
+  SITE_TITLE,
+  SITE_URL,
+  THEME_COLOR_DARK,
+  THEME_COLOR_LIGHT,
+} from "@/app/site";
+import { serializeJsonLd, webApplicationJsonLd } from "@/app/structuredData";
 
 export const metadata: Metadata = {
-  title: "tonihaya-calendar — とにかく速い12ヶ月カレンダー",
-  description:
-    "12ヶ月を一望できる、とにかく速いカレンダー。年→月→週→日のズーム表示、祝日・和風月名・カウントダウンを備えた高速ビューアー。",
+  metadataBase: new URL(SITE_URL),
+  title: SITE_TITLE,
+  description: SITE_DESCRIPTION,
+  alternates: { canonical: "/" },
   openGraph: {
-    title: "tonihaya-calendar",
-    description: "とにかく速い12ヶ月俯瞰カレンダー",
     type: "website",
+    url: "/",
+    siteName: SITE_NAME,
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    locale: "ja_JP",
+    images: [OG_IMAGE],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    images: [OG_IMAGE.url],
   },
 };
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#0e0f11" },
+    { media: "(prefers-color-scheme: light)", color: THEME_COLOR_LIGHT },
+    { media: "(prefers-color-scheme: dark)", color: THEME_COLOR_DARK },
   ],
 };
 
@@ -32,6 +53,12 @@ export default function RootLayout({
           本文へ移動
         </a>
         {children}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: serializeJsonLd(webApplicationJsonLd()),
+          }}
+        />
         <SpeedInsights />
       </body>
     </html>

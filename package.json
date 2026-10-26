@@ -15,6 +15,7 @@
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
     "check:headers": "node scripts/check-headers.mjs",
+    "generate:images": "node scripts/generate-images.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "check": "npm run lint && npm run type-check && npm run format:check && npm run test",
