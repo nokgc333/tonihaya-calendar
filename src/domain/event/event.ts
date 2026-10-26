@@ -119,21 +119,29 @@ const isEventPoint = (v: unknown, requireTime: boolean): v is EventPoint => {
   return requireTime ? isTimeOfDay(v.time) : true;
 };
 
+type StoredCheck = (v: Record<string, unknown>) => boolean;
+
+const isNonEmptyString = (v: unknown): boolean =>
+  typeof v === "string" && v.length > 0;
+const isOptionalString = (v: unknown): boolean =>
+  v === undefined || typeof v === "string";
+
+const STORED_CHECKS: readonly StoredCheck[] = [
+  (v) => isNonEmptyString(v.id),
+  (v) => typeof v.title === "string",
+  (v) => typeof v.allDay === "boolean",
+  (v) => isEventPoint(v.start, !v.allDay),
+  (v) => isEventPoint(v.end, !v.allDay),
+  (v) => COLOR_KEYS.includes(v.colorKey as EventColorKey),
+  (v) => PRIORITIES.includes(v.priority as EventPriority),
+  (v) => isOptionalString(v.url),
+  (v) => isOptionalString(v.note),
+  (v) => typeof v.createdAt === "number",
+  (v) => typeof v.updatedAt === "number",
+];
+
 export function isStoredCalendarEvent(v: unknown): v is CalendarEvent {
-  if (!isObject(v)) return false;
-  if (typeof v.id !== "string" || v.id.length === 0) return false;
-  if (typeof v.title !== "string") return false;
-  if (typeof v.allDay !== "boolean") return false;
-  const requireTime = !v.allDay;
-  if (!isEventPoint(v.start, requireTime)) return false;
-  if (!isEventPoint(v.end, requireTime)) return false;
-  if (!COLOR_KEYS.includes(v.colorKey as EventColorKey)) return false;
-  if (!PRIORITIES.includes(v.priority as EventPriority)) return false;
-  if (v.url !== undefined && typeof v.url !== "string") return false;
-  if (v.note !== undefined && typeof v.note !== "string") return false;
-  if (typeof v.createdAt !== "number") return false;
-  if (typeof v.updatedAt !== "number") return false;
-  return true;
+  return isObject(v) && STORED_CHECKS.every((check) => check(v));
 }
 
 export function isSafeUrl(url: string): boolean {
@@ -149,31 +157,64 @@ export const TITLE_MAX_LENGTH = 200;
 export const NOTE_MAX_LENGTH = 2000;
 export const URL_MAX_LENGTH = 2048;
 
-export function validateEvent(d: EventDraft): readonly string[] {
-  const errors: string[] = [];
-  if (d.title.trim().length === 0) errors.push("タイトルを入力してください");
-  if (d.title.length > TITLE_MAX_LENGTH)
-    errors.push(`タイトルは${TITLE_MAX_LENGTH}文字以内にしてください`);
-  if (d.note && d.note.length > NOTE_MAX_LENGTH)
-    errors.push(`備考は${NOTE_MAX_LENGTH}文字以内にしてください`);
-  if (d.url && !isSafeUrl(d.url))
-    errors.push("URLは http/https のみ使用できます");
-  if (d.url && d.url.length > URL_MAX_LENGTH)
-    errors.push(`URLは${URL_MAX_LENGTH}文字以内にしてください`);
-  const s = epoch(d.start.date);
-  const e = epoch(d.end.date);
-  if (e < s) errors.push("終了日は開始日以降にしてください");
-  if (!d.allDay) {
-    if (!d.start.time || !d.end.time) {
-      errors.push("時間イベントは開始・終了時刻が必要です");
-    } else if (
-      s === e &&
-      minutesOfDay(d.end.time) <= minutesOfDay(d.start.time)
-    ) {
-      errors.push("終了時刻は開始時刻より後にしてください");
-    }
+type EventRule = (d: EventDraft) => readonly string[];
+
+const when = (condition: boolean, message: string): readonly string[] =>
+  condition ? [message] : [];
+
+const titleErrors: EventRule = (d) => [
+  ...when(d.title.trim().length === 0, "タイトルを入力してください"),
+  ...when(
+    d.title.length > TITLE_MAX_LENGTH,
+    `タイトルは${TITLE_MAX_LENGTH}文字以内にしてください`,
+  ),
+];
+
+const noteErrors: EventRule = (d) =>
+  when(
+    Boolean(d.note) && (d.note?.length ?? 0) > NOTE_MAX_LENGTH,
+    `備考は${NOTE_MAX_LENGTH}文字以内にしてください`,
+  );
+
+const urlErrors: EventRule = (d) => [
+  ...when(
+    Boolean(d.url) && !isSafeUrl(d.url ?? ""),
+    "URLは http/https のみ使用できます",
+  ),
+  ...when(
+    Boolean(d.url) && (d.url?.length ?? 0) > URL_MAX_LENGTH,
+    `URLは${URL_MAX_LENGTH}文字以内にしてください`,
+  ),
+];
+
+const dateErrors: EventRule = (d) =>
+  when(
+    epoch(d.end.date) < epoch(d.start.date),
+    "終了日は開始日以降にしてください",
+  );
+
+const timeErrors: EventRule = (d) => {
+  if (d.allDay) return [];
+  if (!d.start.time || !d.end.time) {
+    return ["時間イベントは開始・終了時刻が必要です"];
   }
-  return errors;
+  const isSameDay = epoch(d.start.date) === epoch(d.end.date);
+  return when(
+    isSameDay && minutesOfDay(d.end.time) <= minutesOfDay(d.start.time),
+    "終了時刻は開始時刻より後にしてください",
+  );
+};
+
+const EVENT_RULES: readonly EventRule[] = [
+  titleErrors,
+  noteErrors,
+  urlErrors,
+  dateErrors,
+  timeErrors,
+];
+
+export function validateEvent(d: EventDraft): readonly string[] {
+  return EVENT_RULES.flatMap((rule) => rule(d));
 }
 
 const PRIORITY_RANK: Record<EventPriority, number> = {

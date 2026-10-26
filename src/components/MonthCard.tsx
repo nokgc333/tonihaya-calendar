@@ -2,29 +2,22 @@ import type { DayCell, MonthView } from "@/domain/view";
 import type { CivilDate } from "@/domain/shared/date";
 import type { WeekStart } from "@/domain/calendar";
 import type { CalendarEvent } from "@/domain/event";
-import { eventsForDay, sortForDay } from "@/domain/event";
-import { dayBgColor, dayTextColor } from "@/components/dayPalette";
 import { WEEKDAY_JA } from "@/components/weekdays";
-import { EventChip } from "@/components/EventChip";
-import { eventColor } from "@/components/eventColors";
+import { DayCellView } from "@/components/DayCellView";
+import { SIZE, type MonthCardSize } from "@/components/monthCardSize";
+import {
+  cellContext,
+  DAYS_PER_WEEK,
+  isPivotWeek,
+  type CellContextInput,
+} from "@/components/monthCells";
+
+export type { MonthCardSize } from "@/components/monthCardSize";
 
 const RESERVED_WEEK_ROWS = 6;
-
-export type MonthCardSize = "sm" | "lg";
-const SIZE = {
-  sm: {
-    row: "1.5rem",
-    dayText: "text-[11px]",
-    circle: "h-6 w-6",
-    weekday: "text-[10px]",
-  },
-  lg: {
-    row: "7.59375rem",
-    dayText: "text-base",
-    circle: "h-9 w-9",
-    weekday: "text-xs",
-  },
-} as const;
+const SUNDAY_FIRST_SATURDAY_INDEX = 6;
+const MONDAY_FIRST_SATURDAY_INDEX = 5;
+const MONDAY_FIRST_SUNDAY_INDEX = 6;
 
 function weekdayHeader(weekStart: WeekStart): readonly string[] {
   return weekStart === "mon"
@@ -32,177 +25,191 @@ function weekdayHeader(weekStart: WeekStart): readonly string[] {
     : WEEKDAY_JA;
 }
 
-function dayColor(cell: DayCell): string {
-  if (!cell.inMonth) return "var(--text-faint)";
-  return dayTextColor(cell);
+function weekdayColor(index: number, weekStart: WeekStart): string {
+  const sundayIndex = weekStart === "mon" ? MONDAY_FIRST_SUNDAY_INDEX : 0;
+  const saturdayIndex =
+    weekStart === "mon"
+      ? MONDAY_FIRST_SATURDAY_INDEX
+      : SUNDAY_FIRST_SATURDAY_INDEX;
+  if (index === sundayIndex) return "var(--accent-red)";
+  if (index === saturdayIndex) return "var(--accent-sat)";
+  return "var(--text-muted)";
 }
 
-function dayBg(cell: DayCell): string {
-  if (!cell.inMonth) return "var(--surface)";
-  return dayBgColor(cell);
+function cardInteraction(onClick: (() => void) | undefined) {
+  if (!onClick) return {};
+  return {
+    role: "button" as const,
+    tabIndex: 0,
+    onKeyDown: (e: React.KeyboardEvent) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        onClick();
+      }
+    },
+  };
 }
 
-function DayCellView({
-  cell,
+function MonthCardHeader({
+  month,
   size,
-  spacious,
-  onDayClick,
-  cellYear,
-  cellMonth,
-  jump,
-  dayEvents = [],
-  onEventSelect,
 }: {
-  readonly cell: DayCell;
+  readonly month: MonthView;
   readonly size: MonthCardSize;
-  readonly spacious: boolean;
-  readonly onDayClick?: (year: number, month: number, day: number) => void;
-  readonly cellYear?: number;
-  readonly cellMonth?: number;
-  readonly jump: boolean;
-  readonly dayEvents?: readonly CalendarEvent[];
-  readonly onEventSelect?: (id: string) => void;
 }) {
-  const s = SIZE[size];
-  const vAlign = spacious ? "items-start pt-[7px]" : "items-start pt-[5px]";
-  const clickable =
-    onDayClick && cellYear !== undefined && cellMonth !== undefined
-      ? "cursor-pointer hover:brightness-95"
-      : "";
-  const base = `flex h-full justify-center ${vAlign} ${clickable} ${s.dayText} leading-none tabular-nums`;
-  const bgStyle = { background: dayBg(cell) };
-  const zoomStyle = jump ? { viewTransitionName: "jump-zoom" } : null;
-  const handlers =
-    onDayClick && cellYear !== undefined && cellMonth !== undefined
-      ? {
-          role: "button" as const,
-          tabIndex: 0,
-          onClick: () => onDayClick(cellYear, cellMonth, cell.day),
-          onKeyDown: (e: React.KeyboardEvent<HTMLElement>) => {
-            if (e.key === "Enter" || e.key === " ") {
-              e.preventDefault();
-              onDayClick(cellYear, cellMonth, cell.day);
-            }
-          },
-        }
-      : {};
-
-  const numberNode = (
-    <span className="relative inline-flex items-center justify-center">
-      {cell.isHoliday ? (
-        <span
-          aria-hidden
-          className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full"
-          style={{
-            background: "var(--holiday-disc)",
-            width: "calc(1.5em + 1px)",
-            height: "calc(1.5em + 1px)",
-          }}
-        />
-      ) : null}
-      <span
-        className={`relative ${cell.isToday ? "font-bold" : ""}`}
-        style={{ color: dayColor(cell) }}
-        {...(cell.isToday ? { "aria-current": "date" as const } : {})}
-      >
-        {cell.day}
-      </span>
-    </span>
-  );
-  const todayRing = cell.isToday
-    ? { boxShadow: "inset 0 0 0 1.5px var(--today-bg)" }
-    : {};
-
-  const MAX_CHIPS = 3;
-  const showChips = spacious && cell.inMonth && dayEvents.length > 0;
-  if (showChips) {
-    const overflow = dayEvents.length - MAX_CHIPS;
-    return (
-      <div
-        className={`flex h-full flex-col overflow-hidden ${clickable} ${s.dayText} leading-none tabular-nums`}
-        style={{ ...bgStyle, ...zoomStyle, ...todayRing }}
-        {...handlers}
-      >
-        <div className="flex justify-center pt-[7px]">{numberNode}</div>
-        <div className="mt-1.5 min-h-0 space-y-0.5 px-0.5">
-          {dayEvents.slice(0, MAX_CHIPS).map((e) => (
-            <EventChip key={e.id} event={e} onSelect={onEventSelect} />
-          ))}
-          {overflow > 0 ? (
-            <div
-              className="px-1 text-[10px]"
-              style={{ color: "var(--text-muted)" }}
-            >
-              +{overflow}件
-            </div>
-          ) : null}
-        </div>
-      </div>
-    );
-  }
-
-  const showDots = !spacious && cell.inMonth && dayEvents.length > 0;
-  const MAX_DOTS = 6;
-  const dotOverflow = dayEvents.length > MAX_DOTS;
-  const shownDots = dotOverflow
-    ? dayEvents.slice(0, MAX_DOTS - 1)
-    : dayEvents.slice(0, MAX_DOTS);
-
   return (
-    <div
-      className={`relative ${base}`}
-      style={{
-        ...bgStyle,
-        ...zoomStyle,
-        ...todayRing,
-        opacity: cell.inMonth ? 1 : 0.55,
-      }}
-      title={cell.holidayName}
-      {...handlers}
+    <header
+      className={`flex items-baseline gap-2 ${size === "lg" ? "mb-3" : "mb-2"}`}
     >
-      {numberNode}
-      {showDots ? (
+      <h2 className={`font-bold ${size === "lg" ? "text-2xl" : "text-lg"}`}>
+        {month.labelJa}
+      </h2>
+      {size === "lg" ? (
+        <span className="text-sm" style={{ color: "var(--text-muted)" }}>
+          {month.labelEn} / {month.labelWafu}
+        </span>
+      ) : (
+        <>
+          <span className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+            {month.labelEn}
+          </span>
+          <span
+            className="ml-auto text-[11px]"
+            style={{ color: "var(--text-muted)" }}
+          >
+            {month.labelWafu}
+          </span>
+        </>
+      )}
+    </header>
+  );
+}
+
+function WeekdayRow({
+  weekStart,
+  size,
+}: {
+  readonly weekStart: WeekStart;
+  readonly size: MonthCardSize;
+}) {
+  return (
+    <div className="grid grid-cols-7 pb-1.5">
+      {weekdayHeader(weekStart).map((label, i) => (
         <div
-          className="pointer-events-none absolute grid grid-flow-col grid-rows-3 justify-end gap-x-[1px] gap-y-[2px]"
-          style={{ top: "5px", left: "calc(50% + 9px)", width: "9px" }}
+          key={label}
+          className={`flex h-5 items-center justify-center ${SIZE[size].weekday} font-medium`}
+          style={{ color: weekdayColor(i, weekStart) }}
         >
-          {shownDots.map((e) => (
-            <span
-              key={e.id}
-              className="h-1 w-1 rounded-full"
-              style={{ background: eventColor(e.colorKey).border }}
-            />
-          ))}
-          {dotOverflow ? (
-            <span
-              className="relative flex h-1 w-1 items-center justify-center text-[8px] leading-none"
-              style={{ color: "var(--text-muted)", top: "0.5px" }}
-            >
-              ＋
-            </span>
-          ) : null}
+          {label}
         </div>
-      ) : null}
+      ))}
     </div>
   );
 }
 
-function resolveCellMonth(
-  cells: readonly DayCell[],
-  index: number,
-  year: number,
-  month: number,
-): { readonly year: number; readonly month: number } {
-  if (cells[index].inMonth) return { year, month };
-  const firstInMonthIdx = cells.findIndex((c) => c.inMonth);
-  if (index < firstInMonthIdx) {
-    return month === 1
-      ? { year: year - 1, month: 12 }
-      : { year, month: month - 1 };
-  }
-  return month === 12
-    ? { year: year + 1, month: 1 }
-    : { year, month: month + 1 };
+interface GridProps {
+  readonly month: MonthView;
+  readonly size: MonthCardSize;
+  readonly spacious: boolean;
+  readonly context: CellContextInput;
+  readonly pivotDay?: CivilDate | null;
+  readonly onDayClick?: (year: number, month: number, day: number) => void;
+  readonly onEventSelect?: (id: string) => void;
+}
+
+interface CellSpot {
+  readonly weekIndex: number;
+  readonly cellIndex: number;
+  readonly interactive: boolean;
+}
+
+function renderCell(props: GridProps, cell: DayCell, spot: CellSpot) {
+  const { size, spacious, context, onDayClick, onEventSelect } = props;
+  const { weekIndex, cellIndex, interactive } = spot;
+  const { resolved, isJump, dayEvents } = cellContext(
+    context,
+    cell,
+    weekIndex * DAYS_PER_WEEK + cellIndex,
+    interactive,
+  );
+  return (
+    <DayCellView
+      key={cellIndex}
+      cell={cell}
+      size={size}
+      spacious={spacious}
+      onDayClick={interactive ? onDayClick : undefined}
+      cellYear={resolved?.year}
+      cellMonth={resolved?.month}
+      jump={isJump}
+      dayEvents={dayEvents}
+      onEventSelect={onEventSelect}
+    />
+  );
+}
+
+function WeekRow({
+  props,
+  week,
+  weekIndex,
+}: {
+  readonly props: GridProps;
+  readonly week: readonly DayCell[];
+  readonly weekIndex: number;
+}) {
+  const { context, pivotDay } = props;
+  return (
+    <div
+      className="relative isolate col-span-7 grid grid-cols-subgrid gap-px"
+      style={{ background: "var(--border)" }}
+    >
+      {week.map((cell, ci) =>
+        renderCell(props, cell, {
+          weekIndex,
+          cellIndex: ci,
+          interactive: true,
+        }),
+      )}
+      {isPivotWeek(context, week, weekIndex, pivotDay) && (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 -z-10 grid grid-cols-7 gap-px"
+          style={{
+            background: "var(--border)",
+            viewTransitionName: "day-zoom",
+          }}
+        >
+          {week.map((cell, ci) =>
+            renderCell(props, cell, {
+              weekIndex,
+              cellIndex: ci,
+              interactive: false,
+            }),
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function MonthGrid(props: GridProps) {
+  const { month, size, spacious } = props;
+  return (
+    <div
+      className={`grid grid-cols-7 gap-px border ${spacious ? "aspect-[7/5.3]" : ""}`}
+      style={{
+        gridTemplateRows: spacious
+          ? `repeat(${RESERVED_WEEK_ROWS}, minmax(0, 1fr))`
+          : `repeat(${RESERVED_WEEK_ROWS}, ${SIZE[size].row})`,
+        background: "var(--border)",
+        borderColor: "var(--border)",
+      }}
+    >
+      {month.weeks.map((week, wi) => (
+        <WeekRow key={wi} props={props} week={week} weekIndex={wi} />
+      ))}
+    </div>
+  );
 }
 
 export function MonthCard({
@@ -232,6 +239,13 @@ export function MonthCard({
   readonly events?: readonly CalendarEvent[];
   readonly onEventSelect?: (id: string) => void;
 }) {
+  const context: CellContextInput = {
+    flat: month.weeks.flat(),
+    year,
+    month: month.month,
+    jumpDay,
+    events,
+  };
   return (
     <section
       className={`rounded-xl border p-3 text-left ${onClick ? "cursor-pointer transition-colors hover:border-[var(--border-strong)]" : ""}`}
@@ -241,156 +255,19 @@ export function MonthCard({
         viewTransitionName,
       }}
       onClick={onClick}
-      {...(onClick
-        ? {
-            role: "button",
-            tabIndex: 0,
-            onKeyDown: (e: React.KeyboardEvent) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                onClick();
-              }
-            },
-          }
-        : {})}
+      {...cardInteraction(onClick)}
     >
-      <header
-        className={`flex items-baseline gap-2 ${size === "lg" ? "mb-3" : "mb-2"}`}
-      >
-        <h2 className={`font-bold ${size === "lg" ? "text-2xl" : "text-lg"}`}>
-          {month.labelJa}
-        </h2>
-        {size === "lg" ? (
-          <span className="text-sm" style={{ color: "var(--text-muted)" }}>
-            {month.labelEn} / {month.labelWafu}
-          </span>
-        ) : (
-          <>
-            <span
-              className="text-[11px]"
-              style={{ color: "var(--text-muted)" }}
-            >
-              {month.labelEn}
-            </span>
-            <span
-              className="ml-auto text-[11px]"
-              style={{ color: "var(--text-muted)" }}
-            >
-              {month.labelWafu}
-            </span>
-          </>
-        )}
-      </header>
-
-      <div className="grid grid-cols-7 pb-1.5">
-        {weekdayHeader(weekStart).map((label, i) => (
-          <div
-            key={label}
-            className={`flex h-5 items-center justify-center ${SIZE[size].weekday} font-medium`}
-            style={{
-              color:
-                i === (weekStart === "mon" ? 6 : 0)
-                  ? "var(--accent-red)"
-                  : i === (weekStart === "mon" ? 5 : 6)
-                    ? "var(--accent-sat)"
-                    : "var(--text-muted)",
-            }}
-          >
-            {label}
-          </div>
-        ))}
-      </div>
-
-      <div
-        className={`grid grid-cols-7 gap-px border ${spacious ? "aspect-[7/5.3]" : ""}`}
-        style={{
-          gridTemplateRows: spacious
-            ? `repeat(${RESERVED_WEEK_ROWS}, minmax(0, 1fr))`
-            : `repeat(${RESERVED_WEEK_ROWS}, ${SIZE[size].row})`,
-          background: "var(--border)",
-          borderColor: "var(--border)",
-        }}
-      >
-        {(() => {
-          const flat = month.weeks.flat();
-          const isPivotWeek = (week: readonly DayCell[], wi: number): boolean =>
-            year !== undefined &&
-            !!pivotDay &&
-            week.some((cell, ci) => {
-              const r = resolveCellMonth(flat, wi * 7 + ci, year, month.month);
-              return (
-                r.year === pivotDay.year &&
-                r.month === pivotDay.month &&
-                cell.day === pivotDay.day
-              );
-            });
-          const renderCell = (
-            cell: DayCell,
-            wi: number,
-            ci: number,
-            interactive: boolean,
-          ) => {
-            const i = wi * 7 + ci;
-            const resolved =
-              year !== undefined
-                ? resolveCellMonth(flat, i, year, month.month)
-                : undefined;
-            const isJump =
-              interactive &&
-              !!jumpDay &&
-              cell.inMonth &&
-              !!resolved &&
-              resolved.year === jumpDay.year &&
-              resolved.month === jumpDay.month &&
-              cell.day === jumpDay.day;
-            const dayEvents =
-              interactive && events && cell.inMonth && resolved
-                ? sortForDay(
-                    eventsForDay(events, {
-                      year: resolved.year,
-                      month: resolved.month,
-                      day: cell.day,
-                    }),
-                  )
-                : undefined;
-            return (
-              <DayCellView
-                key={ci}
-                cell={cell}
-                size={size}
-                spacious={spacious}
-                onDayClick={interactive ? onDayClick : undefined}
-                cellYear={resolved?.year}
-                cellMonth={resolved?.month}
-                jump={isJump}
-                dayEvents={dayEvents}
-                onEventSelect={onEventSelect}
-              />
-            );
-          };
-          return month.weeks.map((week, wi) => (
-            <div
-              key={wi}
-              className="relative isolate col-span-7 grid grid-cols-subgrid gap-px"
-              style={{ background: "var(--border)" }}
-            >
-              {week.map((cell, ci) => renderCell(cell, wi, ci, true))}
-              {isPivotWeek(week, wi) && (
-                <div
-                  aria-hidden
-                  className="pointer-events-none absolute inset-0 -z-10 grid grid-cols-7 gap-px"
-                  style={{
-                    background: "var(--border)",
-                    viewTransitionName: "day-zoom",
-                  }}
-                >
-                  {week.map((cell, ci) => renderCell(cell, wi, ci, false))}
-                </div>
-              )}
-            </div>
-          ));
-        })()}
-      </div>
+      <MonthCardHeader month={month} size={size} />
+      <WeekdayRow weekStart={weekStart} size={size} />
+      <MonthGrid
+        month={month}
+        size={size}
+        spacious={spacious}
+        context={context}
+        pivotDay={pivotDay}
+        onDayClick={onDayClick}
+        onEventSelect={onEventSelect}
+      />
     </section>
   );
 }

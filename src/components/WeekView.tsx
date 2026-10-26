@@ -54,7 +54,7 @@ export function WeekView({
   readonly onWeekStartChange: (weekStart: WeekStart) => void;
   readonly jumpPivot: CivilDate | null;
 }) {
-  const week = buildWeekView(year, month, day, today, { weekStart });
+  const week = buildWeekView({ year, month, day }, today, { weekStart });
   const bodyRef = useRef<HTMLDivElement>(null);
   const { events } = useEvents();
   const { openEdit } = useEventEditor();
