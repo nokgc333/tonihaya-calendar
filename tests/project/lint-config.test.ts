@@ -36,8 +36,8 @@ describe("lint", () => {
     expect(config).toMatch(/reportUnusedDisableDirectives:\s*"error"/);
   });
 
-  it("fails on a violation instead of counting warnings", () => {
-    expect(pkg.scripts.lint).not.toContain("max-warnings");
+  it("fails on any warning, so that no violation is merely tolerated", () => {
+    expect(pkg.scripts.lint).toContain("--max-warnings=0");
     expect(config).not.toMatch(/\["warn"/);
   });
 });
