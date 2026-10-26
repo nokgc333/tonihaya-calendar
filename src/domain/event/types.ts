@@ -2,14 +2,7 @@ import type { CivilDate } from "@/domain/shared/date";
 import type { TimeOfDay } from "@/domain/timecalc";
 
 export type EventColorKey =
-  | "blue"
-  | "green"
-  | "teal"
-  | "purple"
-  | "pink"
-  | "amber"
-  | "slate"
-  | "rose";
+  "blue" | "green" | "teal" | "purple" | "pink" | "amber" | "slate" | "rose";
 
 export type EventPriority = "low" | "normal" | "high";
 

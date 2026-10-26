@@ -20,18 +20,23 @@ export function HolidayList({
 }) {
   const holidays = getHolidaysInYear(year);
   const isCurrentYear = today !== null && year === today.year;
-  const todayEpoch = today ? toEpochDay(today.year, today.month, today.day) : null;
+  const todayEpoch = today
+    ? toEpochDay(today.year, today.month, today.day)
+    : null;
 
   return (
     <div
-      className="sticky top-5 self-start max-h-[calc(100dvh-2.5rem)] overflow-y-auto rounded-lg border px-3 py-3"
+      className="sticky top-5 max-h-[calc(100dvh-2.5rem)] self-start overflow-y-auto rounded-lg border px-3 py-3"
       style={{ borderColor: "var(--border)", background: "var(--surface)" }}
     >
       <div className="mb-2 flex items-baseline justify-between">
         <h2 className="text-lg font-bold" style={{ color: "var(--text)" }}>
           祝日一覧
         </h2>
-        <span className="text-[11px] tabular-nums" style={{ color: "var(--text-faint)" }}>
+        <span
+          className="text-[11px] tabular-nums"
+          style={{ color: "var(--text-faint)" }}
+        >
           {year}年 / {holidays.length}日
         </span>
       </div>
@@ -46,9 +51,21 @@ export function HolidayList({
             <li key={`${h.date.month}-${h.date.day}-${h.name}`}>
               <HolidayRow
                 holiday={h}
-                isPast={isCurrentYear && todayEpoch !== null && rowEpoch(h) < todayEpoch}
-                isToday={isCurrentYear && todayEpoch !== null && rowEpoch(h) === todayEpoch}
-                isCurrentMonth={isCurrentYear && today !== null && h.date.month === today.month}
+                isPast={
+                  isCurrentYear &&
+                  todayEpoch !== null &&
+                  rowEpoch(h) < todayEpoch
+                }
+                isToday={
+                  isCurrentYear &&
+                  todayEpoch !== null &&
+                  rowEpoch(h) === todayEpoch
+                }
+                isCurrentMonth={
+                  isCurrentYear &&
+                  today !== null &&
+                  h.date.month === today.month
+                }
                 onClick={() => onMonthClick(h.date.month)}
               />
             </li>
@@ -91,7 +108,10 @@ function HolidayRow({
     >
       <span className="tabular-nums" style={{ color: "var(--accent-red)" }}>
         {date.month}/{date.day}
-        <span className="ml-1 text-[10px]" style={{ color: "var(--text-muted)" }}>
+        <span
+          className="ml-1 text-[10px]"
+          style={{ color: "var(--text-muted)" }}
+        >
           ({WEEKDAY_JA[weekdayIndex(date)]})
         </span>
       </span>

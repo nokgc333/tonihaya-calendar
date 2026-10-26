@@ -1,7 +1,11 @@
 import { daysInMonth } from "../calendar";
 import { getHolidaysInMonth, isHoliday, type Holiday } from "../holiday";
 import { toEpochDay, weekdayOf, type CivilDate } from "../shared/date";
-import { buildMonthView, type MonthView, type YearViewSettings } from "./yearView";
+import {
+  buildMonthView,
+  type MonthView,
+  type YearViewSettings,
+} from "./yearView";
 
 const SUNDAY = 0;
 const SATURDAY = 6;
@@ -12,7 +16,6 @@ function isBusinessDay(year: number, month: number, day: number): boolean {
   return !isWeekend && !isHoliday(year, month, day);
 }
 
-
 export interface MonthDetail {
   readonly month: MonthView;
   readonly holidays: readonly Holiday[];
@@ -22,7 +25,11 @@ export interface MonthDetail {
   readonly businessDaysRemaining: number;
 }
 
-function countBusinessDays(year: number, month: number, dayCount: number): number {
+function countBusinessDays(
+  year: number,
+  month: number,
+  dayCount: number,
+): number {
   let count = 0;
   for (let day = 1; day <= dayCount; day++) {
     if (isBusinessDay(year, month, day)) {
@@ -67,6 +74,11 @@ export function buildMonthDetail(
     dayCount,
     holidayCount: holidays.length,
     businessDayCount: countBusinessDays(year, month, dayCount),
-    businessDaysRemaining: countBusinessDaysRemaining(year, month, dayCount, today),
+    businessDaysRemaining: countBusinessDaysRemaining(
+      year,
+      month,
+      dayCount,
+      today,
+    ),
   };
 }

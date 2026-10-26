@@ -8,7 +8,11 @@ import type { CalendarEvent } from "@/domain/event";
 
 const july = buildMonthView(2026, 7, null, "sun");
 
-const allDayOn = (day: number, id: string, createdAt: number): CalendarEvent => ({
+const allDayOn = (
+  day: number,
+  id: string,
+  createdAt: number,
+): CalendarEvent => ({
   id,
   title: id,
   allDay: true,
@@ -21,7 +25,7 @@ const allDayOn = (day: number, id: string, createdAt: number): CalendarEvent => 
 });
 
 describe("MonthCard", () => {
-  it("L1 (month card) shows 3 chips and \"+1\" for 4 events on the same day", () => {
+  it('L1 (month card) shows 3 chips and "+1" for 4 events on the same day', () => {
     const events = [
       allDayOn(15, "e1", 1),
       allDayOn(15, "e2", 2),
@@ -74,6 +78,8 @@ describe("MonthCard", () => {
         onEventSelect={vi.fn()}
       />,
     );
-    expect(container.querySelectorAll("span.h-1.w-1.rounded-full")).toHaveLength(2);
+    expect(
+      container.querySelectorAll("span.h-1.w-1.rounded-full"),
+    ).toHaveLength(2);
   });
 });

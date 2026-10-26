@@ -65,27 +65,37 @@ describe("addDays / diffDays (3: date ± days and difference)", () => {
 
   test("2024-01-01 to 2024-12-31 = 365 days", () => {
     expect(
-      diffDays({ year: 2024, month: 1, day: 1 }, { year: 2024, month: 12, day: 31 }),
+      diffDays(
+        { year: 2024, month: 1, day: 1 },
+        { year: 2024, month: 12, day: 31 },
+      ),
     ).toBe(365);
   });
 
   test("reverse order gives a negative value", () => {
     expect(
-      diffDays({ year: 2024, month: 12, day: 31 }, { year: 2024, month: 1, day: 1 }),
+      diffDays(
+        { year: 2024, month: 12, day: 31 },
+        { year: 2024, month: 1, day: 1 },
+      ),
     ).toBe(-365);
   });
 });
 
 describe("addDurations (4: adding and subtracting durations)", () => {
   test("1:20 + 2:50 = 4:10", () => {
-    expect(addDurations({ hours: 1, minutes: 20 }, { hours: 2, minutes: 50 })).toEqual({
+    expect(
+      addDurations({ hours: 1, minutes: 20 }, { hours: 2, minutes: 50 }),
+    ).toEqual({
       hours: 4,
       minutes: 10,
     });
   });
 
   test("handles pure durations over 24 hours (20:00 + 10:00 = 30:00)", () => {
-    expect(addDurations({ hours: 20, minutes: 0 }, { hours: 10, minutes: 0 })).toEqual({
+    expect(
+      addDurations({ hours: 20, minutes: 0 }, { hours: 10, minutes: 0 }),
+    ).toEqual({
       hours: 30,
       minutes: 0,
     });

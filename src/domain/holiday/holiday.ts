@@ -1,4 +1,9 @@
-import { fromEpochDay, toEpochDay, weekdayOf, type CivilDate } from "../shared/date";
+import {
+  fromEpochDay,
+  toEpochDay,
+  weekdayOf,
+  type CivilDate,
+} from "../shared/date";
 
 export interface Holiday {
   readonly name: string;
@@ -8,18 +13,27 @@ export interface Holiday {
 const MONDAY = 1;
 const SUNDAY = 0;
 
-function nthWeekday(year: number, month: number, weekday: number, n: number): number {
+function nthWeekday(
+  year: number,
+  month: number,
+  weekday: number,
+  n: number,
+): number {
   const firstWeekday = weekdayOf(year, month, 1);
   const offset = (weekday - firstWeekday + 7) % 7;
   return 1 + offset + (n - 1) * 7;
 }
 
 function shunbunDay(year: number): number {
-  return Math.floor(20.8431 + 0.242194 * (year - 1980) - Math.floor((year - 1980) / 4));
+  return Math.floor(
+    20.8431 + 0.242194 * (year - 1980) - Math.floor((year - 1980) / 4),
+  );
 }
 
 function shubunDay(year: number): number {
-  return Math.floor(23.2488 + 0.242194 * (year - 1980) - Math.floor((year - 1980) / 4));
+  return Math.floor(
+    23.2488 + 0.242194 * (year - 1980) - Math.floor((year - 1980) / 4),
+  );
 }
 
 function baseHolidays(year: number): Holiday[] {
@@ -46,8 +60,12 @@ function baseHolidays(year: number): Holiday[] {
   return list;
 }
 
-const epochOf = (h: Holiday): number => toEpochDay(h.date.year, h.date.month, h.date.day);
-const holidayAt = (epoch: number, name: string): Holiday => ({ name, date: fromEpochDay(epoch) });
+const epochOf = (h: Holiday): number =>
+  toEpochDay(h.date.year, h.date.month, h.date.day);
+const holidayAt = (epoch: number, name: string): Holiday => ({
+  name,
+  date: fromEpochDay(epoch),
+});
 
 const yearHolidayCache = new Map<number, readonly Holiday[]>();
 
@@ -88,7 +106,11 @@ function computeYearHolidays(year: number): readonly Holiday[] {
   return result;
 }
 
-export function getHoliday(year: number, month: number, day: number): Holiday | null {
+export function getHoliday(
+  year: number,
+  month: number,
+  day: number,
+): Holiday | null {
   return (
     computeYearHolidays(year).find(
       (h) => h.date.month === month && h.date.day === day,

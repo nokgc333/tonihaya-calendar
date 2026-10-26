@@ -57,9 +57,23 @@ function Harness() {
       <span data-testid="count">{events.length}</span>
       <span data-testid="titles">{events.map((e) => e.title).join(",")}</span>
       <span data-testid="result">{result}</span>
-      <button onClick={async () => setResult(String(await addEvent(draft("New event"))))}>add</button>
-      <button onClick={() => events[0] && updateEvent({ ...events[0], title: "Updated" })}>update</button>
-      <button onClick={() => events[0] && removeEvent(events[0].id)}>remove</button>
+      <button
+        onClick={async () =>
+          setResult(String(await addEvent(draft("New event"))))
+        }
+      >
+        add
+      </button>
+      <button
+        onClick={() =>
+          events[0] && updateEvent({ ...events[0], title: "Updated" })
+        }
+      >
+        update
+      </button>
+      <button onClick={() => events[0] && removeEvent(events[0].id)}>
+        remove
+      </button>
     </div>
   );
 }
@@ -74,7 +88,9 @@ const renderWith = (repo: EventRepository) =>
 describe("useEvents", () => {
   it("loads the repository list on init and clears loading", async () => {
     renderWith(new FakeRepo([seeded("A")]));
-    await waitFor(() => expect(screen.getByTestId("loading")).toHaveTextContent("false"));
+    await waitFor(() =>
+      expect(screen.getByTestId("loading")).toHaveTextContent("false"),
+    );
     expect(screen.getByTestId("count")).toHaveTextContent("1");
   });
 
@@ -82,9 +98,13 @@ describe("useEvents", () => {
     const repo = new FakeRepo();
     const user = userEvent.setup();
     renderWith(repo);
-    await waitFor(() => expect(screen.getByTestId("loading")).toHaveTextContent("false"));
+    await waitFor(() =>
+      expect(screen.getByTestId("loading")).toHaveTextContent("false"),
+    );
     await user.click(screen.getByRole("button", { name: "add" }));
-    await waitFor(() => expect(screen.getByTestId("count")).toHaveTextContent("1"));
+    await waitFor(() =>
+      expect(screen.getByTestId("count")).toHaveTextContent("1"),
+    );
     expect(repo.store).toHaveLength(1);
     expect(repo.store[0].id).toBeTruthy();
     expect(screen.getByTestId("result")).toHaveTextContent("true");
@@ -94,27 +114,39 @@ describe("useEvents", () => {
     const repo = new FakeRepo([seeded("A")]);
     const user = userEvent.setup();
     renderWith(repo);
-    await waitFor(() => expect(screen.getByTestId("count")).toHaveTextContent("1"));
+    await waitFor(() =>
+      expect(screen.getByTestId("count")).toHaveTextContent("1"),
+    );
     await user.click(screen.getByRole("button", { name: "update" }));
-    await waitFor(() => expect(screen.getByTestId("titles")).toHaveTextContent("Updated"));
+    await waitFor(() =>
+      expect(screen.getByTestId("titles")).toHaveTextContent("Updated"),
+    );
   });
 
   it("removeEvent removes the matching event", async () => {
     const repo = new FakeRepo([seeded("A")]);
     const user = userEvent.setup();
     renderWith(repo);
-    await waitFor(() => expect(screen.getByTestId("count")).toHaveTextContent("1"));
+    await waitFor(() =>
+      expect(screen.getByTestId("count")).toHaveTextContent("1"),
+    );
     await user.click(screen.getByRole("button", { name: "remove" }));
-    await waitFor(() => expect(screen.getByTestId("count")).toHaveTextContent("0"));
+    await waitFor(() =>
+      expect(screen.getByTestId("count")).toHaveTextContent("0"),
+    );
   });
 
   it("does not update optimistically and leaves state unchanged when saving fails", async () => {
     const repo = new ThrowingAddRepo();
     const user = userEvent.setup();
     renderWith(repo);
-    await waitFor(() => expect(screen.getByTestId("loading")).toHaveTextContent("false"));
+    await waitFor(() =>
+      expect(screen.getByTestId("loading")).toHaveTextContent("false"),
+    );
     await user.click(screen.getByRole("button", { name: "add" }));
-    await waitFor(() => expect(screen.getByTestId("result")).toHaveTextContent("false"));
+    await waitFor(() =>
+      expect(screen.getByTestId("result")).toHaveTextContent("false"),
+    );
     expect(repo.store).toHaveLength(0);
     expect(screen.getByTestId("count")).toHaveTextContent("0");
   });

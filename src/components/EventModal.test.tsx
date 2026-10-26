@@ -28,7 +28,12 @@ describe("EventModal", () => {
     const onSubmit = vi.fn();
     const user = userEvent.setup();
     render(
-      <EventModal initial={null} defaultDate={defaultDate} onSubmit={onSubmit} onClose={vi.fn()} />,
+      <EventModal
+        initial={null}
+        defaultDate={defaultDate}
+        onSubmit={onSubmit}
+        onClose={vi.fn()}
+      />,
     );
     await user.click(screen.getByRole("button", { name: "保存" }));
     expect(screen.getByText(/タイトルを入力してください/)).toBeInTheDocument();
@@ -39,12 +44,19 @@ describe("EventModal", () => {
     const onSubmit = vi.fn();
     const user = userEvent.setup();
     render(
-      <EventModal initial={null} defaultDate={defaultDate} onSubmit={onSubmit} onClose={vi.fn()} />,
+      <EventModal
+        initial={null}
+        defaultDate={defaultDate}
+        onSubmit={onSubmit}
+        onClose={vi.fn()}
+      />,
     );
     await user.type(screen.getByLabelText("タイトル"), "Meeting");
     await user.type(screen.getByLabelText("URL"), "javascript:alert(1)");
     await user.click(screen.getByRole("button", { name: "保存" }));
-    expect(screen.getByText(/URLは http\/https のみ使用できます/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/URLは http\/https のみ使用できます/),
+    ).toBeInTheDocument();
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
@@ -52,13 +64,24 @@ describe("EventModal", () => {
     const onSubmit = vi.fn();
     const user = userEvent.setup();
     render(
-      <EventModal initial={null} defaultDate={defaultDate} onSubmit={onSubmit} onClose={vi.fn()} />,
+      <EventModal
+        initial={null}
+        defaultDate={defaultDate}
+        onSubmit={onSubmit}
+        onClose={vi.fn()}
+      />,
     );
     await user.type(screen.getByLabelText("タイトル"), "Meeting");
-    fireEvent.change(screen.getByLabelText("開始日"), { target: { value: "2026-07-11" } });
-    fireEvent.change(screen.getByLabelText("終了日"), { target: { value: "2026-07-10" } });
+    fireEvent.change(screen.getByLabelText("開始日"), {
+      target: { value: "2026-07-11" },
+    });
+    fireEvent.change(screen.getByLabelText("終了日"), {
+      target: { value: "2026-07-10" },
+    });
     await user.click(screen.getByRole("button", { name: "保存" }));
-    expect(screen.getByText(/終了日は開始日以降にしてください/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/終了日は開始日以降にしてください/),
+    ).toBeInTheDocument();
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
@@ -66,14 +89,25 @@ describe("EventModal", () => {
     const onSubmit = vi.fn();
     const user = userEvent.setup();
     render(
-      <EventModal initial={null} defaultDate={defaultDate} onSubmit={onSubmit} onClose={vi.fn()} />,
+      <EventModal
+        initial={null}
+        defaultDate={defaultDate}
+        onSubmit={onSubmit}
+        onClose={vi.fn()}
+      />,
     );
     await user.type(screen.getByLabelText("タイトル"), "Meeting");
     await user.click(screen.getByLabelText("終日"));
-    fireEvent.change(screen.getByLabelText("開始時刻"), { target: { value: "10:00" } });
-    fireEvent.change(screen.getByLabelText("終了時刻"), { target: { value: "09:00" } });
+    fireEvent.change(screen.getByLabelText("開始時刻"), {
+      target: { value: "10:00" },
+    });
+    fireEvent.change(screen.getByLabelText("終了時刻"), {
+      target: { value: "09:00" },
+    });
     await user.click(screen.getByRole("button", { name: "保存" }));
-    expect(screen.getByText(/終了時刻は開始時刻より後にしてください/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/終了時刻は開始時刻より後にしてください/),
+    ).toBeInTheDocument();
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
@@ -81,19 +115,31 @@ describe("EventModal", () => {
     const onSubmit = vi.fn();
     const user = userEvent.setup();
     render(
-      <EventModal initial={null} defaultDate={defaultDate} onSubmit={onSubmit} onClose={vi.fn()} />,
+      <EventModal
+        initial={null}
+        defaultDate={defaultDate}
+        onSubmit={onSubmit}
+        onClose={vi.fn()}
+      />,
     );
     await user.type(screen.getByLabelText("タイトル"), "Meeting");
     await user.click(screen.getByRole("button", { name: "保存" }));
     expect(onSubmit).toHaveBeenCalledTimes(1);
-    expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ title: "Meeting", allDay: true }));
+    expect(onSubmit).toHaveBeenCalledWith(
+      expect.objectContaining({ title: "Meeting", allDay: true }),
+    );
   });
 
   it("shows an error when saving fails (onSubmit returns false)", async () => {
     const onSubmit = vi.fn().mockResolvedValue(false);
     const user = userEvent.setup();
     render(
-      <EventModal initial={null} defaultDate={defaultDate} onSubmit={onSubmit} onClose={vi.fn()} />,
+      <EventModal
+        initial={null}
+        defaultDate={defaultDate}
+        onSubmit={onSubmit}
+        onClose={vi.fn()}
+      />,
     );
     await user.type(screen.getByLabelText("タイトル"), "Meeting");
     await user.click(screen.getByRole("button", { name: "保存" }));
@@ -104,7 +150,10 @@ describe("EventModal", () => {
   it("calls onDelete after confirmation when deleting while editing", async () => {
     const onDelete = vi.fn();
     const user = userEvent.setup();
-    vi.stubGlobal("confirm", vi.fn(() => true));
+    vi.stubGlobal(
+      "confirm",
+      vi.fn(() => true),
+    );
     render(
       <EventModal
         initial={existing()}
