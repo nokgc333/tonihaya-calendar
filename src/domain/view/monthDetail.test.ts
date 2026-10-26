@@ -31,7 +31,9 @@ describe("buildMonthDetail", () => {
     });
 
     test("no business days remain in a past month", () => {
-      expect(buildMonthDetail(2025, 1, TODAY, SETTINGS).businessDaysRemaining).toBe(0);
+      expect(
+        buildMonthDetail(2025, 1, TODAY, SETTINGS).businessDaysRemaining,
+      ).toBe(0);
     });
 
     test("all business days count as remaining when today is unknown", () => {

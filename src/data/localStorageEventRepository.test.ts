@@ -36,7 +36,9 @@ const ev = (id: string): CalendarEvent => ({
 describe("LocalStorageEventRepository", () => {
   let repo: LocalStorageEventRepository;
   beforeEach(() => {
-    repo = new LocalStorageEventRepository(new MemStorage() as unknown as Storage);
+    repo = new LocalStorageEventRepository(
+      new MemStorage() as unknown as Storage,
+    );
   });
   it("round-trips through add and list", async () => {
     await repo.add(ev("a"));
@@ -57,7 +59,9 @@ describe("LocalStorageEventRepository", () => {
   });
   it("logs for development and propagates the exception when saving fails (prevents silent data loss)", async () => {
     const spy = vi.spyOn(console, "error").mockImplementation(() => {});
-    const r = new LocalStorageEventRepository(new ThrowingStorage() as unknown as Storage);
+    const r = new LocalStorageEventRepository(
+      new ThrowingStorage() as unknown as Storage,
+    );
     await expect(r.add(ev("a"))).rejects.toThrow();
     expect(spy).toHaveBeenCalled();
     spy.mockRestore();

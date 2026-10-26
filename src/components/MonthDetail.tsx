@@ -113,7 +113,7 @@ export function MonthDetail({
       </nav>
 
       <div
-        className={`mx-auto w-full max-w-[1256px] flex flex-col gap-4 ${SIDE_BY_SIDE}`}
+        className={`mx-auto flex w-full max-w-[1256px] flex-col gap-4 ${SIDE_BY_SIDE}`}
       >
         <div
           className="w-full max-w-[800px] min-[1168px]:w-[800px] min-[1168px]:max-w-none min-[1168px]:shrink-0"
@@ -226,7 +226,7 @@ function Stat({
       <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>
         {label}
       </span>
-      <span className="text-lg font-bold leading-none tabular-nums">
+      <span className="text-lg leading-none font-bold tabular-nums">
         {value}
         <span
           className="ml-0.5 text-[10px] font-normal"

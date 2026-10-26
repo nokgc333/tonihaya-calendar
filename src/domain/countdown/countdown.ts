@@ -12,7 +12,11 @@ import { toEpochDay, weekdayOf } from "../shared/date";
 const SATURDAY = 6;
 const SUNDAY = 0;
 
-function countRemainingBusinessDays(year: number, month: number, day: number): number {
+function countRemainingBusinessDays(
+  year: number,
+  month: number,
+  day: number,
+): number {
   const lastDay = daysInMonth(year, month);
   let count = 0;
   for (let d = day + 1; d <= lastDay; d += 1) {

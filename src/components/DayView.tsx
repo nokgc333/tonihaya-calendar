@@ -127,7 +127,7 @@ export function DayView({
       </nav>
 
       <div
-        className="mx-auto flex w-full min-h-0 max-w-2xl flex-1 flex-col rounded-md border"
+        className="mx-auto flex min-h-0 w-full max-w-2xl flex-1 flex-col rounded-md border"
         style={{
           borderColor: "var(--border)",
           viewTransitionName: jumpPivot ? "jump-zoom" : undefined,

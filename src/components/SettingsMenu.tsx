@@ -20,7 +20,8 @@ export function SettingsMenu({
     if (!open) return;
     dialogRef.current?.querySelector<HTMLElement>("button")?.focus();
     const onDown = (e: MouseEvent): void => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+      if (ref.current && !ref.current.contains(e.target as Node))
+        setOpen(false);
     };
     const onKey = (e: KeyboardEvent): void => {
       if (e.key === "Escape") {
@@ -47,7 +48,11 @@ export function SettingsMenu({
         aria-haspopup="dialog"
         aria-expanded={open}
         className="flex h-8 w-8 items-center justify-center rounded-lg border transition-opacity hover:opacity-70"
-        style={{ borderColor: "var(--border)", background: "var(--surface-2)", color: "var(--text)" }}
+        style={{
+          borderColor: "var(--border)",
+          background: "var(--surface-2)",
+          color: "var(--text)",
+        }}
       >
         <svg
           width="16"
@@ -70,9 +75,15 @@ export function SettingsMenu({
           role="dialog"
           aria-label="設定"
           className="absolute right-0 z-20 mt-1 rounded-lg border p-3 shadow-lg"
-          style={{ borderColor: "var(--border)", background: "var(--surface-2)" }}
+          style={{
+            borderColor: "var(--border)",
+            background: "var(--surface-2)",
+          }}
         >
-          <div className="mb-1.5 text-[11px]" style={{ color: "var(--text-muted)" }}>
+          <div
+            className="mb-1.5 text-[11px]"
+            style={{ color: "var(--text-muted)" }}
+          >
             週開始
           </div>
           <div className="flex items-center gap-1">

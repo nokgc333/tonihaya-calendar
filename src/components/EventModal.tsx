@@ -1,7 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { CalendarEvent, EventColorKey, EventDraft, EventPriority } from "@/domain/event";
+import type {
+  CalendarEvent,
+  EventColorKey,
+  EventDraft,
+  EventPriority,
+} from "@/domain/event";
 import {
   isSafeUrl,
   validateEvent,
@@ -14,7 +19,8 @@ import type { TimeOfDay } from "@/domain/timecalc";
 import { EVENT_COLOR_KEYS, eventColor } from "@/components/eventColors";
 
 const pad = (n: number): string => String(n).padStart(2, "0");
-const toDateInput = (d: CivilDate): string => `${d.year}-${pad(d.month)}-${pad(d.day)}`;
+const toDateInput = (d: CivilDate): string =>
+  `${d.year}-${pad(d.month)}-${pad(d.day)}`;
 const fromDateInput = (s: string): CivilDate => {
   const [year, month, day] = s.split("-").map(Number);
   return { year, month, day };
@@ -32,8 +38,10 @@ const PRIORITIES: readonly { value: EventPriority; label: string }[] = [
   { value: "high", label: "高" },
 ];
 
-const SAVE_ERROR = "保存できませんでした。ブラウザの空き容量やプライベートモードをご確認ください。";
-const DELETE_ERROR = "削除できませんでした。ブラウザの空き容量やプライベートモードをご確認ください。";
+const SAVE_ERROR =
+  "保存できませんでした。ブラウザの空き容量やプライベートモードをご確認ください。";
+const DELETE_ERROR =
+  "削除できませんでした。ブラウザの空き容量やプライベートモードをご確認ください。";
 
 export function EventModal({
   initial,
@@ -50,12 +58,24 @@ export function EventModal({
 }) {
   const [title, setTitle] = useState(initial?.title ?? "");
   const [allDay, setAllDay] = useState(initial?.allDay ?? true);
-  const [startDate, setStartDate] = useState(toDateInput(initial?.start.date ?? defaultDate));
-  const [endDate, setEndDate] = useState(toDateInput(initial?.end.date ?? defaultDate));
-  const [startTime, setStartTime] = useState(toTimeInput(initial?.start.time, "09:00"));
-  const [endTime, setEndTime] = useState(toTimeInput(initial?.end.time, "10:00"));
-  const [colorKey, setColorKey] = useState<EventColorKey>(initial?.colorKey ?? "blue");
-  const [priority, setPriority] = useState<EventPriority>(initial?.priority ?? "normal");
+  const [startDate, setStartDate] = useState(
+    toDateInput(initial?.start.date ?? defaultDate),
+  );
+  const [endDate, setEndDate] = useState(
+    toDateInput(initial?.end.date ?? defaultDate),
+  );
+  const [startTime, setStartTime] = useState(
+    toTimeInput(initial?.start.time, "09:00"),
+  );
+  const [endTime, setEndTime] = useState(
+    toTimeInput(initial?.end.time, "10:00"),
+  );
+  const [colorKey, setColorKey] = useState<EventColorKey>(
+    initial?.colorKey ?? "blue",
+  );
+  const [priority, setPriority] = useState<EventPriority>(
+    initial?.priority ?? "normal",
+  );
   const [url, setUrl] = useState(initial?.url ?? "");
   const [note, setNote] = useState(initial?.note ?? "");
   const [errors, setErrors] = useState<readonly string[]>([]);
@@ -75,8 +95,14 @@ export function EventModal({
   const buildDraft = (): EventDraft => ({
     title,
     allDay,
-    start: { date: fromDateInput(startDate), time: allDay ? undefined : fromTimeInput(startTime) },
-    end: { date: fromDateInput(endDate), time: allDay ? undefined : fromTimeInput(endTime) },
+    start: {
+      date: fromDateInput(startDate),
+      time: allDay ? undefined : fromTimeInput(startTime),
+    },
+    end: {
+      date: fromDateInput(endDate),
+      time: allDay ? undefined : fromTimeInput(endTime),
+    },
     colorKey,
     priority,
     url: url.trim() ? url.trim() : undefined,
@@ -96,9 +122,12 @@ export function EventModal({
   };
 
   const labelCls = "block text-xs font-medium";
-  const inputCls =
-    "w-full rounded-md border px-2 py-1.5 text-sm";
-  const inputStyle = { borderColor: "var(--border)", background: "var(--surface)", color: "var(--text)" };
+  const inputCls = "w-full rounded-md border px-2 py-1.5 text-sm";
+  const inputStyle = {
+    borderColor: "var(--border)",
+    background: "var(--surface)",
+    color: "var(--text)",
+  };
 
   return (
     <div
@@ -115,7 +144,9 @@ export function EventModal({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-base font-bold">{initial ? "予定を編集" : "予定を作成"}</h2>
+          <h2 className="text-base font-bold">
+            {initial ? "予定を編集" : "予定を作成"}
+          </h2>
           <button
             type="button"
             onClick={onClose}
@@ -128,7 +159,10 @@ export function EventModal({
         </div>
 
         {errors.length > 0 && (
-          <ul className="mb-3 space-y-1 rounded-md p-2 text-xs" style={{ background: "var(--sun-bg)", color: "var(--accent-red)" }}>
+          <ul
+            className="mb-3 space-y-1 rounded-md p-2 text-xs"
+            style={{ background: "var(--sun-bg)", color: "var(--accent-red)" }}
+          >
             {errors.map((e) => (
               <li key={e}>・{e}</li>
             ))}
@@ -137,7 +171,9 @@ export function EventModal({
 
         <div className="space-y-3">
           <div>
-            <label className={labelCls} htmlFor="ev-title">タイトル</label>
+            <label className={labelCls} htmlFor="ev-title">
+              タイトル
+            </label>
             <input
               id="ev-title"
               ref={titleRef}
@@ -151,30 +187,70 @@ export function EventModal({
           </div>
 
           <label className="flex items-center gap-2 text-sm">
-            <input type="checkbox" checked={allDay} onChange={(e) => setAllDay(e.target.checked)} />
+            <input
+              type="checkbox"
+              checked={allDay}
+              onChange={(e) => setAllDay(e.target.checked)}
+            />
             終日
           </label>
 
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className={labelCls} htmlFor="ev-sd">開始日</label>
-              <input id="ev-sd" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className={inputCls} style={inputStyle} />
+              <label className={labelCls} htmlFor="ev-sd">
+                開始日
+              </label>
+              <input
+                id="ev-sd"
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className={inputCls}
+                style={inputStyle}
+              />
             </div>
             <div>
-              <label className={labelCls} htmlFor="ev-ed">終了日</label>
-              <input id="ev-ed" type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className={inputCls} style={inputStyle} />
+              <label className={labelCls} htmlFor="ev-ed">
+                終了日
+              </label>
+              <input
+                id="ev-ed"
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className={inputCls}
+                style={inputStyle}
+              />
             </div>
           </div>
 
           {!allDay && (
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className={labelCls} htmlFor="ev-st">開始時刻</label>
-                <input id="ev-st" type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className={inputCls} style={inputStyle} />
+                <label className={labelCls} htmlFor="ev-st">
+                  開始時刻
+                </label>
+                <input
+                  id="ev-st"
+                  type="time"
+                  value={startTime}
+                  onChange={(e) => setStartTime(e.target.value)}
+                  className={inputCls}
+                  style={inputStyle}
+                />
               </div>
               <div>
-                <label className={labelCls} htmlFor="ev-et">終了時刻</label>
-                <input id="ev-et" type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} className={inputCls} style={inputStyle} />
+                <label className={labelCls} htmlFor="ev-et">
+                  終了時刻
+                </label>
+                <input
+                  id="ev-et"
+                  type="time"
+                  value={endTime}
+                  onChange={(e) => setEndTime(e.target.value)}
+                  className={inputCls}
+                  style={inputStyle}
+                />
               </div>
             </div>
           )}
@@ -193,7 +269,10 @@ export function EventModal({
                     aria-label={`色 ${k}`}
                     aria-pressed={active}
                     className="h-6 w-6 rounded-full border-2 transition-transform hover:scale-110"
-                    style={{ background: c.bg, borderColor: active ? c.fg : c.border }}
+                    style={{
+                      background: c.bg,
+                      borderColor: active ? c.fg : c.border,
+                    }}
                   />
                 );
               })}
@@ -201,16 +280,37 @@ export function EventModal({
           </div>
 
           <div>
-            <label className={labelCls} htmlFor="ev-pri">優先度</label>
-            <select id="ev-pri" value={priority} onChange={(e) => setPriority(e.target.value as EventPriority)} className={inputCls} style={inputStyle}>
+            <label className={labelCls} htmlFor="ev-pri">
+              優先度
+            </label>
+            <select
+              id="ev-pri"
+              value={priority}
+              onChange={(e) => setPriority(e.target.value as EventPriority)}
+              className={inputCls}
+              style={inputStyle}
+            >
               {PRIORITIES.map((p) => (
-                <option key={p.value} value={p.value}>{p.label}</option>
+                <option key={p.value} value={p.value}>
+                  {p.label}
+                </option>
               ))}
             </select>
           </div>
           <div>
-            <label className={labelCls} htmlFor="ev-url">URL</label>
-            <input id="ev-url" type="url" value={url} onChange={(e) => setUrl(e.target.value)} maxLength={URL_MAX_LENGTH} className={inputCls} style={inputStyle} placeholder="https://" />
+            <label className={labelCls} htmlFor="ev-url">
+              URL
+            </label>
+            <input
+              id="ev-url"
+              type="url"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              maxLength={URL_MAX_LENGTH}
+              className={inputCls}
+              style={inputStyle}
+              placeholder="https://"
+            />
             {isSafeUrl(url.trim()) && (
               <a
                 href={url.trim()}
@@ -225,8 +325,18 @@ export function EventModal({
           </div>
 
           <div>
-            <label className={labelCls} htmlFor="ev-note">備考</label>
-            <textarea id="ev-note" value={note} onChange={(e) => setNote(e.target.value)} maxLength={NOTE_MAX_LENGTH} rows={2} className={inputCls} style={inputStyle} />
+            <label className={labelCls} htmlFor="ev-note">
+              備考
+            </label>
+            <textarea
+              id="ev-note"
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              maxLength={NOTE_MAX_LENGTH}
+              rows={2}
+              className={inputCls}
+              style={inputStyle}
+            />
           </div>
         </div>
 
@@ -260,7 +370,10 @@ export function EventModal({
               type="button"
               onClick={handleSubmit}
               className="rounded-md px-3 py-1.5 text-sm font-medium"
-              style={{ background: "var(--today-bg)", color: "var(--today-fg)" }}
+              style={{
+                background: "var(--today-bg)",
+                color: "var(--today-fg)",
+              }}
             >
               保存
             </button>

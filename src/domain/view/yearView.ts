@@ -7,13 +7,33 @@ const SATURDAY = 6;
 const SUNDAY = 0;
 
 const MONTH_LABELS_EN = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
 ] as const;
 
 const MONTH_LABELS_WAFU = [
-  "睦月", "如月", "弥生", "卯月", "皐月", "水無月",
-  "文月", "葉月", "長月", "神無月", "霜月", "師走",
+  "睦月",
+  "如月",
+  "弥生",
+  "卯月",
+  "皐月",
+  "水無月",
+  "文月",
+  "葉月",
+  "長月",
+  "神無月",
+  "霜月",
+  "師走",
 ] as const;
 
 const MONTHS_PER_YEAR = 12;

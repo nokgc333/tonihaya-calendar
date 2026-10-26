@@ -1,7 +1,12 @@
 "use client";
 
 import { useEvents } from "@/hooks/useEvents";
-import { clipEventToDay, eventsForDay, layoutDayColumns, type DaySegment } from "@/domain/event";
+import {
+  clipEventToDay,
+  eventsForDay,
+  layoutDayColumns,
+  type DaySegment,
+} from "@/domain/event";
 import { eventColor } from "@/components/eventColors";
 import type { CivilDate } from "@/domain/shared/date";
 
@@ -29,7 +34,10 @@ export function DayTimedEvents({
       {laid.map((s) => {
         const c = eventColor(s.event.colorKey);
         const top = (s.startMin / 60) * hourHeight;
-        const height = Math.max(((s.endMin - s.startMin) / 60) * hourHeight, 14);
+        const height = Math.max(
+          ((s.endMin - s.startMin) / 60) * hourHeight,
+          14,
+        );
         const frac = 1 / s.columnCount;
         return (
           <button

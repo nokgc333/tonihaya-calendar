@@ -28,7 +28,11 @@ describe("buildYearView", () => {
   });
 
   test("the today flag is set only on the given today", () => {
-    const view = buildYearView(2024, { year: 2024, month: 7, day: 4 }, DEFAULT_SETTINGS);
+    const view = buildYearView(
+      2024,
+      { year: 2024, month: 7, day: 4 },
+      DEFAULT_SETTINGS,
+    );
     const jul = view.months[6];
     const today = jul.weeks.flat().find((c) => c.inMonth && c.day === 4)!;
     expect(today.isToday).toBe(true);
@@ -37,7 +41,11 @@ describe("buildYearView", () => {
   });
 
   test("the today flag is set on exactly one cell in the year (not on adjacent-month padding days)", () => {
-    const view = buildYearView(2026, { year: 2026, month: 7, day: 4 }, DEFAULT_SETTINGS);
+    const view = buildYearView(
+      2026,
+      { year: 2026, month: 7, day: 4 },
+      DEFAULT_SETTINGS,
+    );
     const todayCells = view.months
       .flatMap((m) => m.weeks.flat())
       .filter((c) => c.isToday);
@@ -54,8 +62,16 @@ describe("buildYearView", () => {
   });
 
   test("includes countdowns regardless of the displayed year when today is known (today-based, always shown)", () => {
-    const sameYear = buildYearView(2024, { year: 2024, month: 7, day: 4 }, DEFAULT_SETTINGS);
-    const otherYear = buildYearView(2025, { year: 2024, month: 7, day: 4 }, DEFAULT_SETTINGS);
+    const sameYear = buildYearView(
+      2024,
+      { year: 2024, month: 7, day: 4 },
+      DEFAULT_SETTINGS,
+    );
+    const otherYear = buildYearView(
+      2025,
+      { year: 2024, month: 7, day: 4 },
+      DEFAULT_SETTINGS,
+    );
     expect(sameYear.countdowns).not.toBeNull();
     expect(otherYear.countdowns).not.toBeNull();
     expect(otherYear.countdowns).toEqual(sameYear.countdowns);

@@ -15,7 +15,12 @@ import {
 } from "./event";
 import type { CalendarEvent } from "./types";
 
-const base = { colorKey: "blue", priority: "normal", createdAt: 0, updatedAt: 0 } as const;
+const base = {
+  colorKey: "blue",
+  priority: "normal",
+  createdAt: 0,
+  updatedAt: 0,
+} as const;
 const allDay = (
   id: string,
   s: [number, number, number],
@@ -38,8 +43,14 @@ const timed = (
   id,
   title: id,
   allDay: false,
-  start: { date: { year: d[0], month: d[1], day: d[2] }, time: { hour: sh, minute: 0 } },
-  end: { date: { year: d[0], month: d[1], day: d[2] }, time: { hour: eh, minute: 0 } },
+  start: {
+    date: { year: d[0], month: d[1], day: d[2] },
+    time: { hour: sh, minute: 0 },
+  },
+  end: {
+    date: { year: d[0], month: d[1], day: d[2] },
+    time: { hour: eh, minute: 0 },
+  },
 });
 
 describe("minutesOfDay", () => {
@@ -63,30 +74,49 @@ describe("clipEventToDay", () => {
     id: "m",
     title: "m",
     allDay: false,
-    start: { date: { year: 2026, month: 7, day: 10 }, time: { hour: 23, minute: 0 } },
-    end: { date: { year: 2026, month: 7, day: 12 }, time: { hour: 2, minute: 0 } },
+    start: {
+      date: { year: 2026, month: 7, day: 10 },
+      time: { hour: 23, minute: 0 },
+    },
+    end: {
+      date: { year: 2026, month: 7, day: 12 },
+      time: { hour: 2, minute: 0 },
+    },
   };
   it("the first day runs from the start time to 24:00 and continues to the next day", () => {
     const s = clipEventToDay(multi, { year: 2026, month: 7, day: 10 })!;
-    expect([s.startMin, s.endMin, s.continuesFromPrev, s.continuesToNext]).toEqual([
-      1380, 1440, false, true,
-    ]);
+    expect([
+      s.startMin,
+      s.endMin,
+      s.continuesFromPrev,
+      s.continuesToNext,
+    ]).toEqual([1380, 1440, false, true]);
   });
   it("a middle day runs from 0:00 to 24:00 and continues in both directions", () => {
     const s = clipEventToDay(multi, { year: 2026, month: 7, day: 11 })!;
-    expect([s.startMin, s.endMin, s.continuesFromPrev, s.continuesToNext]).toEqual([
-      0, 1440, true, true,
-    ]);
+    expect([
+      s.startMin,
+      s.endMin,
+      s.continuesFromPrev,
+      s.continuesToNext,
+    ]).toEqual([0, 1440, true, true]);
   });
   it("the last day runs from 0:00 to the end time and continues from the previous day", () => {
     const s = clipEventToDay(multi, { year: 2026, month: 7, day: 12 })!;
-    expect([s.startMin, s.endMin, s.continuesFromPrev, s.continuesToNext]).toEqual([
-      0, 120, true, false,
-    ]);
+    expect([
+      s.startMin,
+      s.endMin,
+      s.continuesFromPrev,
+      s.continuesToNext,
+    ]).toEqual([0, 120, true, false]);
   });
   it("an all-day event returns null", () => {
     expect(
-      clipEventToDay(allDay("a", [2026, 7, 12], [2026, 7, 12]), { year: 2026, month: 7, day: 12 }),
+      clipEventToDay(allDay("a", [2026, 7, 12], [2026, 7, 12]), {
+        year: 2026,
+        month: 7,
+        day: 12,
+      }),
     ).toBeNull();
   });
   it("a day outside the range returns null", () => {
@@ -101,8 +131,14 @@ describe("layoutDayColumns", () => {
       id,
       title: id,
       allDay: false,
-      start: { date: { year: 2026, month: 7, day: 12 }, time: { hour: 0, minute: 0 } },
-      end: { date: { year: 2026, month: 7, day: 12 }, time: { hour: 1, minute: 0 } },
+      start: {
+        date: { year: 2026, month: 7, day: 12 },
+        time: { hour: 0, minute: 0 },
+      },
+      end: {
+        date: { year: 2026, month: 7, day: 12 },
+        time: { hour: 1, minute: 0 },
+      },
     },
     startMin,
     endMin,
@@ -111,7 +147,9 @@ describe("layoutDayColumns", () => {
   });
   it("non-overlapping events use 1 column", () => {
     const out = layoutDayColumns([seg("a", 0, 60), seg("b", 120, 180)]);
-    expect(out.every((s) => s.columnCount === 1 && s.columnIndex === 0)).toBe(true);
+    expect(out.every((s) => s.columnCount === 1 && s.columnIndex === 0)).toBe(
+      true,
+    );
   });
   it("two overlapping events are assigned 2 columns", () => {
     const out = layoutDayColumns([seg("a", 0, 120), seg("b", 60, 180)]);
@@ -122,7 +160,11 @@ describe("layoutDayColumns", () => {
     expect(new Set([a.columnIndex, b.columnIndex])).toEqual(new Set([0, 1]));
   });
   it("non-overlapping events are not put in the same cluster (1 column)", () => {
-    const out = layoutDayColumns([seg("a", 0, 60), seg("b", 30, 90), seg("c", 200, 260)]);
+    const out = layoutDayColumns([
+      seg("a", 0, 60),
+      seg("b", 30, 90),
+      seg("c", 200, 260),
+    ]);
     expect(out.find((s) => s.event.id === "c")!.columnCount).toBe(1);
     expect(out.find((s) => s.event.id === "a")!.columnCount).toBe(2);
   });
@@ -143,20 +185,31 @@ describe("validateEvent", () => {
     allDay: false,
     colorKey: "blue",
     priority: "normal",
-    start: { date: { year: 2026, month: 7, day: 12 }, time: { hour: 9, minute: 0 } },
-    end: { date: { year: 2026, month: 7, day: 12 }, time: { hour: 10, minute: 0 } },
+    start: {
+      date: { year: 2026, month: 7, day: 12 },
+      time: { hour: 9, minute: 0 },
+    },
+    end: {
+      date: { year: 2026, month: 7, day: 12 },
+      time: { hour: 10, minute: 0 },
+    },
   } as const;
   it("a valid timed event has no errors", () => {
     expect(validateEvent(okTimed)).toEqual([]);
   });
   it("an empty title is an error", () => {
-    expect(validateEvent({ ...okTimed, title: "  " }).length).toBeGreaterThan(0);
+    expect(validateEvent({ ...okTimed, title: "  " }).length).toBeGreaterThan(
+      0,
+    );
   });
   it("end <= start on the same day is an error", () => {
     expect(
       validateEvent({
         ...okTimed,
-        end: { date: { year: 2026, month: 7, day: 12 }, time: { hour: 9, minute: 0 } },
+        end: {
+          date: { year: 2026, month: 7, day: 12 },
+          time: { hour: 9, minute: 0 },
+        },
       }).length,
     ).toBeGreaterThan(0);
   });
@@ -164,12 +217,17 @@ describe("validateEvent", () => {
     expect(
       validateEvent({
         ...okTimed,
-        end: { date: { year: 2026, month: 7, day: 11 }, time: { hour: 10, minute: 0 } },
+        end: {
+          date: { year: 2026, month: 7, day: 11 },
+          time: { hour: 10, minute: 0 },
+        },
       }).length,
     ).toBeGreaterThan(0);
   });
   it("an invalid URL is an error", () => {
-    expect(validateEvent({ ...okTimed, url: "javascript:alert(1)" }).length).toBeGreaterThan(0);
+    expect(
+      validateEvent({ ...okTimed, url: "javascript:alert(1)" }).length,
+    ).toBeGreaterThan(0);
   });
   it("a multi-day all-day event is valid", () => {
     expect(
@@ -184,17 +242,27 @@ describe("validateEvent", () => {
     ).toEqual([]);
   });
   it("a title over the limit is an error", () => {
-    expect(validateEvent({ ...okTimed, title: "a".repeat(TITLE_MAX_LENGTH + 1) }).length).toBeGreaterThan(0);
+    expect(
+      validateEvent({ ...okTimed, title: "a".repeat(TITLE_MAX_LENGTH + 1) })
+        .length,
+    ).toBeGreaterThan(0);
   });
   it("a title exactly at the limit is valid", () => {
-    expect(validateEvent({ ...okTimed, title: "a".repeat(TITLE_MAX_LENGTH) })).toEqual([]);
+    expect(
+      validateEvent({ ...okTimed, title: "a".repeat(TITLE_MAX_LENGTH) }),
+    ).toEqual([]);
   });
   it("notes over the limit are an error", () => {
-    expect(validateEvent({ ...okTimed, note: "n".repeat(NOTE_MAX_LENGTH + 1) }).length).toBeGreaterThan(0);
+    expect(
+      validateEvent({ ...okTimed, note: "n".repeat(NOTE_MAX_LENGTH + 1) })
+        .length,
+    ).toBeGreaterThan(0);
   });
   it("a URL over the limit is an error", () => {
     const longUrl = "https://example.com/" + "a".repeat(URL_MAX_LENGTH);
-    expect(validateEvent({ ...okTimed, url: longUrl }).length).toBeGreaterThan(0);
+    expect(validateEvent({ ...okTimed, url: longUrl }).length).toBeGreaterThan(
+      0,
+    );
   });
 });
 
@@ -223,25 +291,41 @@ describe("isStoredCalendarEvent", () => {
     expect(isStoredCalendarEvent(42)).toBe(false);
   });
   it("rejects a missing or empty id", () => {
-    expect(isStoredCalendarEvent({ ...validAllDay, id: undefined })).toBe(false);
+    expect(isStoredCalendarEvent({ ...validAllDay, id: undefined })).toBe(
+      false,
+    );
     expect(isStoredCalendarEvent({ ...validAllDay, id: "" })).toBe(false);
   });
   it("rejects a missing numeric start.date (source of a crash)", () => {
     expect(
-      isStoredCalendarEvent({ ...validAllDay, start: { date: { year: 2026, month: 7 } } }),
+      isStoredCalendarEvent({
+        ...validAllDay,
+        start: { date: { year: 2026, month: 7 } },
+      }),
     ).toBe(false);
-    expect(isStoredCalendarEvent({ ...validAllDay, start: undefined })).toBe(false);
+    expect(isStoredCalendarEvent({ ...validAllDay, start: undefined })).toBe(
+      false,
+    );
   });
   it("rejects a timed event without time (source of a crash in clip)", () => {
     expect(
-      isStoredCalendarEvent({ ...validTimed, start: { date: { year: 2026, month: 7, day: 12 } } }),
+      isStoredCalendarEvent({
+        ...validTimed,
+        start: { date: { year: 2026, month: 7, day: 12 } },
+      }),
     ).toBe(false);
   });
   it("rejects an invalid colorKey or priority", () => {
-    expect(isStoredCalendarEvent({ ...validAllDay, colorKey: "neon" })).toBe(false);
-    expect(isStoredCalendarEvent({ ...validAllDay, priority: "urgent" })).toBe(false);
+    expect(isStoredCalendarEvent({ ...validAllDay, colorKey: "neon" })).toBe(
+      false,
+    );
+    expect(isStoredCalendarEvent({ ...validAllDay, priority: "urgent" })).toBe(
+      false,
+    );
   });
   it("rejects non-numeric createdAt or updatedAt", () => {
-    expect(isStoredCalendarEvent({ ...validAllDay, createdAt: "0" })).toBe(false);
+    expect(isStoredCalendarEvent({ ...validAllDay, createdAt: "0" })).toBe(
+      false,
+    );
   });
 });

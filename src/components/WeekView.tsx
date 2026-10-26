@@ -157,7 +157,7 @@ export function WeekView({
       </nav>
 
       <div
-        className="mx-auto w-full max-w-[1256px] flex min-h-0 flex-1 flex-col overflow-x-auto rounded-md border"
+        className="mx-auto flex min-h-0 w-full max-w-[1256px] flex-1 flex-col overflow-x-auto rounded-md border"
         style={{ borderColor: "var(--border)" }}
       >
         <div
@@ -195,7 +195,7 @@ export function WeekView({
                   {d.isHoliday ? (
                     <span
                       aria-hidden
-                      className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full"
+                      className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full"
                       style={{
                         background: "var(--holiday-disc)",
                         width: "calc(1.5em + 1px)",

@@ -37,7 +37,9 @@ describe("buildDayView", () => {
   });
 
   test("isToday is false when today differs or is null", () => {
-    expect(buildDayView(2026, 7, 8, { year: 2026, month: 7, day: 9 }).day.isToday).toBe(false);
+    expect(
+      buildDayView(2026, 7, 8, { year: 2026, month: 7, day: 9 }).day.isToday,
+    ).toBe(false);
     expect(buildDayView(2026, 7, 8, null).day.isToday).toBe(false);
   });
 

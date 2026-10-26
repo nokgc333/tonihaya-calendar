@@ -1,7 +1,12 @@
 import { toEpochDay } from "@/domain/shared/date";
 import type { CivilDate } from "@/domain/shared/date";
 import type { TimeOfDay } from "@/domain/timecalc";
-import type { CalendarEvent, EventColorKey, EventPoint, EventPriority } from "./types";
+import type {
+  CalendarEvent,
+  EventColorKey,
+  EventPoint,
+  EventPriority,
+} from "./types";
 
 export type EventDraft = Omit<CalendarEvent, "id" | "createdAt" | "updatedAt">;
 
@@ -16,7 +21,9 @@ export function eventsForDay(
   date: CivilDate,
 ): readonly CalendarEvent[] {
   const d = epoch(date);
-  return events.filter((e) => epoch(e.start.date) <= d && d <= epoch(e.end.date));
+  return events.filter(
+    (e) => epoch(e.start.date) <= d && d <= epoch(e.end.date),
+  );
 }
 
 export interface DaySegment {
@@ -27,7 +34,10 @@ export interface DaySegment {
   readonly continuesToNext: boolean;
 }
 
-export function clipEventToDay(event: CalendarEvent, date: CivilDate): DaySegment | null {
+export function clipEventToDay(
+  event: CalendarEvent,
+  date: CivilDate,
+): DaySegment | null {
   if (event.allDay) return null;
   const d = epoch(date);
   const s = epoch(event.start.date);
@@ -35,7 +45,13 @@ export function clipEventToDay(event: CalendarEvent, date: CivilDate): DaySegmen
   if (d < s || d > e) return null;
   const startMin = d === s ? minutesOfDay(event.start.time!) : 0;
   const endMin = d === e ? minutesOfDay(event.end.time!) : 1440;
-  return { event, startMin, endMin, continuesFromPrev: d > s, continuesToNext: d < e };
+  return {
+    event,
+    startMin,
+    endMin,
+    continuesFromPrev: d > s,
+    continuesToNext: d < e,
+  };
 }
 
 export interface LaidOutSegment extends DaySegment {
@@ -43,8 +59,12 @@ export interface LaidOutSegment extends DaySegment {
   readonly columnCount: number;
 }
 
-export function layoutDayColumns(segments: readonly DaySegment[]): readonly LaidOutSegment[] {
-  const sorted = [...segments].sort((a, b) => a.startMin - b.startMin || a.endMin - b.endMin);
+export function layoutDayColumns(
+  segments: readonly DaySegment[],
+): readonly LaidOutSegment[] {
+  const sorted = [...segments].sort(
+    (a, b) => a.startMin - b.startMin || a.endMin - b.endMin,
+  );
   const out: LaidOutSegment[] = [];
   let cluster: Array<DaySegment & { columnIndex: number }> = [];
   let clusterMaxEnd = -1;
@@ -132,26 +152,39 @@ export const URL_MAX_LENGTH = 2048;
 export function validateEvent(d: EventDraft): readonly string[] {
   const errors: string[] = [];
   if (d.title.trim().length === 0) errors.push("タイトルを入力してください");
-  if (d.title.length > TITLE_MAX_LENGTH) errors.push(`タイトルは${TITLE_MAX_LENGTH}文字以内にしてください`);
-  if (d.note && d.note.length > NOTE_MAX_LENGTH) errors.push(`備考は${NOTE_MAX_LENGTH}文字以内にしてください`);
-  if (d.url && !isSafeUrl(d.url)) errors.push("URLは http/https のみ使用できます");
-  if (d.url && d.url.length > URL_MAX_LENGTH) errors.push(`URLは${URL_MAX_LENGTH}文字以内にしてください`);
+  if (d.title.length > TITLE_MAX_LENGTH)
+    errors.push(`タイトルは${TITLE_MAX_LENGTH}文字以内にしてください`);
+  if (d.note && d.note.length > NOTE_MAX_LENGTH)
+    errors.push(`備考は${NOTE_MAX_LENGTH}文字以内にしてください`);
+  if (d.url && !isSafeUrl(d.url))
+    errors.push("URLは http/https のみ使用できます");
+  if (d.url && d.url.length > URL_MAX_LENGTH)
+    errors.push(`URLは${URL_MAX_LENGTH}文字以内にしてください`);
   const s = epoch(d.start.date);
   const e = epoch(d.end.date);
   if (e < s) errors.push("終了日は開始日以降にしてください");
   if (!d.allDay) {
     if (!d.start.time || !d.end.time) {
       errors.push("時間イベントは開始・終了時刻が必要です");
-    } else if (s === e && minutesOfDay(d.end.time) <= minutesOfDay(d.start.time)) {
+    } else if (
+      s === e &&
+      minutesOfDay(d.end.time) <= minutesOfDay(d.start.time)
+    ) {
       errors.push("終了時刻は開始時刻より後にしてください");
     }
   }
   return errors;
 }
 
-const PRIORITY_RANK: Record<EventPriority, number> = { high: 0, normal: 1, low: 2 };
+const PRIORITY_RANK: Record<EventPriority, number> = {
+  high: 0,
+  normal: 1,
+  low: 2,
+};
 
-export function sortForDay(events: readonly CalendarEvent[]): readonly CalendarEvent[] {
+export function sortForDay(
+  events: readonly CalendarEvent[],
+): readonly CalendarEvent[] {
   return [...events].sort((a, b) => {
     if (a.allDay !== b.allDay) return a.allDay ? -1 : 1;
     if (!a.allDay && !b.allDay) {

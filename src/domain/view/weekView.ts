@@ -1,12 +1,16 @@
 import { getHoliday } from "../holiday";
-import { fromEpochDay, toEpochDay, weekdayOf, type CivilDate } from "../shared/date";
+import {
+  fromEpochDay,
+  toEpochDay,
+  weekdayOf,
+  type CivilDate,
+} from "../shared/date";
 import type { WeekStart } from "../calendar";
 
 const DAYS_PER_WEEK = 7;
 const SUNDAY = 0;
 const SATURDAY = 6;
 const MINUTES_PER_HOUR = 60;
-
 
 export interface WeekDay {
   readonly year: number;

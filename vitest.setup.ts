@@ -1,8 +1,11 @@
 import "@testing-library/jest-dom/vitest";
 
 if (typeof document !== "undefined" && !("startViewTransition" in document)) {
-  // @ts-expect-error
-  document.startViewTransition = (cb: () => void) => {
+  (
+    document as unknown as {
+      startViewTransition: (cb: () => void) => object;
+    }
+  ).startViewTransition = (cb: () => void) => {
     cb();
     return {
       finished: Promise.resolve(),

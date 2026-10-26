@@ -24,7 +24,8 @@ export function getMonthGrid(
 ): CalendarWeek[] {
   const startOffset = weekStart === "sun" ? 0 : 1;
   const firstWeekday = weekdayOf(year, month, 1);
-  const leadingCount = (firstWeekday - startOffset + DAYS_PER_WEEK) % DAYS_PER_WEEK;
+  const leadingCount =
+    (firstWeekday - startOffset + DAYS_PER_WEEK) % DAYS_PER_WEEK;
   const cellCount = WEEKS_PER_MONTH_GRID * DAYS_PER_WEEK;
 
   const days: CalendarDay[] = [];

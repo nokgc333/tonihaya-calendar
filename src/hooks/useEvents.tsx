@@ -1,6 +1,13 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import type { CalendarEvent, EventDraft } from "@/domain/event";
 import { LocalStorageEventRepository } from "@/data/localStorageEventRepository";
 import type { EventRepository } from "@/data/eventRepository";
@@ -37,7 +44,6 @@ export function EventProvider({
         setEvents(list);
         setLoading(false);
       });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const value = useMemo<EventContextValue>(
@@ -67,7 +73,9 @@ export function EventProvider({
         } catch {
           return false;
         }
-        setEvents((prev) => prev.map((e) => (e.id === updated.id ? updated : e)));
+        setEvents((prev) =>
+          prev.map((e) => (e.id === updated.id ? updated : e)),
+        );
         return true;
       },
       async removeEvent(id) {
@@ -83,7 +91,9 @@ export function EventProvider({
     [events, loading],
   );
 
-  return <EventContext.Provider value={value}>{children}</EventContext.Provider>;
+  return (
+    <EventContext.Provider value={value}>{children}</EventContext.Provider>
+  );
 }
 
 export function useEvents(): EventContextValue {
