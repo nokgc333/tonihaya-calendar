@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, type RefObject } from "react";
+import { useRef } from "react";
 import { buildWeekView, type JumpLevel } from "@/domain/view";
 import { fromEpochDay, toEpochDay, type CivilDate } from "@/domain/shared/date";
 import type { WeekStart } from "@/domain/calendar";
@@ -11,35 +11,16 @@ import { WeekDayHeaders } from "@/components/WeekDayHeaders";
 import { WeekAllDayRow } from "@/components/WeekAllDayRow";
 import { WeekHourGrid } from "@/components/WeekHourGrid";
 import {
-  initialScrollTop,
+  useEscapeToBack,
+  useScrollToNow,
+} from "@/components/useTimelineEffects";
+import {
   isSameDay,
   nowLineOffset,
   weekRangeLabel,
 } from "@/components/weekLayout";
 
 const DAYS_PER_WEEK = 7;
-
-function useEscapeToBack(onBack: () => void): void {
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent): void => {
-      if (e.key === "Escape") onBack();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [onBack]);
-}
-
-function useScrollToNow(
-  ref: RefObject<HTMLDivElement | null>,
-  todayIndex: number,
-  date: CivilDate,
-): void {
-  const { year, month, day } = date;
-  useEffect(() => {
-    if (!ref.current || todayIndex < 0) return;
-    ref.current.scrollTop = initialScrollTop(new Date());
-  }, [ref, todayIndex, year, month, day]);
-}
 
 interface WeekViewProps {
   readonly year: number;

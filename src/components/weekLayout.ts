@@ -3,6 +3,7 @@ import type { CivilDate } from "@/domain/shared/date";
 
 export const HOUR_HEIGHT = 48;
 export const HOURS = Array.from({ length: 24 }, (_, h) => h);
+export const DAY_GRID_COLS = "3.5rem 1fr";
 export const GRID_COLS = "3.5rem repeat(7, minmax(4.5rem, 1fr))";
 const SCROLL_LEAD_HOURS = 2;
 const MINUTES_PER_HOUR = 60;
