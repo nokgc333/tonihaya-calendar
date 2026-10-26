@@ -1,0 +1,13 @@
+.next
+out
+node_modules
+package-lock.json
+coverage
+.lighthouse
+.lighthouseci
+.vercel
+.superpowers
+docs
+*.md
+next-env.d.ts
+*.tsbuildinfo
