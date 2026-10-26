@@ -25,9 +25,31 @@ describe("TodayHeader", () => {
     );
   });
 
-  it("shows an empty heading until today is known", () => {
+  it("has no readable text until today is known", () => {
     render(<TodayHeader today={null} countdowns={null} />);
-    expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("");
+    expect(
+      screen.getByRole("heading", { level: 1, name: "" }),
+    ).toBeInTheDocument();
+  });
+
+  it("holds the room of the date with hidden text until today is known, so that the page does not move when it arrives", () => {
+    const { container } = render(
+      <TodayHeader today={null} countdowns={null} />,
+    );
+    const placeholder = container.querySelector("h1 span")!;
+    expect(placeholder).toHaveAttribute("aria-hidden", "true");
+    expect(placeholder.className).toContain("invisible");
+    expect(placeholder.textContent).toMatch(/年.*月.*日.*曜日/);
+  });
+
+  it("replaces the hidden text with the date once today is known", () => {
+    render(
+      <TodayHeader
+        today={{ year: 2026, month: 7, day: 15 }}
+        countdowns={null}
+      />,
+    );
+    expect(document.querySelector("h1 span")).toBeNull();
   });
 
   it("shows the countdown chips only when there are countdowns", () => {

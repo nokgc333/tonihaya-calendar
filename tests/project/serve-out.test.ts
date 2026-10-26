@@ -155,3 +155,62 @@ describe("the static server headers", () => {
     }
   });
 });
+
+describe("the static server compression", () => {
+  let dir: string;
+  let server: ReturnType<typeof createStaticServer>;
+  let base: string;
+  const big = "<p>".padEnd(5000, "a");
+
+  beforeAll(async () => {
+    dir = mkdtempSync(join(tmpdir(), "serve-out-z-"));
+    writeFileSync(join(dir, "index.html"), big);
+    writeFileSync(join(dir, "logo.png"), Buffer.alloc(4000, 1));
+    server = createStaticServer(dir);
+    await new Promise<void>((done) => server.listen(0, done));
+    base = `http://localhost:${(server.address() as AddressInfo).port}`;
+  });
+
+  afterAll(async () => {
+    await new Promise((done) => server.close(done));
+    rmSync(dir, { recursive: true, force: true });
+  });
+
+  it("compresses text with the best encoding the client accepts", async () => {
+    const res = await fetch(`${base}/`, {
+      headers: { "Accept-Encoding": "br, gzip" },
+    });
+    expect(res.headers.get("content-encoding")).toBe("br");
+    expect(await res.text()).toBe(big);
+  });
+
+  it("falls back to gzip when the client does not accept br", async () => {
+    const res = await fetch(`${base}/`, {
+      headers: { "Accept-Encoding": "gzip" },
+    });
+    expect(res.headers.get("content-encoding")).toBe("gzip");
+    expect(await res.text()).toBe(big);
+  });
+
+  it("sends the text as it is when the client accepts no encoding", async () => {
+    const res = await fetch(`${base}/`, {
+      headers: { "Accept-Encoding": "identity" },
+    });
+    expect(res.headers.get("content-encoding")).toBeNull();
+    expect(res.headers.get("content-length")).toBe(String(big.length));
+  });
+
+  it("does not compress images", async () => {
+    const res = await fetch(`${base}/logo.png`, {
+      headers: { "Accept-Encoding": "br, gzip" },
+    });
+    expect(res.headers.get("content-encoding")).toBeNull();
+  });
+
+  it("tells caches that the answer depends on the accepted encoding", async () => {
+    const res = await fetch(`${base}/`, {
+      headers: { "Accept-Encoding": "gzip" },
+    });
+    expect(res.headers.get("vary")).toContain("Accept-Encoding");
+  });
+});
