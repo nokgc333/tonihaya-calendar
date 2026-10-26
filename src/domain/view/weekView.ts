@@ -29,16 +29,15 @@ export interface WeekViewModel {
 }
 
 export function buildWeekView(
-  year: number,
-  month: number,
-  day: number,
+  reference: CivilDate,
   today: CivilDate | null,
   settings: { weekStart: WeekStart },
 ): WeekViewModel {
   const startOffset = settings.weekStart === "sun" ? 0 : 1;
-  const refWeekday = weekdayOf(year, month, day);
+  const refWeekday = weekdayOf(reference.year, reference.month, reference.day);
   const back = (refWeekday - startOffset + DAYS_PER_WEEK) % DAYS_PER_WEEK;
-  const startEpoch = toEpochDay(year, month, day) - back;
+  const startEpoch =
+    toEpochDay(reference.year, reference.month, reference.day) - back;
 
   const days: WeekDay[] = [];
   for (let i = 0; i < DAYS_PER_WEEK; i++) {
