@@ -30,9 +30,9 @@ describe("coverage", () => {
   });
 
   it.each(["statements", "branches", "functions", "lines"])(
-    "fails the run when %s coverage drops below the floor of 85%",
+    "fails the run when %s coverage drops below the floor of 95%",
     (name) => {
-      expect(thresholdOf(name)).toBeGreaterThanOrEqual(85);
+      expect(thresholdOf(name)).toBeGreaterThanOrEqual(95);
     },
   );
 
