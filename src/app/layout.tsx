@@ -28,6 +28,9 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <body>
+        <a href="#main" className="skip-link">
+          本文へ移動
+        </a>
         {children}
         <SpeedInsights />
       </body>

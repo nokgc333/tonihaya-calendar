@@ -71,7 +71,10 @@ export function OverviewBody({
             ))}
           </div>
         </div>
-        <aside className="hidden min-w-[280px] flex-1 min-[1600px]:block">
+        <aside
+          aria-label="祝日一覧"
+          className="hidden min-w-[280px] flex-1 min-[1600px]:block"
+        >
           <HolidayList year={year} today={today} onMonthClick={onMonthClick} />
         </aside>
       </div>

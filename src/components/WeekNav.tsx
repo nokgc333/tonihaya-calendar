@@ -45,7 +45,10 @@ export function WeekNav({
   readonly onWeekStartChange: (weekStart: WeekStart) => void;
 }) {
   return (
-    <nav className="mb-5 flex min-h-10 shrink-0 flex-wrap items-center gap-2">
+    <nav
+      aria-label="週の表示の操作"
+      className="mb-5 flex min-h-10 shrink-0 flex-wrap items-center gap-2"
+    >
       <button
         type="button"
         onClick={onBack}
