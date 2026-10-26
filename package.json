@@ -10,7 +10,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint . --max-warnings=2",
+    "lint": "eslint .",
     "test": "vitest run",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
