@@ -90,25 +90,21 @@ describe("day palette", () => {
     },
   ];
 
-  it.each(kinds)(
-    "colors the text of a $name",
-    ({ name: _name, text, ...day }) => {
-      expect(dayTextColor(day)).toBe(text);
-    },
-  );
+  it.each(kinds)("colors the text of a $name", ({ name, text, ...day }) => {
+    expect(dayTextColor(day), name).toBe(text);
+  });
 
-  it.each(kinds)(
-    "tints the background of a $name",
-    ({ name: _name, bg, ...day }) => {
-      expect(dayBgColor(day)).toBe(bg);
-    },
-  );
+  it.each(kinds)("tints the background of a $name", ({ name, bg, ...day }) => {
+    expect(dayBgColor(day), name).toBe(bg);
+  });
 
   it.each(kinds)(
     "uses only variables that the stylesheet defines for a $name",
-    ({ name: _name, text, bg }) => {
+    ({ name, text, bg }) => {
       for (const reference of [text, bg]) {
-        expect(defined(variableOf(reference)), reference).toBe(true);
+        expect(defined(variableOf(reference)), `${name}: ${reference}`).toBe(
+          true,
+        );
       }
     },
   );
