@@ -9,6 +9,8 @@ const eslintConfig = [
       "out/**",
       "node_modules/**",
       "coverage/**",
+      "playwright-report/**",
+      "test-results/**",
       ".lighthouse/**",
       ".lighthouseci/**",
       ".vercel/**",

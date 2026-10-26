@@ -11,3 +11,5 @@ docs
 *.md
 next-env.d.ts
 *.tsbuildinfo
+playwright-report
+test-results
