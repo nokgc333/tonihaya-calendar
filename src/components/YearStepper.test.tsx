@@ -56,4 +56,18 @@ describe("YearStepper", () => {
     render(<YearStepper year={2030} today={today} onYearChange={vi.fn()} />);
     expect(screen.getByRole("button", { name: "今年" })).toBeEnabled();
   });
+
+  it("goes to the year of the clock when today is not known yet", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date(2031, 0, 5));
+    const onYearChange = vi.fn();
+    render(
+      <YearStepper year={2026} today={null} onYearChange={onYearChange} />,
+    );
+    await userEvent
+      .setup({ advanceTimers: vi.advanceTimersByTime })
+      .click(screen.getByRole("button", { name: "今年" }));
+    expect(onYearChange).toHaveBeenCalledWith(2031);
+    vi.useRealTimers();
+  });
 });

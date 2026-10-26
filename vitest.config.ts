@@ -11,8 +11,10 @@ export default defineConfig({
     setupFiles: ["./vitest.setup.ts"],
     coverage: {
       provider: "v8",
-      include: ["src/domain/**"],
-      thresholds: { lines: 80, functions: 80, branches: 80, statements: 80 },
+      include: ["src/**/*.{ts,tsx}"],
+      exclude: ["src/**/*.test.{ts,tsx}", "src/**/*.d.ts", "src/app/**"],
+      reporter: ["text-summary", "text", "html", "lcov"],
+      thresholds: { lines: 95, functions: 95, branches: 95, statements: 95 },
     },
   },
   resolve: {

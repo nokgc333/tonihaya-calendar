@@ -24,7 +24,13 @@ jobs:
       - run: npm run lint
       - run: npm run format:check
       - run: npm run type-check
-      - run: npm run test
+      - run: npm run test:coverage
+      - if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage
+          path: coverage/
+          retention-days: 7
       - run: npm run build
       - uses: actions/upload-artifact@v7
         with:
