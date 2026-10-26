@@ -8,7 +8,7 @@ const read = (file: string) => readFileSync(join(root, file), "utf-8");
 const pkg = JSON.parse(read("package.json"));
 const config = read("eslint.config.mjs");
 
-const CURRENT_WARNINGS = 4;
+const CURRENT_WARNINGS = 3;
 
 describe("lint", () => {
   it("runs the ESLint command line without prompting, instead of the deprecated next lint", () => {
