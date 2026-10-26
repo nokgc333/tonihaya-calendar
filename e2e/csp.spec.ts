@@ -38,7 +38,9 @@ test("serves the pages with the policy of vercel.json, without inline scripts in
   const response = await page.goto("/");
   expect(response?.headers()["content-security-policy"]).toBe(policy);
   expect(policy).not.toMatch(/script-src[^;]*'unsafe-inline'/);
-  const inline = await page.locator("script:not([src])").count();
+  const inline = await page
+    .locator("script:not([src]):not([type='application/ld+json'])")
+    .count();
   expect(inline).toBe(0);
 });
 
