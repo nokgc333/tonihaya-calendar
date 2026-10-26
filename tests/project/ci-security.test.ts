@@ -47,6 +47,18 @@ describe("the dependency review job", () => {
   it("only reads the repository", () => {
     expect(review).toMatch(/permissions:\s*\n\s*contents:\s*read/);
   });
+
+  it("asks GitHub whether the dependency graph is on, which the review needs, and runs the review only then", () => {
+    expect(review).toContain("dependency-graph/compare");
+    expect(review).toMatch(
+      /if:\s*steps\.graph\.outputs\.enabled == 'true'[\s\S]*dependency-review-action/,
+    );
+  });
+
+  it("warns in the run when the dependency graph is off, instead of failing for a reason that is not a vulnerability", () => {
+    expect(review).toContain("::warning::");
+    expect(review).toContain("enabled=false");
+  });
 });
 
 describe("the CodeQL workflow", () => {
