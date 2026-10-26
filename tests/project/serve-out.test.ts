@@ -1,0 +1,216 @@
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join, resolve, sep } from "node:path";
+import type { AddressInfo } from "node:net";
+
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
+
+import {
+  createStaticServer,
+  headersFromConfig,
+  resolveRequestPath,
+} from "../../scripts/serve-out.mjs";
+
+const root = resolve("/site");
+
+describe("resolveRequestPath", () => {
+  it("maps a path inside the root", () => {
+    expect(resolveRequestPath(root, "/a/b.js?x=1")).toBe(
+      resolve(root, "a/b.js"),
+    );
+  });
+
+  it("maps the root itself", () => {
+    expect(resolveRequestPath(root, "/")).toBe(root);
+  });
+
+  it.each([
+    "/../secret",
+    "/a/../../secret",
+    "/%2e%2e/secret",
+    "/../site-other/x",
+    "/..%2f..%2fetc/passwd",
+    "/%2e%2e%2fsecret",
+    "//../secret",
+    "/a/%2e%2e/%2e%2e/secret",
+  ])("never leaves the root for %s", (url) => {
+    const path = resolveRequestPath(root, url);
+    expect(path === null || path === root || path.startsWith(root + sep)).toBe(
+      true,
+    );
+  });
+
+  it.each(["/%2e%2e%2fsecret", "/..%2f..%2fetc/passwd"])(
+    "refuses an encoded slash that would walk up from %s",
+    (url) => {
+      expect(resolveRequestPath(root, url)).toBeNull();
+    },
+  );
+
+  it.each(["/a%00.js", "/%E0%A4%A"])("refuses %s", (url) => {
+    expect(resolveRequestPath(root, url)).toBeNull();
+  });
+});
+
+describe("the static server", () => {
+  let dir: string;
+  let server: ReturnType<typeof createStaticServer>;
+  let base: string;
+
+  beforeAll(async () => {
+    dir = mkdtempSync(join(tmpdir(), "serve-out-"));
+    writeFileSync(join(dir, "index.html"), "<h1>home</h1>");
+    writeFileSync(join(dir, "404.html"), "<h1>missing</h1>");
+    mkdirSync(join(dir, "_next"));
+    writeFileSync(join(dir, "_next", "app.js"), "console.log(1)");
+    writeFileSync(join(dir, "..secret"), "outside");
+    server = createStaticServer(dir);
+    await new Promise<void>((done) => server.listen(0, done));
+    base = `http://localhost:${(server.address() as AddressInfo).port}`;
+  });
+
+  afterAll(async () => {
+    await new Promise((done) => server.close(done));
+    rmSync(dir, { recursive: true, force: true });
+  });
+
+  it("serves the index for the root and for a query string", async () => {
+    expect(await (await fetch(`${base}/?y=2026`)).text()).toBe("<h1>home</h1>");
+  });
+
+  it("serves a file with its content type", async () => {
+    const res = await fetch(`${base}/_next/app.js`);
+    expect(res.status).toBe(200);
+    expect(res.headers.get("content-type")).toContain("text/javascript");
+  });
+
+  it("answers an unknown path with the 404 page and the 404 status", async () => {
+    const res = await fetch(`${base}/nothing`);
+    expect(res.status).toBe(404);
+    expect(await res.text()).toBe("<h1>missing</h1>");
+  });
+
+  it("does not serve a file outside the root", async () => {
+    const res = await fetch(`${base}/%2e%2e/${dir.split("/").pop()}`);
+    expect([403, 404]).toContain(res.status);
+  });
+
+  it("refuses methods that change things", async () => {
+    const res = await fetch(`${base}/`, { method: "POST" });
+    expect(res.status).toBe(405);
+  });
+
+  it("answers HEAD without a body", async () => {
+    const res = await fetch(`${base}/`, { method: "HEAD" });
+    expect(res.status).toBe(200);
+    expect(await res.text()).toBe("");
+  });
+});
+
+describe("headersFromConfig", () => {
+  const config = {
+    headers: [
+      {
+        source: "/(.*)",
+        headers: [
+          { key: "X-A", value: "1" },
+          { key: "X-B", value: "2" },
+        ],
+      },
+    ],
+  };
+
+  it("turns the rule for every path into a header object", () => {
+    expect(headersFromConfig(config)).toEqual({ "X-A": "1", "X-B": "2" });
+  });
+
+  it("gives no headers when there is no rule", () => {
+    expect(headersFromConfig({})).toEqual({});
+  });
+
+  it("refuses a rule for another source, because the server cannot match it", () => {
+    expect(() =>
+      headersFromConfig({ headers: [{ source: "/api/(.*)", headers: [] }] }),
+    ).toThrow(/source/);
+  });
+});
+
+describe("the static server headers", () => {
+  it("sends the headers it was given on pages, assets and the 404 page", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "serve-out-h-"));
+    writeFileSync(join(dir, "index.html"), "<h1>home</h1>");
+    const server = createStaticServer(dir, { "X-Test": "yes" });
+    await new Promise<void>((done) => server.listen(0, done));
+    const base = `http://localhost:${(server.address() as AddressInfo).port}`;
+    try {
+      for (const path of ["/", "/missing"]) {
+        expect(
+          (await fetch(`${base}${path}`)).headers.get("x-test"),
+          path,
+        ).toBe("yes");
+      }
+    } finally {
+      await new Promise((done) => server.close(done));
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("the static server compression", () => {
+  let dir: string;
+  let server: ReturnType<typeof createStaticServer>;
+  let base: string;
+  const big = "<p>".padEnd(5000, "a");
+
+  beforeAll(async () => {
+    dir = mkdtempSync(join(tmpdir(), "serve-out-z-"));
+    writeFileSync(join(dir, "index.html"), big);
+    writeFileSync(join(dir, "logo.png"), Buffer.alloc(4000, 1));
+    server = createStaticServer(dir);
+    await new Promise<void>((done) => server.listen(0, done));
+    base = `http://localhost:${(server.address() as AddressInfo).port}`;
+  });
+
+  afterAll(async () => {
+    await new Promise((done) => server.close(done));
+    rmSync(dir, { recursive: true, force: true });
+  });
+
+  it("compresses text with the best encoding the client accepts", async () => {
+    const res = await fetch(`${base}/`, {
+      headers: { "Accept-Encoding": "br, gzip" },
+    });
+    expect(res.headers.get("content-encoding")).toBe("br");
+    expect(await res.text()).toBe(big);
+  });
+
+  it("falls back to gzip when the client does not accept br", async () => {
+    const res = await fetch(`${base}/`, {
+      headers: { "Accept-Encoding": "gzip" },
+    });
+    expect(res.headers.get("content-encoding")).toBe("gzip");
+    expect(await res.text()).toBe(big);
+  });
+
+  it("sends the text as it is when the client accepts no encoding", async () => {
+    const res = await fetch(`${base}/`, {
+      headers: { "Accept-Encoding": "identity" },
+    });
+    expect(res.headers.get("content-encoding")).toBeNull();
+    expect(res.headers.get("content-length")).toBe(String(big.length));
+  });
+
+  it("does not compress images", async () => {
+    const res = await fetch(`${base}/logo.png`, {
+      headers: { "Accept-Encoding": "br, gzip" },
+    });
+    expect(res.headers.get("content-encoding")).toBeNull();
+  });
+
+  it("tells caches that the answer depends on the accepted encoding", async () => {
+    const res = await fetch(`${base}/`, {
+      headers: { "Accept-Encoding": "gzip" },
+    });
+    expect(res.headers.get("vary")).toContain("Accept-Encoding");
+  });
+});

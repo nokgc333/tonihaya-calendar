@@ -10,6 +10,7 @@ import {
 import type { CivilDate } from "@/domain/shared/date";
 import { useEvents } from "@/hooks/useEvents";
 import { EventModal } from "@/components/EventModal";
+import { useAnnouncer } from "@/hooks/useAnnouncer";
 
 interface EditorState {
   readonly editingId: string | null;
@@ -34,6 +35,7 @@ export function EventEditorProvider({
   readonly children: React.ReactNode;
 }) {
   const { events, addEvent, updateEvent, removeEvent } = useEvents();
+  const announce = useAnnouncer();
   const [state, setState] = useState<EditorState | null>(null);
 
   const openCreate = useCallback((defaultDate: CivilDate) => {
@@ -64,14 +66,20 @@ export function EventEditorProvider({
             const ok = editing
               ? await updateEvent({ ...editing, ...draft })
               : await addEvent(draft);
-            if (ok) close();
+            if (ok) {
+              close();
+              announce("予定を保存しました");
+            }
             return ok;
           }}
           onDelete={
             editing
               ? async () => {
                   const ok = await removeEvent(editing.id);
-                  if (ok) close();
+                  if (ok) {
+                    close();
+                    announce("予定を削除しました");
+                  }
                   return ok;
                 }
               : undefined

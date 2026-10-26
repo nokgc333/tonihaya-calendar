@@ -80,3 +80,12 @@ describe('formatYearWithEra ("Gregorian year (era year)")', () => {
     );
   });
 });
+
+describe("toWareki before the first listed era", () => {
+  test("a date before the last listed era start falls back to that era", () => {
+    expect(toWareki({ year: 1900, month: 1, day: 1 })).toEqual({
+      name: "昭和",
+      year: -25,
+    });
+  });
+});

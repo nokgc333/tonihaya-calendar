@@ -16,11 +16,13 @@ export function SegmentButton({
       type="button"
       {...rest}
       className={`rounded-md border px-2 py-1 text-xs tabular-nums transition-opacity ${
-        active ? "font-bold" : "opacity-60 hover:opacity-100"
+        active
+          ? "font-bold"
+          : "text-[var(--text-muted)] hover:text-[var(--text)]"
       } ${className}`}
       style={{
         borderColor: active ? "var(--border-strong)" : "var(--border)",
-        color: "var(--text)",
+        ...(active ? { color: "var(--text)" } : {}),
         background: active ? "var(--surface)" : "transparent",
       }}
     >

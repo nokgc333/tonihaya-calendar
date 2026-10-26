@@ -266,6 +266,107 @@ describe("validateEvent", () => {
   });
 });
 
+describe("validateEvent in detail", () => {
+  const draft = {
+    title: "x",
+    allDay: false,
+    colorKey: "blue",
+    priority: "normal",
+    start: {
+      date: { year: 2026, month: 7, day: 12 },
+      time: { hour: 9, minute: 0 },
+    },
+    end: {
+      date: { year: 2026, month: 7, day: 12 },
+      time: { hour: 10, minute: 0 },
+    },
+  } as const;
+
+  it("treats a title of only spaces as empty", () => {
+    expect(validateEvent({ ...draft, title: "   " })).toEqual([
+      "タイトルを入力してください",
+    ]);
+  });
+
+  it("accepts notes exactly at the limit and an empty note", () => {
+    expect(
+      validateEvent({ ...draft, note: "n".repeat(NOTE_MAX_LENGTH) }),
+    ).toEqual([]);
+    expect(validateEvent({ ...draft, note: "" })).toEqual([]);
+  });
+
+  it("accepts a safe URL exactly at the limit", () => {
+    const url = "https://example.com/" + "a".repeat(URL_MAX_LENGTH - 20);
+    expect(url.length).toBe(URL_MAX_LENGTH);
+    expect(validateEvent({ ...draft, url })).toEqual([]);
+  });
+
+  it("reports a too long but otherwise safe URL once", () => {
+    const url = "https://example.com/" + "a".repeat(URL_MAX_LENGTH);
+    expect(validateEvent({ ...draft, url })).toEqual([
+      `URLは${URL_MAX_LENGTH}文字以内にしてください`,
+    ]);
+  });
+
+  it("asks for both times when a timed event has none", () => {
+    expect(
+      validateEvent({
+        ...draft,
+        start: { date: draft.start.date },
+        end: { date: draft.end.date },
+      }),
+    ).toEqual(["時間イベントは開始・終了時刻が必要です"]);
+  });
+
+  it("asks for both times when only one of them is missing", () => {
+    expect(validateEvent({ ...draft, end: { date: draft.end.date } })).toEqual([
+      "時間イベントは開始・終了時刻が必要です",
+    ]);
+  });
+
+  it("does not compare times across different days", () => {
+    expect(
+      validateEvent({
+        ...draft,
+        end: {
+          date: { year: 2026, month: 7, day: 13 },
+          time: { hour: 8, minute: 0 },
+        },
+      }),
+    ).toEqual([]);
+  });
+
+  it("does not ask an all-day event for times", () => {
+    expect(
+      validateEvent({
+        ...draft,
+        allDay: true,
+        start: { date: draft.start.date },
+        end: { date: draft.end.date },
+      }),
+    ).toEqual([]);
+  });
+
+  it("lists every problem in the order of the form: title, note, URL, dates, times", () => {
+    expect(
+      validateEvent({
+        ...draft,
+        title: "",
+        note: "n".repeat(NOTE_MAX_LENGTH + 1),
+        url: "ftp://example.com",
+        start: { date: { year: 2026, month: 7, day: 12 } },
+        end: { date: { year: 2026, month: 7, day: 11 } },
+      }),
+    ).toEqual([
+      "タイトルを入力してください",
+      `備考は${NOTE_MAX_LENGTH}文字以内にしてください`,
+      "URLは http/https のみ使用できます",
+      "終了日は開始日以降にしてください",
+      "時間イベントは開始・終了時刻が必要です",
+    ]);
+  });
+});
+
 describe("sortForDay", () => {
   it("all-day events first, then timed events by start time ascending", () => {
     const t9 = timed("t9", [2026, 7, 12], 9, 10);
@@ -327,5 +428,58 @@ describe("isStoredCalendarEvent", () => {
     expect(isStoredCalendarEvent({ ...validAllDay, createdAt: "0" })).toBe(
       false,
     );
+  });
+
+  it("rejects a title, an id or an all-day flag of the wrong type", () => {
+    expect(isStoredCalendarEvent({ ...validAllDay, title: 1 })).toBe(false);
+    expect(isStoredCalendarEvent({ ...validAllDay, id: 1 })).toBe(false);
+    expect(isStoredCalendarEvent({ ...validAllDay, allDay: "yes" })).toBe(
+      false,
+    );
+  });
+
+  it("rejects an end point that is not a date", () => {
+    expect(isStoredCalendarEvent({ ...validAllDay, end: { date: 1 } })).toBe(
+      false,
+    );
+    expect(isStoredCalendarEvent({ ...validAllDay, start: null })).toBe(false);
+  });
+
+  it("accepts a URL and a note when they are strings, or absent", () => {
+    expect(
+      isStoredCalendarEvent({
+        ...validAllDay,
+        url: "https://x.test",
+        note: "n",
+      }),
+    ).toBe(true);
+    expect(
+      isStoredCalendarEvent({
+        ...validAllDay,
+        url: undefined,
+        note: undefined,
+      }),
+    ).toBe(true);
+  });
+
+  it("rejects a URL or a note that is not a string", () => {
+    expect(isStoredCalendarEvent({ ...validAllDay, url: 1 })).toBe(false);
+    expect(isStoredCalendarEvent({ ...validAllDay, note: {} })).toBe(false);
+    expect(isStoredCalendarEvent({ ...validAllDay, url: null })).toBe(false);
+  });
+
+  it("does not ask an all-day event for times, but asks a timed one", () => {
+    expect(
+      isStoredCalendarEvent({
+        ...validAllDay,
+        start: { date: validAllDay.start.date },
+      }),
+    ).toBe(true);
+    expect(
+      isStoredCalendarEvent({
+        ...validTimed,
+        end: { date: validTimed.end.date },
+      }),
+    ).toBe(false);
   });
 });
