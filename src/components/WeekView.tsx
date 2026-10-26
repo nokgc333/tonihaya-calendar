@@ -1,45 +1,47 @@
 "use client";
 
-import { Fragment, useEffect, useRef } from "react";
-import {
-  buildWeekView,
-  minutesToOffset,
-  type JumpLevel,
-  type WeekDay,
-} from "@/domain/view";
+import { useEffect, useRef, type RefObject } from "react";
+import { buildWeekView, type JumpLevel } from "@/domain/view";
 import { fromEpochDay, toEpochDay, type CivilDate } from "@/domain/shared/date";
 import type { WeekStart } from "@/domain/calendar";
-import { LevelSwitcher } from "@/components/LevelSwitcher";
-import { SettingsMenu } from "@/components/SettingsMenu";
-import { dayBgColor, dayTextColor } from "@/components/dayPalette";
-import { WEEKDAY_JA } from "@/components/weekdays";
-import { DayTimedEvents } from "@/components/DayTimedEvents";
-import { AddEventButton } from "@/components/AddEventButton";
 import { useEvents } from "@/hooks/useEvents";
 import { useEventEditor } from "@/hooks/useEventEditor";
-import { eventsForDay } from "@/domain/event";
-import { eventColor } from "@/components/eventColors";
+import { WeekNav } from "@/components/WeekNav";
+import { WeekDayHeaders } from "@/components/WeekDayHeaders";
+import { WeekAllDayRow } from "@/components/WeekAllDayRow";
+import { WeekHourGrid } from "@/components/WeekHourGrid";
+import {
+  initialScrollTop,
+  isSameDay,
+  nowLineOffset,
+  weekRangeLabel,
+} from "@/components/weekLayout";
 
-const HOUR_HEIGHT = 48;
-const HOURS = Array.from({ length: 24 }, (_, h) => h);
-const GRID_COLS = "3.5rem repeat(7, minmax(4.5rem, 1fr))";
-const SCROLL_LEAD_HOURS = 2;
+const DAYS_PER_WEEK = 7;
 
-export function WeekView({
-  year,
-  month,
-  day,
-  today,
-  onBack,
-  onWeekChange,
-  onDayOpen,
-  dayPivot,
-  pivotDay,
-  onJump,
-  weekStart,
-  onWeekStartChange,
-  jumpPivot,
-}: {
+function useEscapeToBack(onBack: () => void): void {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent): void => {
+      if (e.key === "Escape") onBack();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onBack]);
+}
+
+function useScrollToNow(
+  ref: RefObject<HTMLDivElement | null>,
+  todayIndex: number,
+  date: CivilDate,
+): void {
+  const { year, month, day } = date;
+  useEffect(() => {
+    if (!ref.current || todayIndex < 0) return;
+    ref.current.scrollTop = initialScrollTop(new Date());
+  }, [ref, todayIndex, year, month, day]);
+}
+
+interface WeekViewProps {
   readonly year: number;
   readonly month: number;
   readonly day: number;
@@ -53,286 +55,61 @@ export function WeekView({
   readonly weekStart: WeekStart;
   readonly onWeekStartChange: (weekStart: WeekStart) => void;
   readonly jumpPivot: CivilDate | null;
-}) {
-  const week = buildWeekView({ year, month, day }, today, { weekStart });
+}
+
+export function WeekView(props: WeekViewProps) {
+  const { year, month, day, today, onBack, onWeekChange, onDayOpen } = props;
+  const { dayPivot, pivotDay, jumpPivot, weekStart } = props;
+  const date = { year, month, day };
+  const week = buildWeekView(date, today, { weekStart });
   const bodyRef = useRef<HTMLDivElement>(null);
   const { events } = useEvents();
   const { openEdit } = useEventEditor();
   const todayIndex = week.days.findIndex((d) => d.isToday);
-  const isPivot = (d: WeekDay): boolean =>
-    dayPivot !== null &&
-    dayPivot.year === d.year &&
-    dayPivot.month === d.month &&
-    dayPivot.day === d.day;
-  const isJump = (d: WeekDay): boolean =>
-    jumpPivot !== null &&
-    jumpPivot.year === d.year &&
-    jumpPivot.month === d.month &&
-    jumpPivot.day === d.day;
-  const isDayZoom =
-    pivotDay !== null && dayPivot === null && jumpPivot === null;
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent): void => {
-      if (e.key === "Escape") onBack();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [onBack]);
-
-  useEffect(() => {
-    if (!bodyRef.current || todayIndex < 0) return;
-    const now = new Date();
-    const minutes = now.getHours() * 60 + now.getMinutes();
-    bodyRef.current.scrollTop = Math.max(
-      0,
-      minutesToOffset(minutes, HOUR_HEIGHT) - HOUR_HEIGHT * SCROLL_LEAD_HOURS,
-    );
-  }, [todayIndex, year, month, day]);
+  useEscapeToBack(onBack);
+  useScrollToNow(bodyRef, todayIndex, date);
 
   const shiftWeek = (deltaWeeks: number): void => {
-    const next = fromEpochDay(toEpochDay(year, month, day) + deltaWeeks * 7);
+    const next = fromEpochDay(
+      toEpochDay(year, month, day) + deltaWeeks * DAYS_PER_WEEK,
+    );
     onWeekChange(next.year, next.month, next.day);
   };
 
-  const first = week.days[0];
-  const last = week.days[6];
-  const endNeedsPrefix = first.year !== last.year;
-  const weekRangeLabel =
-    `${first.year}年 ${first.month}月${first.day}日 〜 ` +
-    (endNeedsPrefix
-      ? `${last.year}年 ${last.month}月${last.day}日`
-      : `${last.month}月${last.day}日`);
-  const nowOffset =
-    todayIndex >= 0
-      ? minutesToOffset(
-          new Date().getHours() * 60 + new Date().getMinutes(),
-          HOUR_HEIGHT,
-        )
-      : 0;
-
   return (
     <>
-      <nav className="mb-5 flex min-h-10 shrink-0 flex-wrap items-center gap-2">
-        <button
-          type="button"
-          onClick={onBack}
-          className="rounded-md border px-3 py-1 text-sm font-medium transition-opacity hover:opacity-70"
-          style={{ borderColor: "var(--border)", color: "var(--text)" }}
-          aria-label="月に戻る（Escでも戻れます）"
-        >
-          ‹ 戻る
-        </button>
-        <div className="ml-2 flex items-center gap-1.5">
-          <button
-            type="button"
-            onClick={() => shiftWeek(-1)}
-            className="rounded-md border px-2 py-1 text-sm transition-opacity hover:opacity-70"
-            style={{ borderColor: "var(--border)", color: "var(--text)" }}
-            aria-label="前の週"
-          >
-            ‹
-          </button>
-          <span className="min-w-[15rem] text-center text-xl font-bold tabular-nums">
-            {weekRangeLabel}
-          </span>
-          <button
-            type="button"
-            onClick={() => shiftWeek(1)}
-            className="rounded-md border px-2 py-1 text-sm transition-opacity hover:opacity-70"
-            style={{ borderColor: "var(--border)", color: "var(--text)" }}
-            aria-label="次の週"
-          >
-            ›
-          </button>
-        </div>
-        <div className="ml-auto flex items-center gap-3">
-          <AddEventButton date={{ year, month, day }} />
-          <LevelSwitcher current="week" onJump={onJump} />
-          <SettingsMenu
-            weekStart={weekStart}
-            onWeekStartChange={onWeekStartChange}
-          />
-        </div>
-      </nav>
-
+      <WeekNav
+        rangeLabel={weekRangeLabel(week.days[0], week.days[DAYS_PER_WEEK - 1])}
+        date={date}
+        weekStart={weekStart}
+        onBack={onBack}
+        onShift={shiftWeek}
+        onJump={props.onJump}
+        onWeekStartChange={props.onWeekStartChange}
+      />
       <div
         className="mx-auto flex min-h-0 w-full max-w-[1256px] flex-1 flex-col overflow-x-auto rounded-md border"
         style={{ borderColor: "var(--border)" }}
       >
-        <div
-          className="sticky top-0 z-10 grid shrink-0"
-          style={{
-            gridTemplateColumns: GRID_COLS,
-            background: "var(--surface)",
-            viewTransitionName: isDayZoom ? "day-zoom" : undefined,
-          }}
-        >
-          <div />
-          {week.days.map((d) => (
-            <button
-              key={`h-${d.month}-${d.day}`}
-              type="button"
-              onClick={() => onDayOpen(d.year, d.month, d.day)}
-              className="w-full cursor-pointer px-1 py-[7px] text-center transition-opacity hover:opacity-70"
-              style={{
-                ...(isPivot(d)
-                  ? { viewTransitionName: "hour-zoom" }
-                  : isJump(d)
-                    ? { viewTransitionName: "jump-zoom" }
-                    : {}),
-                ...(d.isToday
-                  ? { boxShadow: "inset 0 0 0 1.5px var(--today-bg)" }
-                  : {}),
-              }}
-              aria-label={`${d.month}月${d.day}日を開く`}
-            >
-              <div className="text-[11px]" style={{ color: dayTextColor(d) }}>
-                {WEEKDAY_JA[d.weekday]}
-              </div>
-              <div className="text-base font-bold tabular-nums">
-                <span className="relative inline-flex items-center justify-center">
-                  {d.isHoliday ? (
-                    <span
-                      aria-hidden
-                      className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full"
-                      style={{
-                        background: "var(--holiday-disc)",
-                        width: "calc(1.5em + 1px)",
-                        height: "calc(1.5em + 1px)",
-                      }}
-                    />
-                  ) : null}
-                  <span
-                    className="relative"
-                    style={{ color: dayTextColor(d) }}
-                    {...(d.isToday ? { "aria-current": "date" as const } : {})}
-                  >
-                    {d.day}
-                  </span>
-                </span>
-              </div>
-            </button>
-          ))}
-        </div>
-
-        <div
-          className="grid shrink-0 border-y"
-          style={{
-            gridTemplateColumns: GRID_COLS,
-            borderColor: "var(--border-strong)",
-          }}
-        >
-          <div
-            className="flex items-center justify-end p-1 text-[10px]"
-            style={{ color: "var(--text-muted)" }}
-          >
-            終日
-          </div>
-          {week.days.map((d) => {
-            const allDayEvents = eventsForDay(events, {
-              year: d.year,
-              month: d.month,
-              day: d.day,
-            }).filter((e) => e.allDay);
-            return (
-              <div
-                key={`a-${d.month}-${d.day}`}
-                className="min-h-[33px] space-y-0.5 border-l p-0.5 text-[10px]"
-                style={{
-                  borderColor: "var(--border)",
-                  background: dayBgColor(d),
-                }}
-              >
-                {d.holidayName ? (
-                  <div
-                    className="text-center"
-                    style={{ color: "var(--accent-red)" }}
-                  >
-                    {d.holidayName}
-                  </div>
-                ) : null}
-                {allDayEvents.map((e) => {
-                  const c = eventColor(e.colorKey);
-                  return (
-                    <button
-                      key={e.id}
-                      type="button"
-                      data-event-id={e.id}
-                      onClick={() => openEdit(e.id)}
-                      className="block w-full truncate rounded px-1 text-left leading-tight transition-opacity hover:opacity-90"
-                      style={{
-                        background: c.bg,
-                        color: c.fg,
-                        border: `1px solid ${c.border}`,
-                      }}
-                      title={e.title}
-                    >
-                      {e.title}
-                    </button>
-                  );
-                })}
-              </div>
-            );
-          })}
-        </div>
-
+        <WeekDayHeaders
+          days={week.days}
+          isDayZoom={
+            pivotDay !== null && dayPivot === null && jumpPivot === null
+          }
+          isPivot={(d) => isSameDay(dayPivot, d)}
+          isJump={(d) => isSameDay(jumpPivot, d)}
+          onOpen={onDayOpen}
+        />
+        <WeekAllDayRow days={week.days} events={events} onSelect={openEdit} />
         <div ref={bodyRef} className="min-h-0 flex-1 overflow-y-auto">
-          <div
-            className="relative grid"
-            style={{ gridTemplateColumns: GRID_COLS }}
-          >
-            {HOURS.map((h) => (
-              <Fragment key={h}>
-                <div
-                  className="border-t pr-1 text-right text-[10px]"
-                  style={{
-                    height: HOUR_HEIGHT,
-                    borderColor: "var(--border)",
-                    color: "var(--text-muted)",
-                  }}
-                >
-                  {h}:00
-                </div>
-                {week.days.map((d) => (
-                  <button
-                    key={`c-${h}-${d.month}-${d.day}`}
-                    type="button"
-                    tabIndex={-1}
-                    aria-hidden="true"
-                    onClick={() => onDayOpen(d.year, d.month, d.day)}
-                    className="w-full cursor-pointer border-t border-l transition-opacity hover:opacity-80"
-                    style={{
-                      height: HOUR_HEIGHT,
-                      borderColor: "var(--border)",
-                      background: dayBgColor(d),
-                    }}
-                  />
-                ))}
-              </Fragment>
-            ))}
-            {week.days.map((d, i) => (
-              <DayTimedEvents
-                key={`ev-${d.month}-${d.day}`}
-                date={{ year: d.year, month: d.month, day: d.day }}
-                hourHeight={HOUR_HEIGHT}
-                dayLeft={`(3.5rem + (100% - 3.5rem) * ${i} / 7)`}
-                dayWidth="((100% - 3.5rem) / 7)"
-                onSelect={openEdit}
-              />
-            ))}
-            {todayIndex >= 0 && (
-              <div
-                className="pointer-events-none absolute z-[6]"
-                style={{
-                  top: nowOffset,
-                  left: `calc(3.5rem + ${todayIndex} * (100% - 3.5rem) / 7)`,
-                  width: `calc((100% - 3.5rem) / 7)`,
-                  borderTop: "2px solid var(--accent-red)",
-                }}
-              />
-            )}
-          </div>
+          <WeekHourGrid
+            days={week.days}
+            todayIndex={todayIndex}
+            nowOffset={todayIndex >= 0 ? nowLineOffset(new Date()) : 0}
+            onOpen={onDayOpen}
+            onSelect={openEdit}
+          />
         </div>
       </div>
     </>
