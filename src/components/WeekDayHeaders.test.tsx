@@ -36,7 +36,7 @@ describe("WeekDayHeaders", () => {
   it("opens the day that is clicked", () => {
     const onOpen = vi.fn();
     show({ onOpen });
-    fireEvent.click(screen.getByLabelText("7月16日を開く"));
+    fireEvent.click(screen.getByLabelText("木16 7月16日を開く"));
     expect(onOpen).toHaveBeenCalledWith(2026, 7, 16);
   });
 
@@ -45,10 +45,12 @@ describe("WeekDayHeaders", () => {
       days: week({ year: 2026, month: 7, day: 15 }),
     });
     expect(container.querySelectorAll("[aria-current='date']")).toHaveLength(1);
-    expect(screen.getByLabelText("7月15日を開く").style.boxShadow).toContain(
-      "var(--today-bg)",
+    expect(
+      screen.getByLabelText("水15 7月15日を開く").style.boxShadow,
+    ).toContain("var(--today-bg)");
+    expect(screen.getByLabelText("木16 7月16日を開く").style.boxShadow).toBe(
+      "",
     );
-    expect(screen.getByLabelText("7月16日を開く").style.boxShadow).toBe("");
   });
 
   it("draws a disc behind a holiday only", () => {
@@ -67,13 +69,13 @@ describe("WeekDayHeaders", () => {
       isJump: (d) => d.day === 14,
     });
     expect(
-      screen.getByLabelText("7月13日を開く").style.viewTransitionName,
+      screen.getByLabelText("月13 7月13日を開く").style.viewTransitionName,
     ).toBe("hour-zoom");
     expect(
-      screen.getByLabelText("7月14日を開く").style.viewTransitionName,
+      screen.getByLabelText("火14 7月14日を開く").style.viewTransitionName,
     ).toBe("jump-zoom");
     expect(
-      screen.getByLabelText("7月15日を開く").style.viewTransitionName,
+      screen.getByLabelText("水15 7月15日を開く").style.viewTransitionName,
     ).toBe("");
     expect(
       (container.firstElementChild as HTMLElement).style.viewTransitionName,

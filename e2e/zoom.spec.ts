@@ -5,7 +5,7 @@ test("the page opens on the year with twelve months and today in the header", as
   page,
 }) => {
   await openApp(page);
-  await expect(page.locator("section[role='button']")).toHaveCount(12);
+  await expect(page.getByRole("group", { name: /^\d+月$/ })).toHaveCount(12);
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
     "2026年(令和8年) 7月15日 水曜日",
   );
@@ -15,7 +15,10 @@ test("zooms from the year to the month, the week and the day, and back with Esca
   page,
 }) => {
   await openApp(page);
-  await page.locator("section[role='button']").nth(6).click();
+  await page
+    .getByRole("group", { name: /^\d+月$/ })
+    .nth(6)
+    .click();
   await expect(page).toHaveURL(/\?y=2026&m=7$/);
   await expect(page.getByText("2026年 7月", { exact: true })).toBeVisible();
 
@@ -66,10 +69,13 @@ test("steps through the months, the weeks and the days with the arrow buttons", 
 
 test("follows the browser history back and forward", async ({ page }) => {
   await openApp(page);
-  await page.locator("section[role='button']").nth(2).click();
+  await page
+    .getByRole("group", { name: /^\d+月$/ })
+    .nth(2)
+    .click();
   await expect(page).toHaveURL(/\?y=2026&m=3$/);
   await page.goBack();
-  await expect(page.locator("section[role='button']")).toHaveCount(12);
+  await expect(page.getByRole("group", { name: /^\d+月$/ })).toHaveCount(12);
   await page.goForward();
   await expect(page.getByText("2026年 3月", { exact: true })).toBeVisible();
 });

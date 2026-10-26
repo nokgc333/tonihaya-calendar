@@ -34,16 +34,14 @@ describe("OverviewBody", () => {
   });
 
   it("shows the twelve months of the year", async () => {
-    const { container } = await show().view;
-    expect(container.querySelectorAll("section[role='button']")).toHaveLength(
-      12,
-    );
+    await show().view;
+    expect(screen.getAllByRole("group", { name: /^\d+月$/ })).toHaveLength(12);
   });
 
   it("opens the month that is clicked", async () => {
     const { h, view } = show();
-    const { container } = await view;
-    fireEvent.click(container.querySelectorAll("section[role='button']")[8]);
+    await view;
+    fireEvent.click(screen.getAllByRole("group", { name: /^\d+月$/ })[8]);
     expect(h.onMonthClick).toHaveBeenCalledWith(9);
   });
 

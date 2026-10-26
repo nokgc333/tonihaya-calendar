@@ -34,7 +34,7 @@ function FullHeightScreen({
   readonly children: React.ReactNode;
 }) {
   return (
-    <main className={FULL_HEIGHT_MAIN}>
+    <main id="main" tabIndex={-1} className={FULL_HEIGHT_MAIN}>
       <div className="flex min-h-0 w-full flex-1 flex-col">
         <TodayHeader today={shared.today} countdowns={shared.countdowns} />
         {children}
@@ -120,7 +120,11 @@ export function OverviewScreen({
   readonly nav: Navigation["overview"];
 }) {
   return (
-    <main className="mx-auto max-w-[1600px] min-w-[375px] px-4 py-5">
+    <main
+      id="main"
+      tabIndex={-1}
+      className="mx-auto max-w-[1600px] min-w-[375px] px-4 py-5"
+    >
       <div className="mx-auto w-full max-w-[1256px] min-[1600px]:max-w-[1600px]">
         <TodayHeader today={shared.today} countdowns={shared.countdowns} />
         <OverviewBody
@@ -152,7 +156,11 @@ export function MonthScreen({
   readonly nav: Navigation["month"];
 }) {
   return (
-    <main className="mx-auto max-w-[1600px] min-w-[375px] px-4 py-5">
+    <main
+      id="main"
+      tabIndex={-1}
+      className="mx-auto max-w-[1600px] min-w-[375px] px-4 py-5"
+    >
       <div className="w-full">
         <TodayHeader today={shared.today} countdowns={shared.countdowns} />
         <MonthDetail

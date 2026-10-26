@@ -161,4 +161,56 @@ describe("the event editor", () => {
     await act(async () => {});
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
+
+  it("announces that a new event was saved, an edited one was saved and a deleted one was removed", async () => {
+    const repo = new MemoryRepository([existing]);
+    vi.stubGlobal(
+      "confirm",
+      vi.fn(() => true),
+    );
+    await renderInApp(
+      <>
+        <AddEventButton date={date} />
+        <EditExisting id="Planning" />
+      </>,
+      [existing],
+      repo,
+    );
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    const status = () => screen.getByRole("status").textContent?.trim();
+    expect(status()).toBe("");
+
+    await user.click(screen.getByRole("button", { name: "予定を作成" }));
+    await user.type(screen.getByLabelText("タイトル"), "Kickoff");
+    await user.click(screen.getByRole("button", { name: "保存" }));
+    await waitFor(() => expect(status()).toBe("予定を保存しました"));
+
+    await user.click(screen.getByRole("button", { name: "edit Planning" }));
+    await user.click(screen.getByRole("button", { name: "保存" }));
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),
+    );
+    expect(status()).toBe("予定を保存しました");
+
+    await user.click(screen.getByRole("button", { name: "edit Planning" }));
+    await user.click(screen.getByRole("button", { name: "削除" }));
+    await waitFor(() => expect(status()).toBe("予定を削除しました"));
+  });
+
+  it("announces nothing when saving fails, and shows the error as an alert instead", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    await renderInApp(
+      <AddEventButton date={date} />,
+      [],
+      new FailingRepository(),
+    );
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    await user.click(screen.getByRole("button", { name: "予定を作成" }));
+    await user.type(screen.getByLabelText("タイトル"), "Kickoff");
+    await user.click(screen.getByRole("button", { name: "保存" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      /保存できませんでした/,
+    );
+    expect(screen.getByRole("status").textContent?.trim()).toBe("");
+  });
 });

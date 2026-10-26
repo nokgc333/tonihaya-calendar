@@ -41,6 +41,7 @@ function ErrorList({ errors }: { readonly errors: readonly string[] }) {
   if (errors.length === 0) return null;
   return (
     <ul
+      role="alert"
       className="mb-3 space-y-1 rounded-md p-2 text-xs"
       style={{ background: "var(--sun-bg)", color: "var(--accent-red)" }}
     >

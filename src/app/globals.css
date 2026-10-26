@@ -15,6 +15,7 @@
   --accent-sat: #3f5573;
   --today-bg: #171717;
   --today-fg: #ffffff;
+  --focus-ring: #1d4ed8;
   --holiday-disc: color-mix(in srgb, #a3e635 45%, var(--surface));
   --holiday-text: color-mix(in srgb, #3f6212 88%, var(--text));
 
@@ -59,6 +60,7 @@
     --today-bg: #ededed;
     --today-fg: #0e0f11;
     --holiday-text: #ffffff;
+    --focus-ring: #7aa7ff;
   }
 }
 
@@ -75,6 +77,7 @@
   --accent-sat: #3f5573;
   --today-bg: #171717;
   --today-fg: #ffffff;
+  --focus-ring: #1d4ed8;
 }
 
 :root[data-theme="dark"] {
@@ -91,10 +94,37 @@
   --today-bg: #ededed;
   --today-fg: #0e0f11;
   --holiday-text: #ffffff;
+  --focus-ring: #7aa7ff;
 }
 
 html {
   color-scheme: light dark;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+main:focus {
+  outline: none;
+}
+
+.skip-link {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  padding: 0.5rem 1rem;
+  background: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--border-strong);
+  border-radius: 0.5rem;
+  transform: translateY(-120%);
+}
+
+.skip-link:focus {
+  transform: translateY(0.5rem) translateX(0.5rem);
 }
 
 body {

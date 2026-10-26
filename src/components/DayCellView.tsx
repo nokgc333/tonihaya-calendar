@@ -112,26 +112,69 @@ function EventDots({
   );
 }
 
-function dayClickHandlers(
+function dayOpener(
   onDayClick: DayCellViewProps["onDayClick"],
   cellYear: number | undefined,
   cellMonth: number | undefined,
   day: number,
-) {
+): (() => void) | null {
   if (!onDayClick || cellYear === undefined || cellMonth === undefined) {
-    return {};
+    return null;
   }
-  return {
-    role: "button" as const,
-    tabIndex: 0,
-    onClick: () => onDayClick(cellYear, cellMonth, day),
-    onKeyDown: (e: React.KeyboardEvent<HTMLElement>) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        onDayClick(cellYear, cellMonth, day);
-      }
-    },
-  };
+  return () => onDayClick(cellYear, cellMonth, day);
+}
+
+interface GridStop {
+  readonly index: number;
+  readonly isTabStop: boolean;
+}
+
+function OpenDayButton({
+  cell,
+  month,
+  onOpen,
+  stop,
+}: {
+  readonly cell: DayCell;
+  readonly month: number;
+  readonly onOpen: () => void;
+  readonly stop: GridStop | undefined;
+}) {
+  return (
+    <button
+      type="button"
+      aria-label={`${month}月${cell.day}日を開く`}
+      {...(stop
+        ? {
+            "data-grid-index": stop.index,
+            tabIndex: stop.isTabStop ? 0 : -1,
+          }
+        : {})}
+      onClick={(e) => {
+        e.stopPropagation();
+        onOpen();
+      }}
+    >
+      <DayNumber cell={cell} />
+    </button>
+  );
+}
+
+function DayNumberOrButton({
+  cell,
+  month,
+  onOpen,
+  stop,
+}: {
+  readonly cell: DayCell;
+  readonly month: number | undefined;
+  readonly onOpen: (() => void) | null;
+  readonly stop: GridStop | undefined;
+}) {
+  if (!onOpen || month === undefined) return <DayNumber cell={cell} />;
+  return (
+    <OpenDayButton cell={cell} month={month} onOpen={onOpen} stop={stop} />
+  );
 }
 
 interface DayCellViewProps {
@@ -144,6 +187,7 @@ interface DayCellViewProps {
   readonly jump: boolean;
   readonly dayEvents?: readonly CalendarEvent[];
   readonly onEventSelect?: (id: string) => void;
+  readonly gridStop?: GridStop;
 }
 
 export function DayCellView({
@@ -156,11 +200,20 @@ export function DayCellView({
   jump,
   dayEvents = [],
   onEventSelect,
+  gridStop,
 }: DayCellViewProps) {
   const s = SIZE[size];
-  const handlers = dayClickHandlers(onDayClick, cellYear, cellMonth, cell.day);
-  const clickable =
-    "onClick" in handlers ? "cursor-pointer hover:brightness-95" : "";
+  const onOpen = dayOpener(onDayClick, cellYear, cellMonth, cell.day);
+  const handlers = onOpen ? { onClick: onOpen } : {};
+  const clickable = onOpen ? "cursor-pointer hover:brightness-95" : "";
+  const number = (
+    <DayNumberOrButton
+      cell={cell}
+      month={cellMonth}
+      onOpen={onOpen}
+      stop={gridStop}
+    />
+  );
   const style = cellStyle(cell, jump);
   const hasEvents = cell.inMonth && dayEvents.length > 0;
 
@@ -171,9 +224,7 @@ export function DayCellView({
         style={style}
         {...handlers}
       >
-        <div className="flex justify-center pt-[7px]">
-          <DayNumber cell={cell} />
-        </div>
+        <div className="flex justify-center pt-[7px]">{number}</div>
         <EventChips dayEvents={dayEvents} onEventSelect={onEventSelect} />
       </div>
     );
@@ -188,7 +239,7 @@ export function DayCellView({
       title={cell.holidayName}
       {...handlers}
     >
-      <DayNumber cell={cell} />
+      {number}
       {!spacious && hasEvents ? <EventDots dayEvents={dayEvents} /> : null}
     </div>
   );

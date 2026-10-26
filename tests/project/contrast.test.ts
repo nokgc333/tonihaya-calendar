@@ -9,6 +9,7 @@ type Rgb = readonly [number, number, number];
 type Tokens = Record<string, string>;
 
 const MIN_TEXT_RATIO = 4.5;
+const MIN_NON_TEXT_RATIO = 3;
 
 function blockAfter(marker: string): string {
   const start = css.indexOf(marker);
@@ -139,6 +140,14 @@ describe.each(Object.entries(themes))("the %s theme", (_name, tokens) => {
     expect(
       contrast(tokens, "--holiday-text", "--holiday-disc"),
     ).toBeGreaterThanOrEqual(MIN_TEXT_RATIO);
+  });
+
+  it("keeps the focus ring visible, at 3:1 or more, on every surface and tint", () => {
+    for (const bg of [...SURFACES, ...TINTS]) {
+      expect(contrast(tokens, "--focus-ring", bg), bg).toBeGreaterThanOrEqual(
+        MIN_NON_TEXT_RATIO,
+      );
+    }
   });
 
   it("keeps the text of the today mark readable", () => {

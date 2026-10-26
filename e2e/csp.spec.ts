@@ -53,7 +53,10 @@ test("runs the whole app under the policy without a violation or an error", asyn
 }) => {
   const problems = await watchViolations(page);
   await openApp(page);
-  await page.locator("section[role='button']").nth(6).click();
+  await page
+    .getByRole("group", { name: /^\d+月$/ })
+    .nth(6)
+    .click();
   await page
     .locator("[class*='cursor-pointer']", { hasText: /^15$/ })
     .first()
@@ -76,6 +79,9 @@ test("hydrates the page, so that scripts moved out of the page still run", async
   page,
 }) => {
   await openApp(page);
-  await page.locator("section[role='button']").first().click();
+  await page
+    .getByRole("group", { name: /^\d+月$/ })
+    .first()
+    .click();
   await expect(page).toHaveURL(/\?y=2026&m=1$/);
 });

@@ -88,7 +88,7 @@ describe("CalendarScreens", () => {
   });
 
   it("shows the overview with the layout it is given", async () => {
-    const { container } = await renderInApp(
+    await renderInApp(
       <OverviewScreen
         shared={shared}
         layout="4x3"
@@ -96,9 +96,7 @@ describe("CalendarScreens", () => {
         nav={{ onYearChange: noop, onMonthClick: noop }}
       />,
     );
-    expect(container.querySelectorAll("section[role='button']")).toHaveLength(
-      12,
-    );
+    expect(screen.getAllByRole("group", { name: /^\d+月$/ })).toHaveLength(12);
     expect(screen.getByRole("button", { name: "4×3" })).toHaveAttribute(
       "aria-pressed",
       "true",
@@ -115,5 +113,37 @@ describe("CalendarScreens", () => {
       />,
     );
     expect(screen.getByText("土曜まで")).toBeInTheDocument();
+  });
+
+  it("gives the main content the target of the skip link, which can take the focus", async () => {
+    for (const screen of [
+      <DayScreen
+        key="d"
+        shared={shared}
+        month={7}
+        day={15}
+        nav={{ onBack: noop, onDayChange: noop }}
+      />,
+      <MonthScreen
+        key="m"
+        shared={shared}
+        month={7}
+        pivotDay={null}
+        nav={{ onBack: noop, onMonthChange: noop, onDayClick: noop }}
+      />,
+      <OverviewScreen
+        key="o"
+        shared={shared}
+        layout="3x4"
+        onLayoutChange={noop}
+        nav={{ onYearChange: noop, onMonthClick: noop }}
+      />,
+    ]) {
+      const { container, unmount } = await renderInApp(screen);
+      const main = container.querySelector("main")!;
+      expect(main.id).toBe("main");
+      expect(main.getAttribute("tabindex")).toBe("-1");
+      unmount();
+    }
   });
 });

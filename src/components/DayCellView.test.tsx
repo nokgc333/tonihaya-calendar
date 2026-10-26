@@ -1,5 +1,6 @@
 // @vitest-environment happy-dom
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { DayCellView } from "@/components/DayCellView";
 import { buildMonthView, type DayCell } from "@/domain/view";
@@ -86,10 +87,10 @@ describe("DayCellView", () => {
     ).toBe("");
   });
 
-  it("is not a button without a click handler, a year and a month", () => {
+  it("has no button for the day without a click handler, a year and a month", () => {
     expect(
       show(cellOf(15), { onDayClick: vi.fn() }).container.querySelector(
-        "[role='button']",
+        "button",
       ),
     ).toBeNull();
     cleanup();
@@ -97,27 +98,69 @@ describe("DayCellView", () => {
       show(cellOf(15), {
         cellYear: 2026,
         cellMonth: 7,
-      }).container.querySelector("[role='button']"),
+      }).container.querySelector("button"),
     ).toBeNull();
   });
 
-  it("reports the day on click and on Enter or Space, but not on other keys", () => {
+  it("has one button, named after the date, that is the only tab stop of the cell", () => {
+    const { container } = show(cellOf(15), {
+      onDayClick: vi.fn(),
+      cellYear: 2026,
+      cellMonth: 7,
+    });
+    expect(container.querySelectorAll("button")).toHaveLength(1);
+    expect(
+      screen.getByRole("button", { name: "7月15日を開く" }),
+    ).toBeInTheDocument();
+    expect(container.querySelector("[role='button'], [tabindex]")).toBeNull();
+  });
+
+  it("reports the day when the cell or its button is clicked", () => {
     const onDayClick = vi.fn();
     const { container } = show(cellOf(15), {
       onDayClick,
       cellYear: 2026,
       cellMonth: 7,
     });
-    const cell = container.querySelector("[role='button']")!;
-    fireEvent.click(cell);
-    fireEvent.keyDown(cell, { key: "Enter" });
-    fireEvent.keyDown(cell, { key: " " });
-    fireEvent.keyDown(cell, { key: "a" });
+    fireEvent.click(container.firstElementChild as HTMLElement);
+    fireEvent.click(screen.getByRole("button", { name: "7月15日を開く" }));
     expect(onDayClick.mock.calls).toEqual([
       [2026, 7, 15],
       [2026, 7, 15],
-      [2026, 7, 15],
     ]);
+  });
+
+  it.each(["{Enter}", " "])(
+    "opens the day from the keyboard with %j, once",
+    async (key) => {
+      const onDayClick = vi.fn();
+      show(cellOf(15), { onDayClick, cellYear: 2026, cellMonth: 7 });
+      const user = userEvent.setup();
+      await user.tab();
+      await user.keyboard(key);
+      expect(onDayClick.mock.calls).toEqual([[2026, 7, 15]]);
+    },
+  );
+
+  it("does not open the day with other keys", async () => {
+    const onDayClick = vi.fn();
+    show(cellOf(15), { onDayClick, cellYear: 2026, cellMonth: 7 });
+    const user = userEvent.setup();
+    await user.tab();
+    await user.keyboard("a");
+    expect(onDayClick).not.toHaveBeenCalled();
+  });
+
+  it("keeps the event chips as separate buttons beside the day button, not inside it", () => {
+    show(cellOf(15), {
+      spacious: true,
+      dayEvents: many(1),
+      onDayClick: vi.fn(),
+      cellYear: 2026,
+      cellMonth: 7,
+    });
+    const dayButton = screen.getByRole("button", { name: "7月15日を開く" });
+    expect(dayButton.contains(screen.getByTitle("e0"))).toBe(false);
   });
 });
 

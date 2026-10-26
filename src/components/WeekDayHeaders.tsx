@@ -57,7 +57,7 @@ function DayHeaderButton({
           ? { boxShadow: "inset 0 0 0 1.5px var(--today-bg)" }
           : {}),
       }}
-      aria-label={`${day.month}月${day.day}日を開く`}
+      aria-label={`${WEEKDAY_JA[day.weekday]}${day.day} ${day.month}月${day.day}日を開く`}
     >
       <div className="text-[11px]" style={{ color: dayTextColor(day) }}>
         {WEEKDAY_JA[day.weekday]}

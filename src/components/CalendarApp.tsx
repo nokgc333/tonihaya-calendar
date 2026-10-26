@@ -2,7 +2,11 @@
 
 import { getCountdowns, type Countdown } from "@/domain/countdown";
 import type { WeekStart } from "@/domain/calendar";
+import { useEffect, useRef } from "react";
+import type { ZoomState } from "@/domain/view";
 import { useZoomState } from "@/hooks/useZoomState";
+import { AnnouncerProvider, useAnnouncer } from "@/hooks/useAnnouncer";
+import { describeZoom } from "@/components/describeZoom";
 import { useCalendarPivots } from "@/hooks/useCalendarPivots";
 import { createCalendarNavigation } from "@/hooks/calendarNavigation";
 import { EventProvider } from "@/hooks/useEvents";
@@ -22,18 +26,32 @@ const WEEKSTART_STORAGE_KEY = "tonihaya.weekStart";
 const LAYOUTS: readonly OverviewLayout[] = ["3x4", "4x3"];
 const WEEK_STARTS: readonly WeekStart[] = ["sun", "mon"];
 
+function useAnnounceZoom(zoom: ZoomState, isReady: boolean): void {
+  const announce = useAnnouncer();
+  const previous = useRef<string | null>(null);
+  useEffect(() => {
+    if (!isReady) return;
+    const text = describeZoom(zoom);
+    if (previous.current !== null && previous.current !== text) announce(text);
+    previous.current = text;
+  }, [zoom, isReady, announce]);
+}
+
 export function CalendarApp() {
   return (
-    <EventProvider>
-      <EventEditorProvider>
-        <CalendarAppInner />
-      </EventEditorProvider>
-    </EventProvider>
+    <AnnouncerProvider>
+      <EventProvider>
+        <EventEditorProvider>
+          <CalendarAppInner />
+        </EventEditorProvider>
+      </EventProvider>
+    </AnnouncerProvider>
   );
 }
 
 function CalendarAppInner() {
   const { zoom, today, navigate } = useZoomState();
+  useAnnounceZoom(zoom, today !== null);
   const countdowns: Countdown | null = today
     ? getCountdowns(today.year, today.month, today.day)
     : null;

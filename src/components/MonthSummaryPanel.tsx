@@ -92,6 +92,7 @@ export function MonthSummaryPanel({
 }) {
   return (
     <aside
+      aria-label="月の概要と祝日"
       className="w-full max-w-[800px] rounded-xl border p-4 min-[1168px]:w-auto min-[1168px]:max-w-none min-[1168px]:flex-1"
       style={{ borderColor: "var(--border)", background: "var(--surface-2)" }}
     >

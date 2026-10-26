@@ -83,7 +83,13 @@ export function WeekView(props: WeekViewProps) {
           onOpen={onDayOpen}
         />
         <WeekAllDayRow days={week.days} events={events} onSelect={openEdit} />
-        <div ref={bodyRef} className="min-h-0 flex-1 overflow-y-auto">
+        <div
+          ref={bodyRef}
+          tabIndex={0}
+          role="region"
+          aria-label="時間ごとの予定"
+          className="min-h-0 flex-1 overflow-y-auto"
+        >
           <WeekHourGrid
             days={week.days}
             todayIndex={todayIndex}

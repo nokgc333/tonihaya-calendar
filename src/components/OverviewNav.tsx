@@ -31,7 +31,10 @@ export function OverviewNav({
 }) {
   const isCurrentYear = today !== null && year === today.year;
   return (
-    <nav className="mb-5 flex min-h-10 flex-wrap items-center gap-1.5">
+    <nav
+      aria-label="年の表示の操作"
+      className="mb-5 flex min-h-10 flex-wrap items-center gap-1.5"
+    >
       <YearStepper year={year} today={today} onYearChange={onYearChange} />
       <div className="ml-auto flex items-center gap-3">
         <LayoutToggle layout={layout} onLayoutChange={onLayoutChange} />

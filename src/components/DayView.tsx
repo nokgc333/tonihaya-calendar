@@ -103,7 +103,13 @@ export function DayView(props: DayViewProps) {
           <AllDayLabel />
           <AllDayCell day={d} events={events} onSelect={openEdit} />
         </div>
-        <div ref={bodyRef} className="min-h-0 flex-1 overflow-y-auto">
+        <div
+          ref={bodyRef}
+          tabIndex={0}
+          role="region"
+          aria-label="時間ごとの予定"
+          className="min-h-0 flex-1 overflow-y-auto"
+        >
           <DayHourGrid
             day={d}
             nowOffset={d.isToday ? nowLineOffset(new Date()) : 0}
