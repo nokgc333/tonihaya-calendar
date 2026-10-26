@@ -8,8 +8,6 @@ const read = (file: string) => readFileSync(join(root, file), "utf-8");
 const pkg = JSON.parse(read("package.json"));
 const config = read("eslint.config.mjs");
 
-const CURRENT_WARNINGS = 7;
-
 describe("lint", () => {
   it("runs the ESLint command line without prompting, instead of the deprecated next lint", () => {
     expect(pkg.scripts.lint).toMatch(/^eslint \./);
@@ -22,14 +20,14 @@ describe("lint", () => {
   });
 
   it.each([
-    ["complexity", /complexity:\s*\["(warn|error)",\s*10\]/],
+    ["complexity", /complexity:\s*\["error",\s*10\]/],
     [
       "function length",
-      /"max-lines-per-function":\s*\[\s*"(warn|error)",\s*\{\s*max:\s*80/,
+      /"max-lines-per-function":\s*\[\s*"error",\s*\{\s*max:\s*80/,
     ],
-    ["file length", /"max-lines":\s*\["(warn|error)",\s*300\]/],
-    ["parameter count", /"max-params":\s*\["(warn|error)",\s*4\]/],
-    ["nesting depth", /"max-depth":\s*\["(warn|error)",\s*4\]/],
+    ["file length", /"max-lines":\s*\["error",\s*250\]/],
+    ["parameter count", /"max-params":\s*\["error",\s*4\]/],
+    ["nesting depth", /"max-depth":\s*\["error",\s*4\]/],
   ])("limits the %s", (_name, pattern) => {
     expect(config).toMatch(pattern);
   });
@@ -38,12 +36,9 @@ describe("lint", () => {
     expect(config).toMatch(/reportUnusedDisableDirectives:\s*"error"/);
   });
 
-  it("does not let the number of size and complexity warnings grow", () => {
-    const ceiling = Number(
-      /--max-warnings[= ](\d+)/.exec(pkg.scripts.lint)?.[1],
-    );
-
-    expect(ceiling).toBeLessThanOrEqual(CURRENT_WARNINGS);
+  it("fails on a violation instead of counting warnings", () => {
+    expect(pkg.scripts.lint).not.toContain("max-warnings");
+    expect(config).not.toMatch(/\["warn"/);
   });
 });
 

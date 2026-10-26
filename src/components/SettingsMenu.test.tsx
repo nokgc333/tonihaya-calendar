@@ -30,4 +30,31 @@ describe("SettingsMenu a11y", () => {
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     expect(document.activeElement).toBe(gear);
   });
+
+  it("keeps focus where the user moved it when the parent re-renders", async () => {
+    const user = userEvent.setup();
+    const { rerender } = render(
+      <SettingsMenu weekStart="sun" onWeekStartChange={vi.fn()} />,
+    );
+    await user.click(screen.getByRole("button", { name: "設定" }));
+    const second = screen.getByRole("button", { name: "月" });
+    second.focus();
+    rerender(<SettingsMenu weekStart="sun" onWeekStartChange={vi.fn()} />);
+    expect(document.activeElement).toBe(second);
+  });
+
+  it("closes when the pointer goes down outside and stays open for inside", async () => {
+    const user = userEvent.setup();
+    render(
+      <div>
+        <button type="button">outside</button>
+        <SettingsMenu weekStart="sun" onWeekStartChange={vi.fn()} />
+      </div>,
+    );
+    await user.click(screen.getByRole("button", { name: "設定" }));
+    await user.click(screen.getByRole("dialog"));
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "outside" }));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
 });

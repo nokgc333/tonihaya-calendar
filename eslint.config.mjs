@@ -23,14 +23,14 @@ const eslintConfig = [
     files: ["src/**/*.{ts,tsx}"],
     ignores: ["**/*.test.{ts,tsx}"],
     rules: {
-      complexity: ["warn", 10],
+      complexity: ["error", 10],
       "max-lines-per-function": [
-        "warn",
+        "error",
         { max: 80, skipBlankLines: true, skipComments: true },
       ],
-      "max-lines": ["warn", 300],
-      "max-params": ["warn", 4],
-      "max-depth": ["warn", 4],
+      "max-lines": ["error", 250],
+      "max-params": ["error", 4],
+      "max-depth": ["error", 4],
     },
   },
 ];
