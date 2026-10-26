@@ -57,4 +57,29 @@ describe("SettingsMenu a11y", () => {
     await user.click(screen.getByRole("button", { name: "outside" }));
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
+
+  it("reports the week start that is chosen", async () => {
+    const user = userEvent.setup();
+    const onWeekStartChange = vi.fn();
+    render(
+      <SettingsMenu weekStart="sun" onWeekStartChange={onWeekStartChange} />,
+    );
+    await user.click(screen.getByRole("button", { name: "設定" }));
+    await user.click(screen.getByRole("button", { name: "月" }));
+    await user.click(screen.getByRole("button", { name: "日" }));
+    expect(onWeekStartChange.mock.calls).toEqual([["mon"], ["sun"]]);
+  });
+
+  it("marks the current week start", async () => {
+    const user = userEvent.setup();
+    render(<SettingsMenu weekStart="mon" onWeekStartChange={vi.fn()} />);
+    await user.click(screen.getByRole("button", { name: "設定" }));
+    expect(screen.getByRole("button", { name: "月" })).toHaveAttribute(
+      "aria-current",
+      "true",
+    );
+    expect(screen.getByRole("button", { name: "日" })).not.toHaveAttribute(
+      "aria-current",
+    );
+  });
 });
