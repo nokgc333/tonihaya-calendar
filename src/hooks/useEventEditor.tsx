@@ -1,6 +1,12 @@
 "use client";
 
-import { createContext, useCallback, useContext, useMemo, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from "react";
 import type { CivilDate } from "@/domain/shared/date";
 import { useEvents } from "@/hooks/useEvents";
 import { EventModal } from "@/components/EventModal";
@@ -22,7 +28,11 @@ const todayCivil = (): CivilDate => {
   return { year: n.getFullYear(), month: n.getMonth() + 1, day: n.getDate() };
 };
 
-export function EventEditorProvider({ children }: { readonly children: React.ReactNode }) {
+export function EventEditorProvider({
+  children,
+}: {
+  readonly children: React.ReactNode;
+}) {
   const { events, addEvent, updateEvent, removeEvent } = useEvents();
   const [state, setState] = useState<EditorState | null>(null);
 
@@ -34,9 +44,14 @@ export function EventEditorProvider({ children }: { readonly children: React.Rea
   }, []);
   const close = useCallback(() => setState(null), []);
 
-  const value = useMemo<EventEditorValue>(() => ({ openCreate, openEdit }), [openCreate, openEdit]);
+  const value = useMemo<EventEditorValue>(
+    () => ({ openCreate, openEdit }),
+    [openCreate, openEdit],
+  );
 
-  const editing = state?.editingId ? (events.find((e) => e.id === state.editingId) ?? null) : null;
+  const editing = state?.editingId
+    ? (events.find((e) => e.id === state.editingId) ?? null)
+    : null;
 
   return (
     <EventEditorContext.Provider value={value}>
@@ -70,6 +85,7 @@ export function EventEditorProvider({ children }: { readonly children: React.Rea
 
 export function useEventEditor(): EventEditorValue {
   const ctx = useContext(EventEditorContext);
-  if (!ctx) throw new Error("useEventEditor must be used inside EventEditorProvider");
+  if (!ctx)
+    throw new Error("useEventEditor must be used inside EventEditorProvider");
   return ctx;
 }

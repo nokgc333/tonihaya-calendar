@@ -1,6 +1,12 @@
 "use client";
 
-import { MAX_YEAR, MIN_YEAR, buildYearView, clampYear, resolveYearInput } from "@/domain/view";
+import {
+  MAX_YEAR,
+  MIN_YEAR,
+  buildYearView,
+  clampYear,
+  resolveYearInput,
+} from "@/domain/view";
 import type { JumpLevel } from "@/domain/view";
 import type { CivilDate } from "@/domain/shared/date";
 import type { WeekStart } from "@/domain/calendar";
@@ -14,7 +20,6 @@ import { HolidayList } from "@/components/HolidayList";
 import { useEffect, useState } from "react";
 
 export type OverviewLayout = "3x4" | "4x3";
-
 
 export function OverviewBody({
   year,
@@ -46,15 +51,22 @@ export function OverviewBody({
   const isCurrentYear = today !== null && year === today.year;
   const { events } = useEvents();
 
-  const commitYearDraft = (): void => onYearChange(resolveYearInput(yearDraft, year));
+  const commitYearDraft = (): void =>
+    onYearChange(resolveYearInput(yearDraft, year));
 
   const zoomClass = layout === "4x3" ? "min-[1288px]:[zoom:1.34]" : "";
 
   return (
     <>
       <nav className="mb-5 flex min-h-10 flex-wrap items-center gap-1.5">
-        <NavButton onClick={() => onYearChange(clampYear(year - 10))} label="‹‹ 10" />
-        <NavButton onClick={() => onYearChange(clampYear(year - 1))} label="‹ 1" />
+        <NavButton
+          onClick={() => onYearChange(clampYear(year - 10))}
+          label="‹‹ 10"
+        />
+        <NavButton
+          onClick={() => onYearChange(clampYear(year - 1))}
+          label="‹ 1"
+        />
         <input
           type="number"
           value={yearDraft}
@@ -62,28 +74,71 @@ export function OverviewBody({
           max={MAX_YEAR}
           onChange={(e) => setYearDraft(e.target.value)}
           onBlur={commitYearDraft}
-          onKeyDown={(e) => { if (e.key === "Enter") { commitYearDraft(); e.currentTarget.blur(); } }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              commitYearDraft();
+              e.currentTarget.blur();
+            }
+          }}
           className="w-24 rounded-md border bg-transparent px-2 py-1 text-center text-lg font-bold tabular-nums"
           style={{ borderColor: "var(--border-strong)", color: "var(--text)" }}
           aria-label="表示する年（Enterで確定）"
         />
-        <NavButton onClick={() => onYearChange(clampYear(year + 1))} label="1 ›" />
-        <NavButton onClick={() => onYearChange(clampYear(year + 10))} label="10 ››" />
-        <NavButton onClick={() => onYearChange(today?.year ?? new Date().getFullYear())} label="今年" disabled={isCurrentYear} className="ml-1" suppressHydrationWarning />
-        <span className="ml-2 text-[11px]" style={{ color: "var(--text-faint)" }}>{MIN_YEAR}–{MAX_YEAR}</span>
+        <NavButton
+          onClick={() => onYearChange(clampYear(year + 1))}
+          label="1 ›"
+        />
+        <NavButton
+          onClick={() => onYearChange(clampYear(year + 10))}
+          label="10 ››"
+        />
+        <NavButton
+          onClick={() => onYearChange(today?.year ?? new Date().getFullYear())}
+          label="今年"
+          disabled={isCurrentYear}
+          className="ml-1"
+          suppressHydrationWarning
+        />
+        <span
+          className="ml-2 text-[11px]"
+          style={{ color: "var(--text-faint)" }}
+        >
+          {MIN_YEAR}–{MAX_YEAR}
+        </span>
 
         <div className="ml-auto flex items-center gap-3">
           <div
             className="hidden items-center gap-1 rounded-lg border px-2 py-1 min-[1288px]:flex"
-            style={{ background: "var(--surface-2)", borderColor: "var(--border)" }}
+            style={{
+              background: "var(--surface-2)",
+              borderColor: "var(--border)",
+            }}
           >
-            <span className="mr-1 text-[11px]" style={{ color: "var(--text-muted)" }}>表示</span>
-            <LayoutButton label="3×4" active={layout === "3x4"} onClick={() => onLayoutChange("3x4")} />
-            <LayoutButton label="4×3" active={layout === "4x3"} onClick={() => onLayoutChange("4x3")} />
+            <span
+              className="mr-1 text-[11px]"
+              style={{ color: "var(--text-muted)" }}
+            >
+              表示
+            </span>
+            <LayoutButton
+              label="3×4"
+              active={layout === "3x4"}
+              onClick={() => onLayoutChange("3x4")}
+            />
+            <LayoutButton
+              label="4×3"
+              active={layout === "4x3"}
+              onClick={() => onLayoutChange("4x3")}
+            />
           </div>
-          <AddEventButton date={isCurrentYear && today ? today : { year, month: 1, day: 1 }} />
+          <AddEventButton
+            date={isCurrentYear && today ? today : { year, month: 1, day: 1 }}
+          />
           <LevelSwitcher current="overview" onJump={onJump} />
-          <SettingsMenu weekStart={weekStart} onWeekStartChange={onWeekStartChange} />
+          <SettingsMenu
+            weekStart={weekStart}
+            onWeekStartChange={onWeekStartChange}
+          />
         </div>
       </nav>
 
@@ -96,7 +151,9 @@ export function OverviewBody({
                   month={m}
                   year={year}
                   weekStart={weekStart}
-                  viewTransitionName={jumpPivot ? undefined : `month-${m.month}`}
+                  viewTransitionName={
+                    jumpPivot ? undefined : `month-${m.month}`
+                  }
                   jumpDay={jumpPivot}
                   events={events}
                   onClick={() => onMonthClick(m.month)}
@@ -149,5 +206,12 @@ function LayoutButton({
   readonly active: boolean;
   readonly onClick: () => void;
 }) {
-  return <SegmentButton label={label} active={active} onClick={onClick} aria-pressed={active} />;
+  return (
+    <SegmentButton
+      label={label}
+      active={active}
+      onClick={onClick}
+      aria-pressed={active}
+    />
+  );
 }

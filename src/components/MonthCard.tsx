@@ -12,8 +12,18 @@ const RESERVED_WEEK_ROWS = 6;
 
 export type MonthCardSize = "sm" | "lg";
 const SIZE = {
-  sm: { row: "1.5rem", dayText: "text-[11px]", circle: "h-6 w-6", weekday: "text-[10px]" },
-  lg: { row: "7.59375rem", dayText: "text-base", circle: "h-9 w-9", weekday: "text-xs" },
+  sm: {
+    row: "1.5rem",
+    dayText: "text-[11px]",
+    circle: "h-6 w-6",
+    weekday: "text-[10px]",
+  },
+  lg: {
+    row: "7.59375rem",
+    dayText: "text-base",
+    circle: "h-9 w-9",
+    weekday: "text-xs",
+  },
 } as const;
 
 function weekdayHeader(weekStart: WeekStart): readonly string[] {
@@ -55,12 +65,13 @@ function DayCellView({
 }) {
   const s = SIZE[size];
   const vAlign = spacious ? "items-start pt-[7px]" : "items-start pt-[5px]";
-  const clickable = onDayClick && cellYear !== undefined && cellMonth !== undefined ? "cursor-pointer hover:brightness-95" : "";
+  const clickable =
+    onDayClick && cellYear !== undefined && cellMonth !== undefined
+      ? "cursor-pointer hover:brightness-95"
+      : "";
   const base = `flex h-full justify-center ${vAlign} ${clickable} ${s.dayText} leading-none tabular-nums`;
   const bgStyle = { background: dayBg(cell) };
-  const zoomStyle = jump
-    ? { viewTransitionName: "jump-zoom" }
-    : null;
+  const zoomStyle = jump ? { viewTransitionName: "jump-zoom" } : null;
   const handlers =
     onDayClick && cellYear !== undefined && cellMonth !== undefined
       ? {
@@ -81,7 +92,7 @@ function DayCellView({
       {cell.isHoliday ? (
         <span
           aria-hidden
-          className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full"
+          className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full"
           style={{
             background: "var(--holiday-disc)",
             width: "calc(1.5em + 1px)",
@@ -118,7 +129,10 @@ function DayCellView({
             <EventChip key={e.id} event={e} onSelect={onEventSelect} />
           ))}
           {overflow > 0 ? (
-            <div className="px-1 text-[10px]" style={{ color: "var(--text-muted)" }}>
+            <div
+              className="px-1 text-[10px]"
+              style={{ color: "var(--text-muted)" }}
+            >
               +{overflow}件
             </div>
           ) : null}
@@ -182,9 +196,13 @@ function resolveCellMonth(
   if (cells[index].inMonth) return { year, month };
   const firstInMonthIdx = cells.findIndex((c) => c.inMonth);
   if (index < firstInMonthIdx) {
-    return month === 1 ? { year: year - 1, month: 12 } : { year, month: month - 1 };
+    return month === 1
+      ? { year: year - 1, month: 12 }
+      : { year, month: month - 1 };
   }
-  return month === 12 ? { year: year + 1, month: 1 } : { year, month: month + 1 };
+  return month === 12
+    ? { year: year + 1, month: 1 }
+    : { year, month: month + 1 };
 }
 
 export function MonthCard({
@@ -217,11 +235,28 @@ export function MonthCard({
   return (
     <section
       className={`rounded-xl border p-3 text-left ${onClick ? "cursor-pointer transition-colors hover:border-[var(--border-strong)]" : ""}`}
-      style={{ borderColor: "var(--border)", background: "var(--surface)", viewTransitionName }}
+      style={{
+        borderColor: "var(--border)",
+        background: "var(--surface)",
+        viewTransitionName,
+      }}
       onClick={onClick}
-      {...(onClick ? { role: "button", tabIndex: 0, onKeyDown: (e: React.KeyboardEvent) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onClick(); } } } : {})}
+      {...(onClick
+        ? {
+            role: "button",
+            tabIndex: 0,
+            onKeyDown: (e: React.KeyboardEvent) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                onClick();
+              }
+            },
+          }
+        : {})}
     >
-      <header className={`flex items-baseline gap-2 ${size === "lg" ? "mb-3" : "mb-2"}`}>
+      <header
+        className={`flex items-baseline gap-2 ${size === "lg" ? "mb-3" : "mb-2"}`}
+      >
         <h2 className={`font-bold ${size === "lg" ? "text-2xl" : "text-lg"}`}>
           {month.labelJa}
         </h2>
@@ -231,10 +266,16 @@ export function MonthCard({
           </span>
         ) : (
           <>
-            <span className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+            <span
+              className="text-[11px]"
+              style={{ color: "var(--text-muted)" }}
+            >
               {month.labelEn}
             </span>
-            <span className="ml-auto text-[11px]" style={{ color: "var(--text-muted)" }}>
+            <span
+              className="ml-auto text-[11px]"
+              style={{ color: "var(--text-muted)" }}
+            >
               {month.labelWafu}
             </span>
           </>
@@ -277,11 +318,23 @@ export function MonthCard({
             !!pivotDay &&
             week.some((cell, ci) => {
               const r = resolveCellMonth(flat, wi * 7 + ci, year, month.month);
-              return r.year === pivotDay.year && r.month === pivotDay.month && cell.day === pivotDay.day;
+              return (
+                r.year === pivotDay.year &&
+                r.month === pivotDay.month &&
+                cell.day === pivotDay.day
+              );
             });
-          const renderCell = (cell: DayCell, wi: number, ci: number, interactive: boolean) => {
+          const renderCell = (
+            cell: DayCell,
+            wi: number,
+            ci: number,
+            interactive: boolean,
+          ) => {
             const i = wi * 7 + ci;
-            const resolved = year !== undefined ? resolveCellMonth(flat, i, year, month.month) : undefined;
+            const resolved =
+              year !== undefined
+                ? resolveCellMonth(flat, i, year, month.month)
+                : undefined;
             const isJump =
               interactive &&
               !!jumpDay &&
@@ -326,7 +379,10 @@ export function MonthCard({
                 <div
                   aria-hidden
                   className="pointer-events-none absolute inset-0 -z-10 grid grid-cols-7 gap-px"
-                  style={{ background: "var(--border)", viewTransitionName: "day-zoom" }}
+                  style={{
+                    background: "var(--border)",
+                    viewTransitionName: "day-zoom",
+                  }}
                 >
                   {week.map((cell, ci) => renderCell(cell, wi, ci, false))}
                 </div>

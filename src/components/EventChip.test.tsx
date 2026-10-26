@@ -9,8 +9,14 @@ const timedEvent = (over: Partial<CalendarEvent> = {}): CalendarEvent => ({
   id: "e1",
   title: "Meeting",
   allDay: false,
-  start: { date: { year: 2026, month: 7, day: 11 }, time: { hour: 9, minute: 5 } },
-  end: { date: { year: 2026, month: 7, day: 11 }, time: { hour: 10, minute: 0 } },
+  start: {
+    date: { year: 2026, month: 7, day: 11 },
+    time: { hour: 9, minute: 5 },
+  },
+  end: {
+    date: { year: 2026, month: 7, day: 11 },
+    time: { hour: 10, minute: 0 },
+  },
   colorKey: "blue",
   priority: "normal",
   createdAt: 0,

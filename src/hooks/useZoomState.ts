@@ -5,7 +5,6 @@ import { flushSync } from "react-dom";
 import { parseZoom, zoomToQuery, type ZoomState } from "@/domain/view";
 import type { CivilDate } from "@/domain/shared/date";
 
-
 type HistoryMode = "push" | "replace" | "none";
 
 function withTransition(commit: () => void): void {
@@ -13,11 +12,11 @@ function withTransition(commit: () => void): void {
     typeof window !== "undefined" &&
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const canVT =
-    typeof document !== "undefined" &&
-    "startViewTransition" in document;
+    typeof document !== "undefined" && "startViewTransition" in document;
   if (canVT && !reduce) {
-    (document as unknown as { startViewTransition: (cb: () => void) => void })
-      .startViewTransition(() => flushSync(commit));
+    (
+      document as unknown as { startViewTransition: (cb: () => void) => void }
+    ).startViewTransition(() => flushSync(commit));
   } else {
     commit();
   }
@@ -33,7 +32,11 @@ export function useZoomState() {
 
   useEffect(() => {
     const now = new Date();
-    const t: CivilDate = { year: now.getFullYear(), month: now.getMonth() + 1, day: now.getDate() };
+    const t: CivilDate = {
+      year: now.getFullYear(),
+      month: now.getMonth() + 1,
+      day: now.getDate(),
+    };
     setToday(t);
     fallbackYearRef.current = t.year;
     setZoom(parseZoom(new URLSearchParams(window.location.search), t.year));
@@ -41,7 +44,10 @@ export function useZoomState() {
 
   useEffect(() => {
     const onPop = (): void => {
-      const next = parseZoom(new URLSearchParams(window.location.search), fallbackYearRef.current);
+      const next = parseZoom(
+        new URLSearchParams(window.location.search),
+        fallbackYearRef.current,
+      );
       withTransition(() => setZoom(next));
     };
     window.addEventListener("popstate", onPop);

@@ -33,7 +33,13 @@ export function CountdownChips({
   );
 }
 
-function CountdownChip({ label, value }: { readonly label: string; readonly value: number }) {
+function CountdownChip({
+  label,
+  value,
+}: {
+  readonly label: string;
+  readonly value: number;
+}) {
   return (
     <div
       className="rounded-lg border px-3 py-1.5"
@@ -50,7 +56,13 @@ function CountdownChip({ label, value }: { readonly label: string; readonly valu
   );
 }
 
-function BlockChip({ label, value }: { readonly label: string; readonly value: number }) {
+function BlockChip({
+  label,
+  value,
+}: {
+  readonly label: string;
+  readonly value: number;
+}) {
   return (
     <div
       className="flex flex-col items-center gap-0.5 rounded-lg border px-2 py-2 text-center"
@@ -61,7 +73,10 @@ function BlockChip({ label, value }: { readonly label: string; readonly value: n
       </span>
       <span className="text-base font-bold tabular-nums">
         {value}
-        <span className="ml-0.5 text-[10px] font-normal" style={{ color: "var(--text-muted)" }}>
+        <span
+          className="ml-0.5 text-[10px] font-normal"
+          style={{ color: "var(--text-muted)" }}
+        >
           日
         </span>
       </span>

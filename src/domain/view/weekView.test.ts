@@ -7,7 +7,12 @@ describe("buildWeekView", () => {
   test("7 days starting on Sunday, with Sunday first", () => {
     const week = buildWeekView(2026, 7, 8, null, SETTINGS);
     expect(week.days).toHaveLength(7);
-    expect(week.days[0]).toMatchObject({ year: 2026, month: 7, day: 5, weekday: 0 });
+    expect(week.days[0]).toMatchObject({
+      year: 2026,
+      month: 7,
+      day: 5,
+      weekday: 0,
+    });
     expect(week.days[6]).toMatchObject({ month: 7, day: 11, weekday: 6 });
   });
 
@@ -18,7 +23,13 @@ describe("buildWeekView", () => {
   });
 
   test("today, holiday and weekend flags", () => {
-    const week = buildWeekView(2026, 1, 1, { year: 2026, month: 1, day: 1 }, SETTINGS);
+    const week = buildWeekView(
+      2026,
+      1,
+      1,
+      { year: 2026, month: 1, day: 1 },
+      SETTINGS,
+    );
     const jan1 = week.days.find((d) => d.month === 1 && d.day === 1)!;
     expect(jan1.isToday).toBe(true);
     expect(jan1.isHoliday).toBe(true);

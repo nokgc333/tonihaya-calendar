@@ -22,7 +22,7 @@ const lhArgs = [
   "--output=json",
   "--output=html",
   `--output-path=${OUT_BASE}`,
-  '--chrome-flags=--headless=new',
+  "--chrome-flags=--headless=new",
 ];
 if (desktop) lhArgs.push("--preset=desktop");
 
@@ -31,16 +31,21 @@ console.log(`\n▶ Lighthouse (${desktop ? "desktop" : "mobile"}) → ${url}\n`)
 const bin = join(ROOT, "node_modules", ".bin", "lighthouse");
 const run = spawnSync(bin, lhArgs, { stdio: ["ignore", "ignore", "inherit"] });
 if (run.status !== 0) {
-  console.error("\n✗ Lighthouse failed. If Chrome cannot be found, set the CHROME_PATH environment variable.");
+  console.error(
+    "\n✗ Lighthouse failed. If Chrome cannot be found, set the CHROME_PATH environment variable.",
+  );
   process.exit(run.status ?? 1);
 }
 
 const report = JSON.parse(readFileSync(`${OUT_BASE}.report.json`, "utf8"));
 const score = Math.round((report.categories.performance.score ?? 0) * 100);
 const a = report.audits;
-const row = (label, audit) => `  ${label.padEnd(22)} ${a[audit]?.displayValue ?? "-"}`;
+const row = (label, audit) =>
+  `  ${label.padEnd(22)} ${a[audit]?.displayValue ?? "-"}`;
 
-console.log(`\n■ Performance score: ${score} / 100  ${score >= 95 ? "✓ (SLO 95+)" : "✗ (below SLO 95+)"}\n`);
+console.log(
+  `\n■ Performance score: ${score} / 100  ${score >= 95 ? "✓ (SLO 95+)" : "✗ (below SLO 95+)"}\n`,
+);
 console.log(row("LCP", "largest-contentful-paint"));
 console.log(row("FCP", "first-contentful-paint"));
 console.log(row("CLS", "cumulative-layout-shift"));

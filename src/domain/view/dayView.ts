@@ -5,7 +5,6 @@ import type { WeekDay } from "./weekView";
 const SUNDAY = 0;
 const SATURDAY = 6;
 
-
 export interface DayViewModel {
   readonly day: WeekDay;
 }

@@ -151,7 +151,7 @@ function CalendarAppInner() {
     zoom.day !== undefined
   ) {
     return (
-      <main className="mx-auto flex h-dvh min-w-[375px] max-w-[1600px] flex-col px-4 py-5">
+      <main className="mx-auto flex h-dvh max-w-[1600px] min-w-[375px] flex-col px-4 py-5">
         <div className="flex min-h-0 w-full flex-1 flex-col">
           <TodayHeader today={today} countdowns={countdowns} />
           <DayView
@@ -195,7 +195,7 @@ function CalendarAppInner() {
     zoom.day !== undefined
   ) {
     return (
-      <main className="mx-auto flex h-dvh min-w-[375px] max-w-[1600px] flex-col px-4 py-5">
+      <main className="mx-auto flex h-dvh max-w-[1600px] min-w-[375px] flex-col px-4 py-5">
         <div className="flex min-h-0 w-full flex-1 flex-col">
           <TodayHeader today={today} countdowns={countdowns} />
           <WeekView
@@ -239,7 +239,7 @@ function CalendarAppInner() {
   }
 
   return (
-    <main className="mx-auto min-w-[375px] max-w-[1600px] px-4 py-5">
+    <main className="mx-auto max-w-[1600px] min-w-[375px] px-4 py-5">
       {zoom.level === "overview" || zoom.month === undefined ? (
         <div className="mx-auto w-full max-w-[1256px] min-[1600px]:max-w-[1600px]">
           <TodayHeader today={today} countdowns={countdowns} />
