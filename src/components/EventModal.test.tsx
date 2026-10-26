@@ -37,6 +37,9 @@ describe("EventModal", () => {
     );
     await user.click(screen.getByRole("button", { name: "保存" }));
     expect(screen.getByText(/タイトルを入力してください/)).toBeInTheDocument();
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "タイトルを入力してください",
+    );
     expect(onSubmit).not.toHaveBeenCalled();
   });
 

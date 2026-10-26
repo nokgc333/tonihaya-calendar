@@ -2,6 +2,7 @@ import type { ReactElement } from "react";
 import { act, render, type RenderResult } from "@testing-library/react";
 import { EventProvider } from "@/hooks/useEvents";
 import { EventEditorProvider } from "@/hooks/useEventEditor";
+import { AnnouncerProvider } from "@/hooks/useAnnouncer";
 import type { EventRepository } from "@/data/eventRepository";
 import type { CalendarEvent } from "@/domain/event";
 
@@ -57,9 +58,11 @@ export async function renderInApp(
   repository: EventRepository = new MemoryRepository(events),
 ): Promise<RenderResult> {
   const result = render(
-    <EventProvider repository={repository}>
-      <EventEditorProvider>{ui}</EventEditorProvider>
-    </EventProvider>,
+    <AnnouncerProvider>
+      <EventProvider repository={repository}>
+        <EventEditorProvider>{ui}</EventEditorProvider>
+      </EventProvider>
+    </AnnouncerProvider>,
   );
   await act(async () => {});
   return result;

@@ -27,16 +27,31 @@ function weekdayColor(index: number, weekStart: WeekStart): string {
 export function MonthCardHeader({
   month,
   size,
+  onOpen,
 }: {
   readonly month: MonthView;
   readonly size: MonthCardSize;
+  readonly onOpen?: () => void;
 }) {
   return (
     <header
       className={`flex items-baseline gap-2 ${size === "lg" ? "mb-3" : "mb-2"}`}
     >
       <h2 className={`font-bold ${size === "lg" ? "text-2xl" : "text-lg"}`}>
-        {month.labelJa}
+        {onOpen ? (
+          <button
+            type="button"
+            aria-label={`${month.labelJa}を開く`}
+            onClick={(e) => {
+              e.stopPropagation();
+              onOpen();
+            }}
+          >
+            {month.labelJa}
+          </button>
+        ) : (
+          month.labelJa
+        )}
       </h2>
       {size === "lg" ? (
         <span className="text-sm" style={{ color: "var(--text-muted)" }}>

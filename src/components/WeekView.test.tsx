@@ -82,7 +82,7 @@ describe("WeekView", () => {
   it("opens a day from its header and from an hour cell", async () => {
     const { h, view } = show();
     const { container } = await view;
-    fireEvent.click(screen.getByLabelText("7月16日を開く"));
+    fireEvent.click(screen.getByLabelText("木16 7月16日を開く"));
     fireEvent.click(container.querySelector("button[aria-hidden='true']")!);
     expect(h.onDayOpen.mock.calls).toEqual([
       [2026, 7, 16],
@@ -144,13 +144,13 @@ describe("WeekView", () => {
     const picked = await show({ dayPivot: { year: 2026, month: 7, day: 16 } })
       .view;
     expect(
-      screen.getByLabelText("7月16日を開く").style.viewTransitionName,
+      screen.getByLabelText("木16 7月16日を開く").style.viewTransitionName,
     ).toBe("hour-zoom");
     expect(picked.container.querySelector("[style*='day-zoom']")).toBeNull();
     cleanup();
     await show({ jumpPivot: { year: 2026, month: 7, day: 17 } }).view;
     expect(
-      screen.getByLabelText("7月17日を開く").style.viewTransitionName,
+      screen.getByLabelText("金17 7月17日を開く").style.viewTransitionName,
     ).toBe("jump-zoom");
   });
 });
