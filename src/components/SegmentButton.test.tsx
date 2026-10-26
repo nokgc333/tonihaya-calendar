@@ -29,12 +29,20 @@ describe("SegmentButton", () => {
     expect(button.style.background).toBe("var(--surface)");
   });
 
-  it("is dimmed with the light border when inactive", () => {
+  it("uses the muted text color, not opacity, with the light border when inactive", () => {
     render(<SegmentButton label="月" active={false} />);
     const button = screen.getByRole("button");
-    expect(button.className).toContain("opacity-60");
+    expect(button.className).toContain("text-[var(--text-muted)]");
+    expect(button.className).not.toContain("opacity-60");
     expect(button.className).not.toContain("font-bold");
     expect(button.style.borderColor).toBe("var(--border)");
+  });
+
+  it("returns to the main text color on hover when inactive", () => {
+    render(<SegmentButton label="月" active={false} />);
+    expect(screen.getByRole("button").className).toContain(
+      "hover:text-[var(--text)]",
+    );
   });
 
   it("passes the other button attributes through and adds extra classes", () => {

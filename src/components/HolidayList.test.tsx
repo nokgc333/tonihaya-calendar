@@ -32,4 +32,30 @@ describe("HolidayList", () => {
     );
     expect(container.querySelector("[aria-current]")).toBeNull();
   });
+
+  it("shows the holidays that have passed in the faint and muted colors, not through opacity", () => {
+    render(
+      <HolidayList
+        year={2026}
+        today={{ year: 2026, month: 7, day: 15 }}
+        onMonthClick={vi.fn()}
+      />,
+    );
+    const passed = screen.getByRole("button", { name: /元日/ });
+    const upcoming = screen.getByRole("button", { name: /海の日/ });
+    expect(passed.style.opacity).toBe("");
+    expect(upcoming.style.opacity).toBe("");
+    expect(
+      passed.querySelector<HTMLElement>("span.tabular-nums")!.style.color,
+    ).toBe("var(--text-faint)");
+    expect(
+      passed.querySelector<HTMLElement>("span.truncate")!.style.color,
+    ).toBe("var(--text-muted)");
+    expect(
+      upcoming.querySelector<HTMLElement>("span.tabular-nums")!.style.color,
+    ).toBe("var(--accent-red)");
+    expect(
+      upcoming.querySelector<HTMLElement>("span.truncate")!.style.color,
+    ).toBe("var(--text)");
+  });
 });

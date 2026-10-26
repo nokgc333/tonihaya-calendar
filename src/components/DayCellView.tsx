@@ -184,7 +184,7 @@ export function DayCellView({
   return (
     <div
       className={`relative ${base}`}
-      style={{ ...style, opacity: cell.inMonth ? 1 : 0.55 }}
+      style={style}
       title={cell.holidayName}
       {...handlers}
     >
