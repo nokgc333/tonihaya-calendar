@@ -53,13 +53,23 @@ describe("DayCellView", () => {
     expect(container.firstElementChild!.getAttribute("title")).toBe("海の日");
   });
 
-  it("dims a day of the neighboring month and keeps its events out", () => {
+  it("shows a day of the neighboring month in the faint text color, not through opacity, and keeps its events out", () => {
     const outside = cells.find((c) => !c.inMonth)!;
     const { container } = show(outside, { dayEvents: many(2) });
-    expect((container.firstElementChild as HTMLElement).style.opacity).toBe(
-      "0.55",
-    );
+    expect((container.firstElementChild as HTMLElement).style.opacity).toBe("");
+    expect(
+      (container.querySelector("span.relative span.relative") as HTMLElement)
+        .style.color,
+    ).toBe("var(--text-faint)");
     expect(container.querySelectorAll(".rounded-full")).toHaveLength(0);
+  });
+
+  it("shows a day of the month in its own color, never in the faint one", () => {
+    const { container } = show(cellOf(16));
+    expect(
+      (container.querySelector("span.relative span.relative") as HTMLElement)
+        .style.color,
+    ).not.toBe("var(--text-faint)");
   });
 
   it("names the jump transition only when it is the jump target", () => {

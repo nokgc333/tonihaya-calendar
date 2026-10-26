@@ -101,21 +101,26 @@ function HolidayRow({
       aria-label={`${date.month}月${date.day}日 ${name}、${date.month}月へ移動`}
       className="grid w-full grid-cols-[4rem_1fr] items-baseline gap-2 rounded-md px-2 py-1 text-left text-sm transition-colors hover:bg-[var(--surface-2)]"
       style={{
-        opacity: isPast ? 0.5 : 1,
         background: isToday ? "var(--surface-2)" : undefined,
         fontWeight: isToday || isCurrentMonth ? 700 : undefined,
       }}
     >
-      <span className="tabular-nums" style={{ color: "var(--accent-red)" }}>
+      <span
+        className="tabular-nums"
+        style={{ color: isPast ? "var(--text-faint)" : "var(--accent-red)" }}
+      >
         {date.month}/{date.day}
         <span
           className="ml-1 text-[10px]"
-          style={{ color: "var(--text-muted)" }}
+          style={{ color: isPast ? "var(--text-faint)" : "var(--text-muted)" }}
         >
           ({WEEKDAY_JA[weekdayIndex(date)]})
         </span>
       </span>
-      <span className="truncate" style={{ color: "var(--text)" }}>
+      <span
+        className="truncate"
+        style={{ color: isPast ? "var(--text-muted)" : "var(--text)" }}
+      >
         {name}
       </span>
     </button>
