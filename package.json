@@ -16,6 +16,7 @@
     "test:e2e": "playwright test",
     "check:headers": "node scripts/check-headers.mjs",
     "check:duplicates": "jscpd",
+    "check:site": "node scripts/check-site.mjs",
     "generate:images": "node scripts/generate-images.mjs",
     "test:mutation": "stryker run",
     "format": "prettier --write .",
