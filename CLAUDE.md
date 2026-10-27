@@ -17,7 +17,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### コミットメッセージ
 
 - `Co-Authored-By` は付けない
-- 日本語スタイル: `type: 日本語の説明`
+- 英語スタイル: `type: description in English`（説明は動詞で始まる英語。日本語との併記はしない）
 - Conventional Commits形式（feat / fix / refactor / style / chore / docs / build / perf / revert）
 - 過去のコミット履歴のスタイル・分割粒度をトレースする（1つの意味単位＝1コミット、粒度は細かめ）
 - subjectは命令形、先頭小文字（英語の型名）、末尾ピリオドなし
