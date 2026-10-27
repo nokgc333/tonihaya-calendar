@@ -2,7 +2,7 @@
 import { act, cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { AddEventButton } from "@/components/AddEventButton";
+import { AddEventButton } from "@/components/event/AddEventButton";
 import { useEventEditor } from "@/hooks/useEventEditor";
 import {
   MemoryRepository,
