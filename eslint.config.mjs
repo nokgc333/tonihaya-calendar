@@ -10,6 +10,8 @@ const eslintConfig = [
       "node_modules/**",
       "coverage/**",
       "playwright-report/**",
+      "reports/**",
+      ".stryker-tmp/**",
       "test-results/**",
       ".lighthouse/**",
       ".lighthouseci/**",
