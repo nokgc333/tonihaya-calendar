@@ -1,4 +1,4 @@
-import { weekdayOf } from "../shared/date";
+import { fromEpochDay, toEpochDay, weekdayOf } from "../shared/date";
 import type { CalendarDay, CalendarWeek, WeekStart } from "./types";
 
 export function isLeapYear(year: number): boolean {
@@ -28,16 +28,15 @@ export function getMonthGrid(
     (firstWeekday - startOffset + DAYS_PER_WEEK) % DAYS_PER_WEEK;
   const cellCount = WEEKS_PER_MONTH_GRID * DAYS_PER_WEEK;
 
+  const firstEpoch = toEpochDay(year, month, 1) - leadingCount;
   const days: CalendarDay[] = [];
   for (let i = 0; i < cellCount; i++) {
-    const date = new Date(Date.UTC(year, month - 1, 1 - leadingCount + i));
-    const y = date.getUTCFullYear();
-    const m = date.getUTCMonth() + 1;
+    const { year: y, month: m, day } = fromEpochDay(firstEpoch + i);
     days.push({
       year: y,
       month: m,
-      day: date.getUTCDate(),
-      weekday: date.getUTCDay(),
+      day,
+      weekday: weekdayOf(y, m, day),
       inMonth: y === year && m === month,
     });
   }

@@ -24,16 +24,51 @@ function nthWeekday(
   return 1 + offset + (n - 1) * 7;
 }
 
-function shunbunDay(year: number): number {
+const EQUINOX_RATE = 0.242194;
+const REFERENCE_YEAR = 1980;
+const LAST_YEAR_OF_FIRST_FORMULA = 1979;
+const LAST_YEAR_OF_SECOND_FORMULA = 2099;
+
+interface EquinoxFormula {
+  readonly base: number;
+  readonly leapShift: (year: number) => number;
+}
+
+const leapFrom1983 = (year: number): number => Math.trunc((year - 1983) / 4);
+const leapFrom1980 = (year: number): number => Math.floor((year - 1980) / 4);
+
+function equinoxFormula(
+  year: number,
+  bases: readonly [number, number, number],
+): EquinoxFormula {
+  if (year <= LAST_YEAR_OF_FIRST_FORMULA) {
+    return { base: bases[0], leapShift: leapFrom1983 };
+  }
+  if (year <= LAST_YEAR_OF_SECOND_FORMULA) {
+    return { base: bases[1], leapShift: leapFrom1980 };
+  }
+  return { base: bases[2], leapShift: leapFrom1980 };
+}
+
+function equinoxDay(
+  year: number,
+  bases: readonly [number, number, number],
+): number {
+  const { base, leapShift } = equinoxFormula(year, bases);
   return Math.floor(
-    20.8431 + 0.242194 * (year - 1980) - Math.floor((year - 1980) / 4),
+    base + EQUINOX_RATE * (year - REFERENCE_YEAR) - leapShift(year),
   );
 }
 
+const SHUNBUN_BASES = [20.8357, 20.8431, 21.851] as const;
+const SHUBUN_BASES = [23.2588, 23.2488, 24.2488] as const;
+
+function shunbunDay(year: number): number {
+  return equinoxDay(year, SHUNBUN_BASES);
+}
+
 function shubunDay(year: number): number {
-  return Math.floor(
-    23.2488 + 0.242194 * (year - 1980) - Math.floor((year - 1980) / 4),
-  );
+  return equinoxDay(year, SHUBUN_BASES);
 }
 
 function baseHolidays(year: number): Holiday[] {

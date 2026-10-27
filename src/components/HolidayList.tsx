@@ -1,13 +1,9 @@
 "use client";
 
 import type { CivilDate } from "@/domain/shared/date";
-import { toEpochDay } from "@/domain/shared/date";
+import { toEpochDay, weekdayOf } from "@/domain/shared/date";
 import { getHolidaysInYear, type Holiday } from "@/domain/holiday";
 import { WEEKDAY_JA } from "@/components/weekdays";
-
-function weekdayIndex(date: CivilDate): number {
-  return new Date(Date.UTC(date.year, date.month - 1, date.day)).getUTCDay();
-}
 
 export function HolidayList({
   year,
@@ -114,7 +110,7 @@ function HolidayRow({
           className="ml-1 text-[10px]"
           style={{ color: isPast ? "var(--text-faint)" : "var(--text-muted)" }}
         >
-          ({WEEKDAY_JA[weekdayIndex(date)]})
+          ({WEEKDAY_JA[weekdayOf(date.year, date.month, date.day)]})
         </span>
       </span>
       <span
