@@ -15,12 +15,13 @@ describe("the mutation testing", () => {
     expect(pkg.devDependencies["@stryker-mutator/vitest-runner"]).toBeDefined();
   });
 
-  it("mutates the domain layer only, and not its tests, indexes or type files", () => {
+  it("mutates the domain layer only, and not its tests, indexes, type files or the generators of the property tests", () => {
     expect(stryker.mutate).toEqual([
       "src/domain/**/*.ts",
       "!src/domain/**/*.test.ts",
       "!src/domain/**/index.ts",
       "!src/domain/**/types.ts",
+      "!src/domain/properties/**",
     ]);
   });
 
