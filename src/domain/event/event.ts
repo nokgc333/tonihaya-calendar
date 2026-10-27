@@ -1,12 +1,7 @@
 import { toEpochDay } from "@/domain/shared/date";
 import type { CivilDate } from "@/domain/shared/date";
 import type { TimeOfDay } from "@/domain/timecalc";
-import type {
-  CalendarEvent,
-  EventColorKey,
-  EventPoint,
-  EventPriority,
-} from "./types";
+import type { CalendarEvent, EventPriority } from "./types";
 
 export type EventDraft = Omit<CalendarEvent, "id" | "createdAt" | "updatedAt">;
 
@@ -88,60 +83,6 @@ export function layoutDayColumns(
   }
   flush();
   return out;
-}
-
-const COLOR_KEYS: readonly EventColorKey[] = [
-  "blue",
-  "green",
-  "teal",
-  "purple",
-  "pink",
-  "amber",
-  "slate",
-  "rose",
-];
-const PRIORITIES: readonly EventPriority[] = ["low", "normal", "high"];
-
-const isObject = (v: unknown): v is Record<string, unknown> =>
-  typeof v === "object" && v !== null;
-
-const isCivilDate = (v: unknown): v is CivilDate =>
-  isObject(v) &&
-  typeof v.year === "number" &&
-  typeof v.month === "number" &&
-  typeof v.day === "number";
-
-const isTimeOfDay = (v: unknown): v is TimeOfDay =>
-  isObject(v) && typeof v.hour === "number" && typeof v.minute === "number";
-
-const isEventPoint = (v: unknown, requireTime: boolean): v is EventPoint => {
-  if (!isObject(v) || !isCivilDate(v.date)) return false;
-  return requireTime ? isTimeOfDay(v.time) : true;
-};
-
-type StoredCheck = (v: Record<string, unknown>) => boolean;
-
-const isNonEmptyString = (v: unknown): boolean =>
-  typeof v === "string" && v.length > 0;
-const isOptionalString = (v: unknown): boolean =>
-  v === undefined || typeof v === "string";
-
-const STORED_CHECKS: readonly StoredCheck[] = [
-  (v) => isNonEmptyString(v.id),
-  (v) => typeof v.title === "string",
-  (v) => typeof v.allDay === "boolean",
-  (v) => isEventPoint(v.start, !v.allDay),
-  (v) => isEventPoint(v.end, !v.allDay),
-  (v) => COLOR_KEYS.includes(v.colorKey as EventColorKey),
-  (v) => PRIORITIES.includes(v.priority as EventPriority),
-  (v) => isOptionalString(v.url),
-  (v) => isOptionalString(v.note),
-  (v) => typeof v.createdAt === "number",
-  (v) => typeof v.updatedAt === "number",
-];
-
-export function isStoredCalendarEvent(v: unknown): v is CalendarEvent {
-  return isObject(v) && STORED_CHECKS.every((check) => check(v));
 }
 
 export function isSafeUrl(url: string): boolean {

@@ -3,7 +3,6 @@ import {
   clipEventToDay,
   eventsForDay,
   isSafeUrl,
-  isStoredCalendarEvent,
   layoutDayColumns,
   minutesOfDay,
   sortForDay,
@@ -13,6 +12,7 @@ import {
   URL_MAX_LENGTH,
   type DaySegment,
 } from "./event";
+import { isStoredCalendarEvent } from "./storedEvent";
 import type { CalendarEvent } from "./types";
 
 const base = {

@@ -9,7 +9,7 @@ import {
 } from "react";
 import type { CivilDate } from "@/domain/shared/date";
 import { useEvents } from "@/hooks/useEvents";
-import { EventModal } from "@/components/EventModal";
+import { EventModal } from "@/components/event/EventModal";
 import { useAnnouncer } from "@/hooks/useAnnouncer";
 
 interface EditorState {

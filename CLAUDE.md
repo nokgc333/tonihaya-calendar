@@ -31,3 +31,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### 検証
 
 - コード変更後は、テスト・型チェック・ビルドの3点セットで検証する（技術スタック確定後に具体化）。
+
+### ドキュメントの更新
+
+- 機能・スクリプト・品質の基準・保存データの形式を変えたら、同じ PR で `README.md` も更新する
+- バージョンを上げるときは、`package.json` の `version` と README を合わせ、`docs/deploy-checklist.md` の手順で本番を確認する
+- 公開されている README に、仮の屋号やコピーを書かない

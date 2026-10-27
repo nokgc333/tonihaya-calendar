@@ -8,7 +8,7 @@ import {
   type ZoomState,
 } from "@/domain/view";
 import type { CivilDate } from "@/domain/shared/date";
-import { planJump } from "@/components/calendarJump";
+import { planJump } from "@/components/calendar/calendarJump";
 import { useCalendarPivots } from "@/hooks/useCalendarPivots";
 
 type Navigate = (next: ZoomState, mode: "push" | "replace" | "none") => void;

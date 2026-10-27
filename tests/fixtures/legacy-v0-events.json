@@ -1,0 +1,296 @@
+[
+  {
+    "id": "legacy-all-blue",
+    "title": "終日 blue",
+    "allDay": true,
+    "start": {
+      "date": {
+        "year": 2026,
+        "month": 7,
+        "day": 1
+      }
+    },
+    "end": {
+      "date": {
+        "year": 2026,
+        "month": 7,
+        "day": 1
+      }
+    },
+    "colorKey": "blue",
+    "priority": "low",
+    "createdAt": 1700000000000,
+    "updatedAt": 1700000000000
+  },
+  {
+    "id": "legacy-all-green",
+    "title": "終日 green",
+    "allDay": true,
+    "start": {
+      "date": {
+        "year": 2026,
+        "month": 7,
+        "day": 2
+      }
+    },
+    "end": {
+      "date": {
+        "year": 2026,
+        "month": 7,
+        "day": 2
+      }
+    },
+    "colorKey": "green",
+    "priority": "normal",
+    "createdAt": 1700000000001,
+    "updatedAt": 1700000000001
+  },
+  {
+    "id": "legacy-all-teal",
+    "title": "終日 teal",
+    "allDay": true,
+    "start": {
+      "date": {
+        "year": 2026,
+        "month": 7,
+        "day": 3
+      }
+    },
+    "end": {
+      "date": {
+        "year": 2026,
+        "month": 7,
+        "day": 3
+      }
+    },
+    "colorKey": "teal",
+    "priority": "high",
+    "createdAt": 1700000000002,
+    "updatedAt": 1700000000002
+  },
+  {
+    "id": "legacy-all-purple",
+    "title": "終日 purple",
+    "allDay": true,
+    "start": {
+      "date": {
+        "year": 2026,
+        "month": 7,
+        "day": 4
+      }
+    },
+    "end": {
+      "date": {
+        "year": 2026,
+        "month": 7,
+        "day": 4
+      }
+    },
+    "colorKey": "purple",
+    "priority": "low",
+    "createdAt": 1700000000003,
+    "updatedAt": 1700000000003
+  },
+  {
+    "id": "legacy-all-pink",
+    "title": "終日 pink",
+    "allDay": true,
+    "start": {
+      "date": {
+        "year": 2026,
+        "month": 7,
+        "day": 5
+      }
+    },
+    "end": {
+      "date": {
+        "year": 2026,
+        "month": 7,
+        "day": 5
+      }
+    },
+    "colorKey": "pink",
+    "priority": "normal",
+    "createdAt": 1700000000004,
+    "updatedAt": 1700000000004
+  },
+  {
+    "id": "legacy-all-amber",
+    "title": "終日 amber",
+    "allDay": true,
+    "start": {
+      "date": {
+        "year": 2026,
+        "month": 7,
+        "day": 6
+      }
+    },
+    "end": {
+      "date": {
+        "year": 2026,
+        "month": 7,
+        "day": 6
+      }
+    },
+    "colorKey": "amber",
+    "priority": "high",
+    "createdAt": 1700000000005,
+    "updatedAt": 1700000000005
+  },
+  {
+    "id": "legacy-all-slate",
+    "title": "終日 slate",
+    "allDay": true,
+    "start": {
+      "date": {
+        "year": 2026,
+        "month": 7,
+        "day": 7
+      }
+    },
+    "end": {
+      "date": {
+        "year": 2026,
+        "month": 7,
+        "day": 7
+      }
+    },
+    "colorKey": "slate",
+    "priority": "low",
+    "createdAt": 1700000000006,
+    "updatedAt": 1700000000006
+  },
+  {
+    "id": "legacy-all-rose",
+    "title": "終日 rose",
+    "allDay": true,
+    "start": {
+      "date": {
+        "year": 2026,
+        "month": 7,
+        "day": 8
+      }
+    },
+    "end": {
+      "date": {
+        "year": 2026,
+        "month": 7,
+        "day": 8
+      }
+    },
+    "colorKey": "rose",
+    "priority": "normal",
+    "createdAt": 1700000000007,
+    "updatedAt": 1700000000007
+  },
+  {
+    "id": "legacy-span",
+    "title": "年またぎ",
+    "allDay": true,
+    "start": {
+      "date": {
+        "year": 2026,
+        "month": 12,
+        "day": 30
+      }
+    },
+    "end": {
+      "date": {
+        "year": 2027,
+        "month": 1,
+        "day": 2
+      }
+    },
+    "colorKey": "blue",
+    "priority": "normal",
+    "note": "メモ",
+    "url": "https://example.com/plan?x=1",
+    "createdAt": 1700000000100,
+    "updatedAt": 1700000000200
+  },
+  {
+    "id": "legacy-timed",
+    "title": "打合せ",
+    "allDay": false,
+    "start": {
+      "date": {
+        "year": 2026,
+        "month": 7,
+        "day": 15
+      },
+      "time": {
+        "hour": 9,
+        "minute": 30
+      }
+    },
+    "end": {
+      "date": {
+        "year": 2026,
+        "month": 7,
+        "day": 15
+      },
+      "time": {
+        "hour": 10,
+        "minute": 45
+      }
+    },
+    "colorKey": "green",
+    "priority": "high",
+    "createdAt": 1700000000300,
+    "updatedAt": 1700000000300
+  },
+  {
+    "id": "legacy-night",
+    "title": "夜をまたぐ",
+    "allDay": false,
+    "start": {
+      "date": {
+        "year": 2026,
+        "month": 7,
+        "day": 17
+      },
+      "time": {
+        "hour": 22,
+        "minute": 0
+      }
+    },
+    "end": {
+      "date": {
+        "year": 2026,
+        "month": 7,
+        "day": 18
+      },
+      "time": {
+        "hour": 2,
+        "minute": 0
+      }
+    },
+    "colorKey": "purple",
+    "priority": "low",
+    "createdAt": 1700000000400,
+    "updatedAt": 1700000000400
+  },
+  {
+    "id": "legacy-leap",
+    "title": "閏日",
+    "allDay": true,
+    "start": {
+      "date": {
+        "year": 2028,
+        "month": 2,
+        "day": 29
+      }
+    },
+    "end": {
+      "date": {
+        "year": 2028,
+        "month": 2,
+        "day": 29
+      }
+    },
+    "colorKey": "rose",
+    "priority": "normal",
+    "createdAt": 1700000000500,
+    "updatedAt": 1700000000500
+  }
+]
