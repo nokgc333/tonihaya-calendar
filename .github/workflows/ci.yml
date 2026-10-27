@@ -82,7 +82,20 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/dependency-review-action@v5
+      - id: graph
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          base=${{ github.event.pull_request.base.sha }}
+          head=${{ github.event.pull_request.head.sha }}
+          if gh api "repos/${{ github.repository }}/dependency-graph/compare/${base}...${head}" > /dev/null 2>&1; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::The dependency graph is off, so the added dependencies were not reviewed. Turn it on in Settings > Advanced Security."
+          fi
+      - if: steps.graph.outputs.enabled == 'true'
+        uses: actions/dependency-review-action@v5
         with:
           fail-on-severity: high
 
