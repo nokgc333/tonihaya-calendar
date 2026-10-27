@@ -1,5 +1,5 @@
 import type { Countdown } from "@/domain/countdown";
-import type { CivilDate } from "@/domain/shared/date";
+import { weekdayOf, type CivilDate } from "@/domain/shared/date";
 import { formatYearWithEra } from "@/domain/era";
 import { CountdownChips } from "@/components/CountdownChips";
 import { WEEKDAY_JA } from "@/components/weekdays";
@@ -7,9 +7,7 @@ import { WEEKDAY_JA } from "@/components/weekdays";
 const PLACEHOLDER = "2026年(令和8年) 12月30日 水曜日";
 
 function weekdayJa(date: CivilDate): string {
-  return WEEKDAY_JA[
-    new Date(Date.UTC(date.year, date.month - 1, date.day)).getUTCDay()
-  ];
+  return WEEKDAY_JA[weekdayOf(date.year, date.month, date.day)];
 }
 
 export function TodayHeader({

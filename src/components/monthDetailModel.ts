@@ -1,4 +1,4 @@
-import type { CivilDate } from "@/domain/shared/date";
+import { weekdayOf, type CivilDate } from "@/domain/shared/date";
 import { WEEKDAY_JA } from "@/components/weekdays";
 
 const MONTHS_PER_YEAR = 12;
@@ -32,8 +32,5 @@ export function defaultEventDate(
 }
 
 export function weekdayLabel(date: CivilDate): string {
-  const weekday = new Date(
-    Date.UTC(date.year, date.month - 1, date.day),
-  ).getUTCDay();
-  return WEEKDAY_JA[weekday];
+  return WEEKDAY_JA[weekdayOf(date.year, date.month, date.day)];
 }
