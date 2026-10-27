@@ -83,5 +83,6 @@
     "*": [
       "secretlint"
     ]
-  }
+  },
+  "license": "MIT"
 }
