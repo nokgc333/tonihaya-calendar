@@ -1,25 +1,24 @@
-import { FlatCompat } from "@eslint/eslintrc";
+import { defineConfig, globalIgnores } from "eslint/config";
+import nextVitals from "eslint-config-next/core-web-vitals";
+import nextTs from "eslint-config-next/typescript";
 
-const compat = new FlatCompat({ baseDirectory: import.meta.dirname });
-
-const eslintConfig = [
-  {
-    ignores: [
-      ".next/**",
-      "out/**",
-      "node_modules/**",
-      "coverage/**",
-      "playwright-report/**",
-      "reports/**",
-      ".stryker-tmp/**",
-      "test-results/**",
-      ".lighthouse/**",
-      ".lighthouseci/**",
-      ".vercel/**",
-      "next-env.d.ts",
-    ],
-  },
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
+const eslintConfig = defineConfig([
+  globalIgnores([
+    ".next/**",
+    "out/**",
+    "node_modules/**",
+    "coverage/**",
+    "playwright-report/**",
+    "reports/**",
+    ".stryker-tmp/**",
+    "test-results/**",
+    ".lighthouse/**",
+    ".lighthouseci/**",
+    ".vercel/**",
+    "next-env.d.ts",
+  ]),
+  ...nextVitals,
+  ...nextTs,
   {
     linterOptions: { reportUnusedDisableDirectives: "error" },
   },
@@ -37,6 +36,6 @@ const eslintConfig = [
       "max-depth": ["error", 4],
     },
   },
-];
+]);
 
 export default eslintConfig;
