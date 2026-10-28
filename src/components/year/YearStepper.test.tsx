@@ -70,4 +70,23 @@ describe("YearStepper", () => {
     expect(onYearChange).toHaveBeenCalledWith(2031);
     vi.useRealTimers();
   });
+
+  it("follows the year when it changes from outside, replacing a draft that was never committed", async () => {
+    const onYearChange = vi.fn();
+    const user = userEvent.setup();
+    const { rerender } = render(
+      <YearStepper year={2026} today={today} onYearChange={onYearChange} />,
+    );
+    expect(input()).toHaveValue(2026);
+
+    await user.clear(input());
+    await user.type(input(), "2040");
+    expect(input()).toHaveValue(2040);
+
+    rerender(
+      <YearStepper year={2030} today={today} onYearChange={onYearChange} />,
+    );
+    expect(input()).toHaveValue(2030);
+    expect(onYearChange).not.toHaveBeenCalled();
+  });
 });
