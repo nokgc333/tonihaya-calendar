@@ -12,12 +12,6 @@ updates:
     ignore:
       - dependency-name: "@types/node"
         update-types: ["version-update:semver-major"]
-      # Next.js 16 is a framework migration, done on purpose, not by a bot.
-      - dependency-name: "next"
-        update-types: ["version-update:semver-major"]
-      # eslint-config-next must match the Next.js major (15), so it moves with Next.
-      - dependency-name: "eslint-config-next"
-        update-types: ["version-update:semver-major"]
       # The ESLint plugins that eslint-config-next bundles do not support ESLint 10 yet.
       - dependency-name: "eslint"
         update-types: ["version-update:semver-major"]

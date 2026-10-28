@@ -29,13 +29,13 @@ describe("the Lighthouse CI assertions", () => {
     expect(options.maxNumericValue).toBe(2500);
   });
 
-  it("keep the size budgets of the scripts (128 KiB) and of the whole page (150 KiB, which includes the manifest and its 192 pixel icon that the browser fetches), a few percent above what the page weighs", () => {
+  it("keep the size budgets of the scripts (162 KiB) and of the whole page (184 KiB, which includes the manifest and its 192 pixel icon that the browser fetches), a few percent above what the page weighs with Next.js 16", () => {
     expect(
       assertions["resource-summary:script:size"][1].maxNumericValue,
-    ).toBeLessThanOrEqual(131072);
+    ).toBeLessThanOrEqual(165888);
     expect(
       assertions["resource-summary:total:size"][1].maxNumericValue,
-    ).toBeLessThanOrEqual(153600);
+    ).toBeLessThanOrEqual(188416);
   });
 
   it("measure the exported site three times", () => {
