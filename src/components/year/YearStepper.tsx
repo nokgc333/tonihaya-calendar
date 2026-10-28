@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { MAX_YEAR, MIN_YEAR, clampYear, resolveYearInput } from "@/domain/view";
 import type { CivilDate } from "@/domain/shared/date";
 import { NavButton } from "@/components/year/OverviewControls";
@@ -17,13 +17,7 @@ export function YearStepper({
   readonly onYearChange: (year: number) => void;
 }) {
   const [yearDraft, setYearDraft] = useState<string>(String(year));
-  // The field follows the year when it changes from outside (and drops an uncommitted draft).
-  // Adjusting state while rendering avoids a second pass through an effect.
-  const [draftYear, setDraftYear] = useState<number>(year);
-  if (draftYear !== year) {
-    setDraftYear(year);
-    setYearDraft(String(year));
-  }
+  useEffect(() => setYearDraft(String(year)), [year]);
 
   const isCurrentYear = today !== null && year === today.year;
   const commitYearDraft = (): void =>

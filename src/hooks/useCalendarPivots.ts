@@ -23,11 +23,9 @@ export function useCalendarPivots(zoom: ZoomState) {
   const [weekOrigin, setWeekOrigin] = useState<WeekOrigin | null>(null);
 
   const [dayPivot, setDayPivot] = useState<CivilDate | null>(null);
-  // The day pivot only lives on the week and the day levels; drop it as soon as the zoom leaves
-  // them (adjusting state while rendering, so no stale pivot is ever painted).
-  if (dayPivot !== null && zoom.level !== "week" && zoom.level !== "day") {
-    setDayPivot(null);
-  }
+  useEffect(() => {
+    if (zoom.level !== "week" && zoom.level !== "day") setDayPivot(null);
+  }, [zoom.level]);
 
   return {
     pivotDay,
