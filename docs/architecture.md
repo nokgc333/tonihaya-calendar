@@ -12,7 +12,7 @@
 
 「12ヶ月を一望できる、とにかく速いカレンダー」。
 
-- **技術**: Next.js 16（App Router）＋ React 19 ＋ TypeScript（strict）＋ Tailwind v4。
+- **技術**: Next.js 15（App Router）＋ React 19 ＋ TypeScript（strict）＋ Tailwind v4。
 - **配信形態**: **完全な静的サイト**（`output: "export"` → `out/`）。サーバ・DB・認証・API を持たない。
 - **状態の持ち方**: 表示状態（どのレベル/年月日を見ているか）は **URLクエリ**（`?y=&m=&d=&v=`）＝共有・ブラウザ戻る対応。予定データは **localStorage**（key `tonihaya.events`）。
 - **ズーム階層**: L0 俯瞰(12ヶ月) → L1 月 → L2 週 → L3 日。相互に View Transitions でモーフ遷移。

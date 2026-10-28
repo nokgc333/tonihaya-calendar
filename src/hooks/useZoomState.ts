@@ -37,7 +37,6 @@ export function useZoomState() {
       month: now.getMonth() + 1,
       day: now.getDate(),
     };
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- the clock and the URL exist only in the browser; the statically exported HTML renders without them
     setToday(t);
     fallbackYearRef.current = t.year;
     setZoom(parseZoom(new URLSearchParams(window.location.search), t.year));
