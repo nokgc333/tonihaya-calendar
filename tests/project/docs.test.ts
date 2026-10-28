@@ -90,4 +90,22 @@ describe("CLAUDE.md", () => {
     expect(rules).toContain("同じ PR で `README.md` も更新する");
     expect(rules).toContain("`version`");
   });
+
+  it("states the English commit message style that the history uses", () => {
+    const rules = read("CLAUDE.md");
+    expect(rules).toContain("英語スタイル");
+    expect(rules).not.toContain("日本語スタイル");
+  });
+});
+
+describe("the license", () => {
+  it("is the MIT license, with a year and a holder, and is said so in the package and the README", () => {
+    const license = read("LICENSE");
+    expect(license.startsWith("MIT License")).toBe(true);
+    expect(license).toMatch(/Copyright \(c\) \d{4} \S+/);
+    expect(pkg.license).toBe("MIT");
+    expect(readme).toContain("MIT License");
+    expect(readme).toContain("./LICENSE");
+    expect(readme).not.toContain("未定");
+  });
 });

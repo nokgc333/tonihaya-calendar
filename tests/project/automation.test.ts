@@ -101,4 +101,14 @@ describe("the checks before a commit", () => {
       expect(existsSync(join(root, file)), file).toBe(true);
     }
   });
+
+  it("keep the Node type definitions on the major version of the runtime that the repository pins", () => {
+    const runtime = read(".nvmrc").trim();
+    expect(dependabot).toMatch(
+      /dependency-name:\s*"@types\/node"\s*\n\s*update-types:\s*\["version-update:semver-major"\]/,
+    );
+    expect(pkg.devDependencies["@types/node"]).toMatch(
+      new RegExp(`^\\^${runtime}\\.`),
+    );
+  });
 });
