@@ -112,3 +112,27 @@ describe("the checks before a commit", () => {
     );
   });
 });
+
+describe("the recorded protection of the main branch", () => {
+  const policy = JSON.parse(read(".github/branch-protection/main.json"));
+  const workflows = [
+    ".github/workflows/ci.yml",
+    ".github/workflows/codeql.yml",
+  ].map(read);
+
+  it("requires only checks that a workflow job really reports", () => {
+    const required: string[] = policy.required_status_checks.contexts;
+    expect(required.length).toBeGreaterThan(0);
+    for (const name of required) {
+      expect(
+        workflows.some((text) => text.includes(`name: ${name}`)),
+        name,
+      ).toBe(true);
+    }
+  });
+
+  it("forbids force pushes and deletions", () => {
+    expect(policy.allow_force_pushes).toBe(false);
+    expect(policy.allow_deletions).toBe(false);
+  });
+});
