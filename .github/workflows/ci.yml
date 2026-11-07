@@ -99,3 +99,20 @@ jobs:
         uses: actions/dependency-review-action@v5
         with:
           fail-on-severity: high
+
+  lighthouse:
+    name: lighthouse (size budget / perf score)
+    needs: verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm install --no-audit --no-fund
+      - uses: actions/download-artifact@v8
+        with:
+          name: out
+          path: out/
+      - run: npm run ci:lhci
