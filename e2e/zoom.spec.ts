@@ -23,7 +23,7 @@ test("zooms from the year to the month, the week and the day, and back with Esca
   await expect(page.getByText("2026年 7月", { exact: true })).toBeVisible();
 
   await page
-    .locator("[class*='cursor-pointer']", { hasText: /^15$/ })
+    .locator("[class*='cursor-pointer']", { hasText: /^15(?!\d)/ })
     .first()
     .click();
   await expect(page).toHaveURL(/\?y=2026&m=7&d=15&v=week$/);
