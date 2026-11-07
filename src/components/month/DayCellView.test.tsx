@@ -1,5 +1,6 @@
 // @vitest-environment happy-dom
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { DayCellView } from "@/components/month/DayCellView";
 import { buildMonthView, type DayCell } from "@/domain/view";
@@ -112,5 +113,102 @@ describe("DayCellView", () => {
       screen.getByRole("button", { name: "7月15日を開く" }),
     ).toBeInTheDocument();
     expect(container.querySelector("[role='button'], [tabindex]")).toBeNull();
+  });
+
+  it("reports the day when the cell or its button is clicked", () => {
+    const onDayClick = vi.fn();
+    const { container } = show(cellOf(15), {
+      onDayClick,
+      cellYear: 2026,
+      cellMonth: 7,
+    });
+    fireEvent.click(container.firstElementChild as HTMLElement);
+    fireEvent.click(screen.getByRole("button", { name: "7月15日を開く" }));
+    expect(onDayClick.mock.calls).toEqual([
+      [2026, 7, 15],
+      [2026, 7, 15],
+    ]);
+  });
+
+  it.each(["{Enter}", " "])(
+    "opens the day from the keyboard with %j, once",
+    async (key) => {
+      const onDayClick = vi.fn();
+      show(cellOf(15), { onDayClick, cellYear: 2026, cellMonth: 7 });
+      const user = userEvent.setup();
+      await user.tab();
+      await user.keyboard(key);
+      expect(onDayClick.mock.calls).toEqual([[2026, 7, 15]]);
+    },
+  );
+
+  it("does not open the day with other keys", async () => {
+    const onDayClick = vi.fn();
+    show(cellOf(15), { onDayClick, cellYear: 2026, cellMonth: 7 });
+    const user = userEvent.setup();
+    await user.tab();
+    await user.keyboard("a");
+    expect(onDayClick).not.toHaveBeenCalled();
+  });
+
+  it("keeps the event chips as separate buttons beside the day button, not inside it", () => {
+    show(cellOf(15), {
+      spacious: true,
+      dayEvents: many(1),
+      onDayClick: vi.fn(),
+      cellYear: 2026,
+      cellMonth: 7,
+    });
+    const dayButton = screen.getByRole("button", { name: "7月15日を開く" });
+    expect(dayButton.contains(screen.getByTitle("e0"))).toBe(false);
+  });
+});
+
+describe("DayCellView events", () => {
+  it("shows up to three chips and the number of the rest when spacious", () => {
+    const { container } = show(cellOf(15), {
+      spacious: true,
+      dayEvents: many(5),
+    });
+    expect(container.querySelectorAll("[data-event-id]")).toHaveLength(3);
+    expect(screen.getByText("+2件")).toBeInTheDocument();
+  });
+
+  it("shows no overflow note for three events or fewer", () => {
+    show(cellOf(15), { spacious: true, dayEvents: many(3) });
+    expect(screen.queryByText(/件$/)).not.toBeInTheDocument();
+  });
+
+  it("tells which chip was picked without opening the day", () => {
+    const onSelect = vi.fn();
+    const onDayClick = vi.fn();
+    show(cellOf(15), {
+      spacious: true,
+      dayEvents: many(1),
+      onEventSelect: onSelect,
+      onDayClick,
+      cellYear: 2026,
+      cellMonth: 7,
+    });
+    fireEvent.click(screen.getByTitle("e0"));
+    expect(onSelect).toHaveBeenCalledWith("e0");
+    expect(onDayClick).not.toHaveBeenCalled();
+  });
+
+  it("shows dots instead of chips when not spacious, up to six", () => {
+    const { container } = show(cellOf(15), { dayEvents: many(6) });
+    expect(container.querySelectorAll(".h-1.w-1.rounded-full")).toHaveLength(6);
+    expect(container.querySelector("[data-event-id]")).toBeNull();
+  });
+
+  it("shows five dots and a plus mark for more than six events", () => {
+    const { container } = show(cellOf(15), { dayEvents: many(8) });
+    expect(container.querySelectorAll(".h-1.w-1.rounded-full")).toHaveLength(5);
+    expect(screen.getByText("＋")).toBeInTheDocument();
+  });
+
+  it("shows no dots for a day without events", () => {
+    const { container } = show(cellOf(15));
+    expect(container.querySelector(".h-1.w-1")).toBeNull();
   });
 });
