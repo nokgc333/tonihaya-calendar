@@ -105,6 +105,8 @@ docs/             要件定義書、仕様書、設計、デプロイの手順�
 
 短命ブランチから `main` への PR を、マージコミットで取り込む。`main` へのマージで、Vercel が本番へデプロイする。デプロイ後の確認は [`docs/deploy-checklist.md`](./docs/deploy-checklist.md) の手順で行う。
 
+`main` の保護（必須チェックと、force push・削除の禁止）は、`.github/branch-protection/main.json` に記録している。適用は `gh api -X PUT repos/<owner>/<repo>/branches/main/protection --input .github/branch-protection/main.json`。
+
 ## セキュリティヘッダー
 
 `vercel.json` で、`script-src 'self'`(インラインスクリプトなし)、`frame-ancestors 'none'`、COOP / CORP、HSTS などを設定している。静的書き出しのページに残る小さなインラインスクリプトは、ビルドの最後に外部ファイルへ移す。
