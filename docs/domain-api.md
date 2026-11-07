@@ -46,6 +46,7 @@
 
 | 関数・定数 | 内容 |
 | --- | --- |
+| `toKyureki(year, month, day)` | 西暦の日付を `Kyureki`(旧暦の `year`・`month`・`day`・`leap`)に変換。1950-01-01〜2150-12-31 の範囲外は `null`。閏月は直前の月と同じ月番号で `leap: true` |
 | `KYUREKI_FIRST_YEAR` | `kyureki/table` の表の先頭の旧暦年(1949 年) |
 | `KYUREKI_ROWS` | `kyureki/table` の読み取り専用の 202 行。各行は正月の西暦元日からの日数・閏月番号(なければ 0)・月の長さのビット列(下位から暦順、1 は 30 日、0 は 29 日) |
 
