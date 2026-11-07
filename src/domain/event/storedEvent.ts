@@ -1,6 +1,12 @@
 import { daysInMonth } from "@/domain/calendar";
 import { toEpochDay } from "@/domain/shared/date";
-import { minutesOfDay } from "./event";
+import {
+  NOTE_MAX_LENGTH,
+  TITLE_MAX_LENGTH,
+  URL_MAX_LENGTH,
+  isSafeUrl,
+  minutesOfDay,
+} from "./event";
 import type {
   CalendarEvent,
   EventColorKey,
@@ -73,6 +79,27 @@ const instant = (p: EventPoint): number =>
   toEpochDay(p.date.year, p.date.month, p.date.day) * 24 * 60 +
   (p.time ? minutesOfDay(p.time) : 0);
 
+function readOptionalText(
+  v: unknown,
+  field: string,
+  limit: number,
+  repaired: string[],
+): string | undefined | null {
+  if (v === undefined) return undefined;
+  if (typeof v !== "string") return null;
+  if (v.length <= limit) return v;
+  repaired.push(field);
+  return v.slice(0, limit);
+}
+
+function readUrl(v: unknown, repaired: string[]): string | undefined | null {
+  if (v === undefined) return undefined;
+  if (typeof v !== "string") return null;
+  if (v.length <= URL_MAX_LENGTH && isSafeUrl(v)) return v;
+  repaired.push("url");
+  return undefined;
+}
+
 const reject = (field: string): StoredParse => ({
   ok: false,
   reason: `${field} is not valid`,
@@ -117,14 +144,13 @@ interface Texts {
   readonly note: string | undefined;
 }
 
-function readTexts(v: Obj): Texts | string {
-  if (v.note !== undefined && typeof v.note !== "string") return "note";
-  if (v.url !== undefined && typeof v.url !== "string") return "url";
-  return {
-    title: v.title as string,
-    url: v.url as string | undefined,
-    note: v.note as string | undefined,
-  };
+function readTexts(v: Obj, repaired: string[]): Texts | string {
+  const title = readOptionalText(v.title, "title", TITLE_MAX_LENGTH, repaired);
+  const note = readOptionalText(v.note, "note", NOTE_MAX_LENGTH, repaired);
+  if (note === null) return "note";
+  const url = readUrl(v.url, repaired);
+  if (url === null) return "url";
+  return { title: title ?? "", url, note };
 }
 
 export function parseStoredEvent(v: unknown): StoredParse {
@@ -133,7 +159,8 @@ export function parseStoredEvent(v: unknown): StoredParse {
   if (badScalar !== null) return reject(badScalar);
   const points = readPoints(v);
   if (typeof points === "string") return reject(points);
-  const texts = readTexts(v);
+  const repaired: string[] = [];
+  const texts = readTexts(v, repaired);
   if (typeof texts === "string") return reject(texts);
 
   const event: CalendarEvent = {
@@ -149,5 +176,13 @@ export function parseStoredEvent(v: unknown): StoredParse {
     createdAt: v.createdAt as number,
     updatedAt: v.updatedAt as number,
   };
-  return { ok: true, event, repaired: [] };
+  return { ok: true, event, repaired: orderRepairs(repaired) };
+}
+
+const REPAIR_ORDER = ["title", "url", "note"];
+
+function orderRepairs(repaired: readonly string[]): string[] {
+  return [...repaired].sort(
+    (a, b) => REPAIR_ORDER.indexOf(a) - REPAIR_ORDER.indexOf(b),
+  );
 }

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { NOTE_MAX_LENGTH, TITLE_MAX_LENGTH, URL_MAX_LENGTH } from "./event";
 import { parseStoredEvent } from "./storedEvent";
 
 const allDay = (over: Record<string, unknown> = {}) => ({
@@ -172,5 +173,71 @@ describe("parseStoredEvent: what it rejects", () => {
     expect(
       reason(allDay({ start: { date: { year: 2026, month: 2, day: 30 } } })),
     ).toContain("start");
+  });
+});
+
+describe("parseStoredEvent: what it repairs", () => {
+  it("cuts a title that is too long to the limit and says so", () => {
+    const r = parseStoredEvent(
+      allDay({ title: "あ".repeat(TITLE_MAX_LENGTH + 50) }),
+    );
+    expect(r.ok && r.event.title).toHaveLength(TITLE_MAX_LENGTH);
+    expect(r.ok && r.repaired).toEqual(["title"]);
+  });
+
+  it("keeps a title that is exactly at the limit", () => {
+    const r = parseStoredEvent(allDay({ title: "a".repeat(TITLE_MAX_LENGTH) }));
+    expect(r.ok && r.repaired).toEqual([]);
+  });
+
+  it("cuts a note that is too long to the limit", () => {
+    const r = parseStoredEvent(
+      allDay({ note: "n".repeat(NOTE_MAX_LENGTH + 1) }),
+    );
+    expect(r.ok && r.event.note).toHaveLength(NOTE_MAX_LENGTH);
+    expect(r.ok && r.repaired).toEqual(["note"]);
+  });
+
+  it.each([
+    "javascript:alert(1)",
+    "JaVaScRiPt:alert(1)",
+    "data:text/html,<script>alert(1)</script>",
+    "vbscript:msgbox(1)",
+    "file:///etc/passwd",
+    "ftp://example.com/",
+    "//example.com/",
+    "not a url",
+  ])("drops the link %s and keeps the event", (url) => {
+    const r = parseStoredEvent(allDay({ url }));
+    expect(r.ok && "url" in r.event).toBe(false);
+    expect(r.ok && r.repaired).toEqual(["url"]);
+  });
+
+  it("drops a link that is too long", () => {
+    const r = parseStoredEvent(
+      allDay({ url: `https://example.com/${"a".repeat(URL_MAX_LENGTH)}` }),
+    );
+    expect(r.ok && "url" in r.event).toBe(false);
+    expect(r.ok && r.repaired).toEqual(["url"]);
+  });
+
+  it("forgets everything it does not know, so that nothing unexpected is carried on", () => {
+    const r = parseStoredEvent(
+      allDay({ extra: "x", __proto__: { polluted: true }, constructor: "y" }),
+    );
+    expect(r.ok && Object.keys(r.event).sort()).toEqual(
+      [
+        "allDay",
+        "colorKey",
+        "createdAt",
+        "end",
+        "id",
+        "priority",
+        "start",
+        "title",
+        "updatedAt",
+      ].sort(),
+    );
+    expect(({} as Record<string, unknown>).polluted).toBeUndefined();
   });
 });
