@@ -14,7 +14,10 @@
     "type-check": "tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check": "npm run lint && npm run type-check && npm run format:check"
+    "check": "npm run lint && npm run type-check && npm run format:check",
+    "prepare": "husky || true",
+    "secrets": "secretlint \"**/*\"",
+    "check:duplicates": "jscpd"
   },
   "overrides": {
     "next": {
@@ -38,6 +41,23 @@
     "eslint": "^9.39.5",
     "eslint-config-next": "^15.5.28",
     "prettier": "^3.9.10",
-    "prettier-plugin-tailwindcss": "^0.8.1"
+    "prettier-plugin-tailwindcss": "^0.8.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.6.0",
+    "secretlint": "^13.1.0",
+    "@secretlint/secretlint-rule-preset-recommend": "^13.1.0",
+    "jscpd": "^5.4.2"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,mjs,cjs}": [
+      "prettier --write",
+      "eslint --max-warnings=0"
+    ],
+    "*.{json,md,css,yml,yaml}": [
+      "prettier --write"
+    ],
+    "*": [
+      "secretlint"
+    ]
   }
 }
