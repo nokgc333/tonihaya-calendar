@@ -4,5 +4,12 @@ export {
   addDays,
   diffDays,
   addDurations,
+  subtractDurations,
 } from "./timecalc";
-export type { TimeOfDay, Duration, CivilDate, TimeResult } from "./timecalc";
+export type {
+  TimeOfDay,
+  Duration,
+  SignedDuration,
+  CivilDate,
+  TimeResult,
+} from "./timecalc";

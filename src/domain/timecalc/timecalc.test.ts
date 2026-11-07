@@ -5,6 +5,7 @@ import {
   addDurations,
   diffDays,
   diffTime,
+  subtractDurations,
 } from "./timecalc";
 
 describe("addDurationToTime (1: time ± duration)", () => {
@@ -98,6 +99,74 @@ describe("addDurations (4: adding and subtracting durations)", () => {
     ).toEqual({
       hours: 30,
       minutes: 0,
+    });
+  });
+});
+
+describe("subtractDurations (4: subtracting durations)", () => {
+  test("4:10 - 2:50 = 1:20", () => {
+    expect(
+      subtractDurations({ hours: 4, minutes: 10 }, { hours: 2, minutes: 50 }),
+    ).toEqual({ hours: 1, minutes: 20, negative: false });
+  });
+
+  test("1:20 - 2:50 = -1:30 (the result is negative)", () => {
+    expect(
+      subtractDurations({ hours: 1, minutes: 20 }, { hours: 2, minutes: 50 }),
+    ).toEqual({ hours: 1, minutes: 30, negative: true });
+  });
+
+  test("equal durations give zero, which is not negative", () => {
+    expect(
+      subtractDurations({ hours: 2, minutes: 0 }, { hours: 2, minutes: 0 }),
+    ).toEqual({ hours: 0, minutes: 0, negative: false });
+  });
+});
+
+describe("the boundaries of the calendar", () => {
+  const date = (year: number, month: number, day: number) => ({
+    year,
+    month,
+    day,
+  });
+
+  test.each([
+    [date(2023, 2, 28), 1, date(2023, 3, 1)],
+    [date(2024, 2, 29), 1, date(2024, 3, 1)],
+    [date(2024, 12, 31), 1, date(2025, 1, 1)],
+    [date(2025, 1, 1), -1, date(2024, 12, 31)],
+    [date(2024, 3, 1), -1, date(2024, 2, 29)],
+    [date(2023, 3, 1), -1, date(2023, 2, 28)],
+    [date(2026, 1, 31), 30, date(2026, 3, 2)],
+  ])("%j + %i days = %j", (from, days, expected) => {
+    expect(addDays(from, days)).toEqual(expected);
+  });
+
+  test.each([
+    [date(2024, 2, 28), date(2024, 3, 1), 2],
+    [date(2023, 2, 28), date(2023, 3, 1), 1],
+    [date(2023, 12, 31), date(2024, 1, 1), 1],
+    [date(2026, 7, 4), date(2026, 12, 31), 180],
+    [date(2026, 7, 4), date(2026, 7, 4), 0],
+  ])("%j to %j = %i days", (from, to, expected) => {
+    expect(diffDays(from, to)).toBe(expected);
+  });
+
+  test("a time difference of zero is zero, not 24 hours", () => {
+    expect(diffTime({ hour: 9, minute: 0 }, { hour: 9, minute: 0 })).toEqual({
+      hours: 0,
+      minutes: 0,
+    });
+  });
+
+  test("adding a whole day or more to a time moves only the day offset", () => {
+    expect(addDurationToTime({ hour: 14, minute: 30 }, 1440 + 45)).toEqual({
+      time: { hour: 15, minute: 15 },
+      dayOffset: 1,
+    });
+    expect(addDurationToTime({ hour: 0, minute: 0 }, -2880)).toEqual({
+      time: { hour: 0, minute: 0 },
+      dayOffset: -2,
     });
   });
 });

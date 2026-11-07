@@ -60,6 +60,22 @@ export function diffDays(from: CivilDate, to: CivilDate): number {
   );
 }
 
+export interface SignedDuration extends Duration {
+  readonly negative: boolean;
+}
+
+export function subtractDurations(a: Duration, b: Duration): SignedDuration {
+  const diff =
+    toMinutes({ hour: a.hours, minute: a.minutes }) -
+    toMinutes({ hour: b.hours, minute: b.minutes });
+  const size = Math.abs(diff);
+  return {
+    hours: Math.floor(size / MINUTES_PER_HOUR),
+    minutes: size % MINUTES_PER_HOUR,
+    negative: diff < 0,
+  };
+}
+
 export function addDurations(a: Duration, b: Duration): Duration {
   const total =
     a.hours * MINUTES_PER_HOUR +
