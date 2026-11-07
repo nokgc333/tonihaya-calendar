@@ -62,6 +62,7 @@ npm run dev
 - **`npm run check:headers -- <URL>`:** デプロイしたサイトのヘッダーと、インラインスクリプトが無いことの確認
 - **`npm run check:site [URL]`:** デプロイしたサイトの主要導線・ポリシー違反・メタ情報・ファイルの確認
 - **`npm run generate:images`:** 共有画像とアイコンの再生成(`npm run build` の後に実行)
+- **`npm run generate:kyureki`:** 旧暦の変換表を天文計算から再生成(JST、1950〜2150 年の変換用)
 - **`npm run secrets`:** リポジトリ全体の秘密情報の検査
 
 ## 品質の基準
