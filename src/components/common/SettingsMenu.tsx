@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type RefObject } from "react";
 import type { WeekStart } from "@/domain/calendar";
 import { SegmentButton } from "@/components/common/SegmentButton";
 import { useDisplaySettings } from "@/components/common/DisplaySettings";
+import type { ThemeChoice } from "@/components/common/theme";
 
 function GearIcon() {
   return (
@@ -126,6 +127,42 @@ function SwitchOptions({
   );
 }
 
+const THEME_LABELS: readonly (readonly [ThemeChoice, string])[] = [
+  ["system", "システム"],
+  ["light", "ライト"],
+  ["dark", "ダーク"],
+];
+
+function ThemeOptions({
+  theme,
+  onChange,
+}: {
+  readonly theme: ThemeChoice;
+  readonly onChange: (theme: ThemeChoice) => void;
+}) {
+  return (
+    <div role="group" aria-label="テーマ" className="mt-3">
+      <div
+        className="mb-1.5 text-[11px]"
+        style={{ color: "var(--text-muted)" }}
+      >
+        テーマ
+      </div>
+      <div className="flex items-center gap-1">
+        {THEME_LABELS.map(([choice, label]) => (
+          <SegmentButton
+            key={choice}
+            label={label}
+            active={theme === choice}
+            onClick={() => onChange(choice)}
+            aria-current={theme === choice ? "true" : undefined}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function DisplayOptions() {
   const settings = useDisplaySettings();
   return (
@@ -140,6 +177,7 @@ function DisplayOptions() {
         on={settings.wafuMonth}
         onChange={settings.onWafuMonthChange}
       />
+      <ThemeOptions theme={settings.theme} onChange={settings.onThemeChange} />
     </>
   );
 }

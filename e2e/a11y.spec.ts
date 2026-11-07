@@ -126,3 +126,26 @@ test("has no color contrast violation on any view, in either theme, on a wide sc
     }
   }
 });
+
+for (const [choice, system] of [
+  ["light", "dark"],
+  ["dark", "light"],
+] as const) {
+  for (const [name, search] of views) {
+    test(`has no accessibility violation on ${name} when the ${choice} theme is chosen on a ${system} system`, async ({
+      page,
+    }) => {
+      await page.emulateMedia({ colorScheme: system });
+      await page.addInitScript((value) => {
+        localStorage.setItem("tonihaya.theme", value);
+      }, choice);
+      await openApp(page, search);
+      await expect(page.locator("html")).toHaveAttribute("data-theme", choice);
+      expect(await newViolations(page)).toEqual([]);
+      const { violations } = await new AxeBuilder({ page })
+        .withRules(["color-contrast"])
+        .analyze();
+      expect(violations).toEqual([]);
+    });
+  }
+}
