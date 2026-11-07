@@ -31,3 +31,40 @@ jobs:
           name: out
           path: out/
           retention-days: 1
+
+  audit:
+    name: audit (production dependencies)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+      - run: npm audit --omit=dev --audit-level=high
+
+  dependency-review:
+    name: dependency review (added dependencies)
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+      - id: graph
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          base=${{ github.event.pull_request.base.sha }}
+          head=${{ github.event.pull_request.head.sha }}
+          if gh api "repos/${{ github.repository }}/dependency-graph/compare/${base}...${head}" > /dev/null 2>&1; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::The dependency graph is off, so the added dependencies were not reviewed. Turn it on in Settings > Advanced Security."
+          fi
+      - if: steps.graph.outputs.enabled == 'true'
+        uses: actions/dependency-review-action@v5
+        with:
+          fail-on-severity: high
