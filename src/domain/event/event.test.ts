@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { clipEventToDay, eventsForDay, minutesOfDay } from "./event";
+import {
+  clipEventToDay,
+  eventsForDay,
+  minutesOfDay,
+  layoutDayColumns,
+  type DaySegment,
+} from "./event";
 import type { CalendarEvent } from "./types";
 
 const base = {
@@ -89,5 +95,51 @@ describe("clipEventToDay", () => {
   });
   it("a day outside the range returns null", () => {
     expect(clipEventToDay(multi, { year: 2026, month: 7, day: 13 })).toBeNull();
+  });
+});
+
+describe("layoutDayColumns", () => {
+  const seg = (id: string, startMin: number, endMin: number): DaySegment => ({
+    event: {
+      ...base,
+      id,
+      title: id,
+      allDay: false,
+      start: {
+        date: { year: 2026, month: 7, day: 12 },
+        time: { hour: 0, minute: 0 },
+      },
+      end: {
+        date: { year: 2026, month: 7, day: 12 },
+        time: { hour: 1, minute: 0 },
+      },
+    },
+    startMin,
+    endMin,
+    continuesFromPrev: false,
+    continuesToNext: false,
+  });
+  it("non-overlapping events use 1 column", () => {
+    const out = layoutDayColumns([seg("a", 0, 60), seg("b", 120, 180)]);
+    expect(out.every((s) => s.columnCount === 1 && s.columnIndex === 0)).toBe(
+      true,
+    );
+  });
+  it("two overlapping events are assigned 2 columns", () => {
+    const out = layoutDayColumns([seg("a", 0, 120), seg("b", 60, 180)]);
+    const a = out.find((s) => s.event.id === "a")!;
+    const b = out.find((s) => s.event.id === "b")!;
+    expect(a.columnCount).toBe(2);
+    expect(b.columnCount).toBe(2);
+    expect(new Set([a.columnIndex, b.columnIndex])).toEqual(new Set([0, 1]));
+  });
+  it("non-overlapping events are not put in the same cluster (1 column)", () => {
+    const out = layoutDayColumns([
+      seg("a", 0, 60),
+      seg("b", 30, 90),
+      seg("c", 200, 260),
+    ]);
+    expect(out.find((s) => s.event.id === "c")!.columnCount).toBe(1);
+    expect(out.find((s) => s.event.id === "a")!.columnCount).toBe(2);
   });
 });

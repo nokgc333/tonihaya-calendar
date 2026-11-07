@@ -48,3 +48,39 @@ export function clipEventToDay(
     continuesToNext: d < e,
   };
 }
+
+export interface LaidOutSegment extends DaySegment {
+  readonly columnIndex: number;
+  readonly columnCount: number;
+}
+
+export function layoutDayColumns(
+  segments: readonly DaySegment[],
+): readonly LaidOutSegment[] {
+  const sorted = [...segments].sort(
+    (a, b) => a.startMin - b.startMin || a.endMin - b.endMin,
+  );
+  const out: LaidOutSegment[] = [];
+  let cluster: Array<DaySegment & { columnIndex: number }> = [];
+  let clusterMaxEnd = -1;
+
+  const flush = (): void => {
+    const count = cluster.reduce((m, c) => Math.max(m, c.columnIndex + 1), 0);
+    for (const c of cluster) out.push({ ...c, columnCount: count });
+    cluster = [];
+    clusterMaxEnd = -1;
+  };
+
+  for (const s of sorted) {
+    if (cluster.length > 0 && s.startMin >= clusterMaxEnd) flush();
+    const occupied = new Set(
+      cluster.filter((c) => c.endMin > s.startMin).map((c) => c.columnIndex),
+    );
+    let col = 0;
+    while (occupied.has(col)) col++;
+    cluster.push({ ...s, columnIndex: col });
+    clusterMaxEnd = Math.max(clusterMaxEnd, s.endMin);
+  }
+  flush();
+  return out;
+}
