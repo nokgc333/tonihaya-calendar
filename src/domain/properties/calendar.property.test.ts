@@ -1,6 +1,7 @@
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 import { getMonthGrid } from "@/domain/calendar";
+import { getCountdowns } from "@/domain/countdown";
 import { formatYearWithEra, toWareki } from "@/domain/era";
 import {
   getHoliday,
@@ -247,6 +248,87 @@ describe("the holidays of a year", () => {
         const count = getHolidaysInYear(year).length;
         expect(count).toBeGreaterThanOrEqual(16);
         expect(count).toBeLessThanOrEqual(22);
+      }),
+    );
+  });
+});
+
+describe("the countdowns", () => {
+  it("count the days to the next Saturday as a number from 0 to 6 that reaches a Saturday", () => {
+    fc.assert(
+      fc.property(appDate, (d) => {
+        const c = getCountdowns(d.year, d.month, d.day);
+        expect(c.toSaturday).toBeGreaterThanOrEqual(0);
+        expect(c.toSaturday).toBeLessThanOrEqual(6);
+        const saturday = fromEpochDay(epochOf(d) + c.toSaturday);
+        expect(weekdayOf(saturday.year, saturday.month, saturday.day)).toBe(
+          SATURDAY,
+        );
+      }),
+    );
+  });
+
+  it("count the days to the end of the month and to the end of the year exactly", () => {
+    fc.assert(
+      fc.property(appDate, (d) => {
+        const c = getCountdowns(d.year, d.month, d.day);
+        const monthEnd = fromEpochDay(epochOf(d) + c.toMonthEnd);
+        expect([monthEnd.year, monthEnd.month, monthEnd.day]).toEqual([
+          d.year,
+          d.month,
+          daysInMonth(d.year, d.month),
+        ]);
+        const yearEnd = fromEpochDay(epochOf(d) + c.toYearEnd);
+        expect([yearEnd.year, yearEnd.month, yearEnd.day]).toEqual([
+          d.year,
+          12,
+          31,
+        ]);
+      }),
+    );
+  });
+
+  it("keep the remaining business days, which do not include today, between none and the days left, and never count a holiday or a weekend", () => {
+    fc.assert(
+      fc.property(appDate, (d) => {
+        const c = getCountdowns(d.year, d.month, d.day);
+        expect(c.remainingBusinessDays).toBeGreaterThanOrEqual(0);
+        expect(c.remainingBusinessDays).toBeLessThanOrEqual(c.toMonthEnd);
+        let expected = 0;
+        for (
+          let day = d.day + 1;
+          day <= daysInMonth(d.year, d.month);
+          day += 1
+        ) {
+          const w = weekdayOf(d.year, d.month, day);
+          if (
+            w !== SATURDAY &&
+            w !== SUNDAY &&
+            !isHoliday(d.year, d.month, day)
+          )
+            expected += 1;
+        }
+        expect(c.remainingBusinessDays).toBe(expected);
+      }),
+    );
+  });
+
+  it("never gain business days as the month goes on", () => {
+    fc.assert(
+      fc.property(appDate, (d) => {
+        if (d.day === daysInMonth(d.year, d.month)) return;
+        const today = getCountdowns(
+          d.year,
+          d.month,
+          d.day,
+        ).remainingBusinessDays;
+        const tomorrow = getCountdowns(
+          d.year,
+          d.month,
+          d.day + 1,
+        ).remainingBusinessDays;
+        expect(tomorrow).toBeLessThanOrEqual(today);
+        expect(today - tomorrow).toBeLessThanOrEqual(1);
       }),
     );
   });
