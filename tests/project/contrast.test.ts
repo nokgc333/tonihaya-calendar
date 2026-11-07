@@ -46,6 +46,11 @@ const forcedDark = tokensOf(blockAfter(':root[data-theme="dark"]'));
 const themes: Record<string, Tokens> = {
   "light by default": base,
   "light by choice": { ...base, ...forcedLight },
+  "light by choice on a dark system": {
+    ...base,
+    ...darkMedia,
+    ...forcedLight,
+  },
   "dark by the system setting": { ...base, ...darkMedia },
   "dark by choice": { ...base, ...forcedDark },
 };
