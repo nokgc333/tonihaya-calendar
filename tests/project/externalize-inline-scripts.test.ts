@@ -1,6 +1,21 @@
 import { createHash } from "node:crypto";
-import { describe, expect, it } from "vitest";
-import { externalizeInlineScripts } from "../../scripts/externalize-inline-scripts.mjs";
+import {
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+
+import { afterEach, describe, expect, it } from "vitest";
+
+import {
+  externalizeInlineScripts,
+  externalizeSite,
+} from "../../scripts/externalize-inline-scripts.mjs";
 
 const PUBLIC_DIR = "/_next/static/inline";
 
@@ -96,5 +111,69 @@ describe("externalizeInlineScripts", () => {
       PUBLIC_DIR,
     );
     expect(html.match(/<script(?![^>]*\bsrc=)[^>]*>/g)).toBeNull();
+  });
+});
+
+describe("externalizeSite", () => {
+  let dir = "";
+  afterEach(() => {
+    if (dir) rmSync(dir, { recursive: true, force: true });
+  });
+
+  const site = () => {
+    dir = mkdtempSync(join(tmpdir(), "externalize-"));
+    mkdirSync(join(dir, "docs"));
+    writeFileSync(
+      join(dir, "index.html"),
+      page(inline("a();"), inline("b();")),
+    );
+    writeFileSync(join(dir, "404.html"), page(inline("a();"), inline("c();")));
+    writeFileSync(join(dir, "docs", "x.html"), page(inline("a();")));
+    writeFileSync(join(dir, "index.txt"), "<script>self.a();</script>");
+    return dir;
+  };
+
+  it("rewrites every page, including those in folders, and writes one file for each content", () => {
+    const root = site();
+    const result = externalizeSite(root);
+    expect(result.pages).toBe(3);
+    const files = readdirSync(join(root, "_next/static/inline"));
+    expect(files).toHaveLength(3);
+    for (const page of ["index.html", "404.html", "docs/x.html"]) {
+      expect(readFileSync(join(root, page), "utf-8")).not.toMatch(
+        /<script(?![^>]*\bsrc=)[^>]*>/,
+      );
+    }
+  });
+
+  it("shares the file between pages with the same scripts", () => {
+    const root = site();
+    writeFileSync(join(root, "docs", "y.html"), page(inline("a();")));
+    externalizeSite(root);
+    expect(readdirSync(join(root, "_next/static/inline"))).toHaveLength(3);
+  });
+
+  it("leaves files that are not pages alone", () => {
+    const root = site();
+    externalizeSite(root);
+    expect(readFileSync(join(root, "index.txt"), "utf-8")).toBe(
+      "<script>self.a();</script>",
+    );
+  });
+
+  it("is safe to run twice", () => {
+    const root = site();
+    externalizeSite(root);
+    const after = readFileSync(join(root, "index.html"), "utf-8");
+    externalizeSite(root);
+    expect(readFileSync(join(root, "index.html"), "utf-8")).toBe(after);
+  });
+
+  it("serves the script that the tag points to with the content of the inline scripts", () => {
+    const root = site();
+    externalizeSite(root);
+    const html = readFileSync(join(root, "index.html"), "utf-8");
+    const src = /<script src="([^"]+)">/.exec(html)![1];
+    expect(readFileSync(join(root, src), "utf-8")).toBe("a();\n;b();");
   });
 });

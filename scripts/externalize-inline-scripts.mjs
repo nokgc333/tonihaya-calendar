@@ -1,4 +1,14 @@
+#!/usr/bin/env node
 import { createHash } from "node:crypto";
+import {
+  mkdirSync,
+  readFileSync,
+  readdirSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
+import { join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const PUBLIC_DIR = "/_next/static/inline";
 const SCRIPT_TAG = /<script(\s[^>]*)?>([\s\S]*?)<\/script>/g;
@@ -38,4 +48,36 @@ export function externalizeInlineScripts(html, publicDir = PUBLIC_DIR) {
     .replace("\u0000", `<script src="${url}"></script>`)
     .replace("</head>", `${preload}</head>`);
   return { html: rewritten, script, fileName };
+}
+
+function pagesIn(dir) {
+  return readdirSync(dir).flatMap((name) => {
+    const path = join(dir, name);
+    if (statSync(path).isDirectory()) return pagesIn(path);
+    return name.endsWith(".html") ? [path] : [];
+  });
+}
+
+export function externalizeSite(root) {
+  const outDir = join(root, "_next/static/inline");
+  mkdirSync(outDir, { recursive: true });
+  let pages = 0;
+  for (const page of pagesIn(root)) {
+    const { html, script, fileName } = externalizeInlineScripts(
+      readFileSync(page, "utf-8"),
+    );
+    if (script === null) continue;
+    writeFileSync(join(outDir, fileName), script);
+    writeFileSync(page, html);
+    pages += 1;
+  }
+  return { pages };
+}
+
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  const root = resolve(process.argv[2] ?? "out");
+  const { pages } = externalizeSite(root);
+  console.log(
+    `Moved the inline scripts of ${pages} pages into ${join(root, "_next/static/inline")}`,
+  );
 }
