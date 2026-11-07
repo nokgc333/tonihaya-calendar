@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+
 import { describe, expect, it } from "vitest";
 
 import {
@@ -10,6 +12,12 @@ const newYearDay = (row: (typeof rows)[number]) =>
   Date.UTC(row.year, 0, 1) / 86_400_000 + row.newYearOffset;
 
 describe("the old calendar table generator", () => {
+  it("reproduces the committed table exactly", () => {
+    expect(readFileSync("src/domain/kyureki/table.ts", "utf-8")).toBe(
+      renderKyurekiTable(rows),
+    );
+  });
+
   it("renders month lengths with the first month in the least significant bit", () => {
     const source = renderKyurekiTable([
       {
