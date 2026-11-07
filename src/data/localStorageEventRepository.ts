@@ -1,10 +1,17 @@
 import type { CalendarEvent } from "@/domain/event";
 import type { EventRepository } from "./eventRepository";
-import { decodeEvents, encodeEvents, type DecodeResult } from "./storageFormat";
+import {
+  decodeEvents,
+  encodeEvents,
+  type DecodeResult,
+  type RejectedEntry,
+} from "./storageFormat";
 
 const KEY = "tonihaya.events";
 const BACKUP_KEY = `${KEY}.backup`;
 const LEGACY_KEY = `${KEY}.legacy-v0`;
+const REJECTED_KEY = `${KEY}.rejected`;
+const MAX_REJECTED = 100;
 
 export class LocalStorageEventRepository implements EventRepository {
   constructor(private readonly storage: Storage = window.localStorage) {}
@@ -35,14 +42,34 @@ export class LocalStorageEventRepository implements EventRepository {
       return;
     }
     if (status === "migrated") this.storage.setItem(LEGACY_KEY, raw ?? "");
-    if (status === "migrated") {
-      this.storage.setItem(KEY, encodeEvents(result.events));
-    }
+    const needsRewrite =
+      status === "migrated" ||
+      result.rejected.length > 0 ||
+      result.repaired > 0;
+    if (!needsRewrite) return;
+    this.setAside(result.rejected);
+    this.storage.setItem(KEY, encodeEvents(result.events));
   }
 
   private moveAway(raw: string): void {
     this.storage.setItem(BACKUP_KEY, raw);
     this.storage.removeItem(KEY);
+  }
+
+  private setAside(rejected: readonly RejectedEntry[]): void {
+    if (rejected.length === 0) return;
+    const before = this.readAside();
+    const all = [...before, ...rejected].slice(-MAX_REJECTED);
+    this.storage.setItem(REJECTED_KEY, JSON.stringify(all));
+  }
+
+  private readAside(): RejectedEntry[] {
+    try {
+      const parsed = JSON.parse(this.storage.getItem(REJECTED_KEY) ?? "[]");
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
   }
 
   private write(events: readonly CalendarEvent[]): void {
