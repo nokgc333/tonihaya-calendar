@@ -184,3 +184,49 @@ describe("CalendarApp drill-down", () => {
     expect(window.location.search).toBe("?y=2150&m=1&d=1&v=day");
   });
 });
+
+describe("CalendarApp announcements", () => {
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date(2026, 6, 15, 12, 0));
+    localStorage.clear();
+    window.history.replaceState({}, "", "/");
+  });
+  afterEach(() => {
+    cleanup();
+    vi.useRealTimers();
+  });
+
+  const status = (root: HTMLElement) =>
+    root.querySelector("[role='status']")!.textContent?.trim();
+
+  it("says nothing when the page first shows", () => {
+    const { container } = render(<CalendarApp />);
+    expect(status(container)).toBe("");
+  });
+
+  it("says nothing when the page opens on a deep link", () => {
+    window.history.replaceState({}, "", "/?y=2026&m=3&d=10&v=day");
+    const { container } = render(<CalendarApp />);
+    expect(status(container)).toBe("");
+  });
+
+  it("says which view it moved to", () => {
+    const { container } = render(<CalendarApp />);
+    jump(container, "月");
+    expect(status(container)).toBe("2026年7月を表示しています");
+    jump(container, "日");
+    expect(status(container)).toBe("2026年7月15日 水曜日を表示しています");
+    jump(container, "週");
+    expect(status(container)).toBe("2026年7月15日の週を表示しています");
+    jump(container, "年");
+    expect(status(container)).toBe("2026年の一覧を表示しています");
+  });
+
+  it("says which month it moved to when it steps through the months", () => {
+    window.history.replaceState({}, "", "/?y=2026&m=7");
+    const { container } = render(<CalendarApp />);
+    press(container, "次の月");
+    expect(status(container)).toBe("2026年8月を表示しています");
+  });
+});
