@@ -26,7 +26,8 @@
     "test:coverage": "vitest run --coverage",
     "lighthouse": "node scripts/lighthouse.mjs",
     "ci:lhci": "lhci autorun",
-    "test:mutation": "stryker run"
+    "test:mutation": "stryker run",
+    "check:site": "node scripts/check-site.mjs"
   },
   "overrides": {
     "next": {
