@@ -81,11 +81,27 @@ function migrate(
 
 function readEntries(entries: unknown[]): Omit<DecodeResult, "status"> {
   const events: CalendarEvent[] = [];
+  const rejected: RejectedEntry[] = [];
+  const seen = new Set<string>();
+  let repaired = 0;
   for (const value of entries) {
     const parsed = parseStoredEvent(value);
-    if (parsed.ok) events.push(parsed.event);
+    if (!parsed.ok) {
+      rejected.push({ value, reason: parsed.reason });
+    } else if (seen.has(parsed.event.id)) {
+      rejected.push({ value, reason: `duplicate id ${parsed.event.id}` });
+    } else if (events.length >= MAX_EVENTS) {
+      rejected.push({
+        value,
+        reason: `over the limit of ${MAX_EVENTS} events`,
+      });
+    } else {
+      seen.add(parsed.event.id);
+      events.push(parsed.event);
+      if (parsed.repaired.length > 0) repaired += 1;
+    }
   }
-  return { events, rejected: [], repaired: 0 };
+  return { events, rejected, repaired };
 }
 
 export function decodeEvents(raw: string | null): DecodeResult {
