@@ -47,6 +47,7 @@
 | 関数・定数 | 内容 |
 | --- | --- |
 | `toKyureki(year, month, day)` | 西暦の日付を `Kyureki`(旧暦の `year`・`month`・`day`・`leap`)に変換。1950-01-01〜2150-12-31 の範囲外は `null`。閏月は直前の月と同じ月番号で `leap: true` |
+| `rokuyoOf(year, month, day)` | その日の六曜(大安・赤口・先勝・友引・先負・仏滅)。旧暦の月と日の和を 6 で割った余りで決まり、閏月は繰り返す月と同じ。範囲外は `null` |
 | `KYUREKI_FIRST_YEAR` | `kyureki/table` の表の先頭の旧暦年(1949 年) |
 | `KYUREKI_ROWS` | `kyureki/table` の読み取り専用の 202 行。各行は正月の西暦元日からの日数・閏月番号(なければ 0)・月の長さのビット列(下位から暦順、1 は 30 日、0 は 29 日) |
 
