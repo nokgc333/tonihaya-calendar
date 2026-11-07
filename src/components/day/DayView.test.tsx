@@ -46,6 +46,11 @@ describe("DayView", () => {
     expect(screen.getByText("2026年7月15日（水）")).toBeInTheDocument();
   });
 
+  it("shows the rokuyo of the day beside the date in the heading", async () => {
+    await show().view;
+    expect(screen.getByText("先勝")).toBeInTheDocument();
+  });
+
   it("moves one day back and forward across month and year edges", async () => {
     const { h, view } = show({ month: 12, day: 31 });
     await view;

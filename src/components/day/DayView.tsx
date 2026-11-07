@@ -4,6 +4,7 @@ import { useRef } from "react";
 import { buildDayView, type JumpLevel } from "@/domain/view";
 import { fromEpochDay, toEpochDay, type CivilDate } from "@/domain/shared/date";
 import type { WeekStart } from "@/domain/calendar";
+import { rokuyoOf } from "@/domain/kyureki";
 import type { WeekDay } from "@/domain/view";
 import { useEvents } from "@/hooks/useEvents";
 import { useEventEditor } from "@/hooks/useEventEditor";
@@ -26,6 +27,7 @@ function DayHeading({
   readonly day: WeekDay;
   readonly jumpPivot: CivilDate | null;
 }) {
+  const rokuyo = rokuyoOf(day.year, day.month, day.day);
   return (
     <div
       className="sticky top-0 z-10 grid min-h-[54.5px] shrink-0 items-center py-1.5"
@@ -41,6 +43,14 @@ function DayHeading({
         style={{ color: dayTextColor(day) }}
       >
         {day.year}年{day.month}月{day.day}日（{WEEKDAY_JA[day.weekday]}）
+        {rokuyo === null ? null : (
+          <span
+            className="ml-2 text-sm font-normal"
+            style={{ color: "var(--text-muted)" }}
+          >
+            {rokuyo}
+          </span>
+        )}
       </div>
     </div>
   );

@@ -25,18 +25,17 @@ const show = (over: Partial<Parameters<typeof WeekDayHeaders>[0]> = {}) =>
   );
 
 describe("WeekDayHeaders", () => {
-  it("shows seven day buttons with weekday and day number", () => {
+  it("puts the rokuyo that the button shows into its name, so that the name contains the visible text", () => {
     const { container } = show();
-    const buttons = container.querySelectorAll("button");
-    expect(buttons).toHaveLength(7);
-    expect(buttons[0].textContent).toBe("日12");
-    expect(buttons[6].textContent).toBe("土18");
+    expect(
+      container.querySelectorAll("button")[0].getAttribute("aria-label"),
+    ).toBe("日12友引 7月12日を開く");
   });
 
   it("opens the day that is clicked", () => {
     const onOpen = vi.fn();
     show({ onOpen });
-    fireEvent.click(screen.getByLabelText("木16 7月16日を開く"));
+    fireEvent.click(screen.getByLabelText(/^木16.* 7月16日を開く$/));
     expect(onOpen).toHaveBeenCalledWith(2026, 7, 16);
   });
 
@@ -46,11 +45,11 @@ describe("WeekDayHeaders", () => {
     });
     expect(container.querySelectorAll("[aria-current='date']")).toHaveLength(1);
     expect(
-      screen.getByLabelText("水15 7月15日を開く").style.boxShadow,
+      screen.getByLabelText(/^水15.* 7月15日を開く$/).style.boxShadow,
     ).toContain("var(--today-bg)");
-    expect(screen.getByLabelText("木16 7月16日を開く").style.boxShadow).toBe(
-      "",
-    );
+    expect(
+      screen.getByLabelText(/^木16.* 7月16日を開く$/).style.boxShadow,
+    ).toBe("");
   });
 
   it("draws a disc behind a holiday only", () => {
@@ -69,13 +68,13 @@ describe("WeekDayHeaders", () => {
       isJump: (d) => d.day === 14,
     });
     expect(
-      screen.getByLabelText("月13 7月13日を開く").style.viewTransitionName,
+      screen.getByLabelText(/^月13.* 7月13日を開く$/).style.viewTransitionName,
     ).toBe("hour-zoom");
     expect(
-      screen.getByLabelText("火14 7月14日を開く").style.viewTransitionName,
+      screen.getByLabelText(/^火14.* 7月14日を開く$/).style.viewTransitionName,
     ).toBe("jump-zoom");
     expect(
-      screen.getByLabelText("水15 7月15日を開く").style.viewTransitionName,
+      screen.getByLabelText(/^水15.* 7月15日を開く$/).style.viewTransitionName,
     ).toBe("");
     expect(
       (container.firstElementChild as HTMLElement).style.viewTransitionName,

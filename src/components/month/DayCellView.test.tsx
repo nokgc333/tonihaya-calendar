@@ -164,6 +164,54 @@ describe("DayCellView", () => {
   });
 });
 
+describe("DayCellView rokuyo", () => {
+  const spaciousProps = {
+    spacious: true,
+    cellYear: 2026,
+    cellMonth: 7,
+    onDayClick: vi.fn(),
+  };
+
+  it("shows the rokuyo of an ordinary day of the month when there is room", () => {
+    show(cellOf(15), spaciousProps);
+    expect(screen.getByText("先勝")).toBeInTheDocument();
+  });
+
+  it("describes the day button by the rokuyo, which its name leaves out", () => {
+    show(cellOf(15), spaciousProps);
+    const button = screen.getByRole("button", { name: "7月15日を開く" });
+    expect(button).toHaveAccessibleDescription("先勝");
+  });
+
+  it("shows it above the event chips", () => {
+    show(cellOf(15), { ...spaciousProps, dayEvents: many(1) });
+    const label = screen.getByText("先勝");
+    const chip = screen.getByTitle("e0");
+    expect(
+      label.compareDocumentPosition(chip) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
+
+  it("leaves it out of the small cells of the year, where it would not fit", () => {
+    const { container } = show(cellOf(15), {
+      ...spaciousProps,
+      spacious: false,
+    });
+    expect(container.textContent).toBe("15");
+  });
+
+  it("leaves it out of a day of the neighboring month, and without a year and a month", () => {
+    const outside = cells.find((c) => !c.inMonth)!;
+    expect(show(outside, spaciousProps).container.textContent).toBe(
+      String(outside.day),
+    );
+    cleanup();
+    expect(show(cellOf(15), { spacious: true }).container.textContent).toBe(
+      "15",
+    );
+  });
+});
+
 describe("DayCellView events", () => {
   it("shows up to three chips and the number of the rest when spacious", () => {
     const { container } = show(cellOf(15), {

@@ -60,7 +60,7 @@ test("runs the whole app under the policy without a violation or an error", asyn
     .nth(6)
     .click();
   await page
-    .locator("[class*='cursor-pointer']", { hasText: /^15$/ })
+    .locator("[class*='cursor-pointer']", { hasText: /^15(?!\d)/ })
     .first()
     .click();
   await page.getByLabel("7月16日を開く").click();

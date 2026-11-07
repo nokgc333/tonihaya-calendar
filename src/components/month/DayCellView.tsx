@@ -1,17 +1,17 @@
 import type { DayCell } from "@/domain/view";
 import type { CalendarEvent } from "@/domain/event";
-import { dayBgColor, dayTextColor } from "@/components/common/dayPalette";
+import { dayBgColor } from "@/components/common/dayPalette";
+import { dayRokuyo, plainLayout } from "@/components/month/dayCellRokuyo";
+import {
+  DayNumberOrButton,
+  type GridStop,
+} from "@/components/month/DayNumberButton";
 import { EventChip } from "@/components/event/EventChip";
 import { eventColor } from "@/components/event/eventColors";
 import { SIZE, type MonthCardSize } from "@/components/month/monthCardSize";
 
 const MAX_CHIPS = 3;
 const MAX_DOTS = 6;
-
-function dayColor(cell: DayCell): string {
-  if (!cell.inMonth) return "var(--text-faint)";
-  return dayTextColor(cell);
-}
 
 function dayBg(cell: DayCell): string {
   if (!cell.inMonth) return "var(--surface)";
@@ -27,31 +27,6 @@ function cellStyle(cell: DayCell, jump: boolean): React.CSSProperties {
     ...(jump ? { viewTransitionName: "jump-zoom" } : null),
     ...todayRing,
   };
-}
-
-function DayNumber({ cell }: { readonly cell: DayCell }) {
-  return (
-    <span className="relative inline-flex items-center justify-center">
-      {cell.isHoliday ? (
-        <span
-          aria-hidden
-          className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full"
-          style={{
-            background: "var(--holiday-disc)",
-            width: "calc(1.5em + 1px)",
-            height: "calc(1.5em + 1px)",
-          }}
-        />
-      ) : null}
-      <span
-        className={`relative ${cell.isToday ? "font-bold" : ""}`}
-        style={{ color: dayColor(cell) }}
-        {...(cell.isToday ? { "aria-current": "date" as const } : {})}
-      >
-        {cell.day}
-      </span>
-    </span>
-  );
 }
 
 function EventChips({
@@ -124,59 +99,6 @@ function dayOpener(
   return () => onDayClick(cellYear, cellMonth, day);
 }
 
-interface GridStop {
-  readonly index: number;
-  readonly isTabStop: boolean;
-}
-
-function OpenDayButton({
-  cell,
-  month,
-  onOpen,
-  stop,
-}: {
-  readonly cell: DayCell;
-  readonly month: number;
-  readonly onOpen: () => void;
-  readonly stop: GridStop | undefined;
-}) {
-  return (
-    <button
-      type="button"
-      aria-label={`${month}月${cell.day}日を開く`}
-      {...(stop
-        ? {
-            "data-grid-index": stop.index,
-            tabIndex: stop.isTabStop ? 0 : -1,
-          }
-        : {})}
-      onClick={(e) => {
-        e.stopPropagation();
-        onOpen();
-      }}
-    >
-      <DayNumber cell={cell} />
-    </button>
-  );
-}
-
-function DayNumberOrButton({
-  cell,
-  month,
-  onOpen,
-  stop,
-}: {
-  readonly cell: DayCell;
-  readonly month: number | undefined;
-  readonly onOpen: (() => void) | null;
-  readonly stop: GridStop | undefined;
-}) {
-  if (!onOpen || month === undefined) return <DayNumber cell={cell} />;
-  return (
-    <OpenDayButton cell={cell} month={month} onOpen={onOpen} stop={stop} />
-  );
-}
-
 interface DayCellViewProps {
   readonly cell: DayCell;
   readonly size: MonthCardSize;
@@ -206,12 +128,14 @@ export function DayCellView({
   const onOpen = dayOpener(onDayClick, cellYear, cellMonth, cell.day);
   const handlers = onOpen ? { onClick: onOpen } : {};
   const clickable = onOpen ? "cursor-pointer hover:brightness-95" : "";
+  const { label, describedBy } = dayRokuyo(cell, spacious, cellYear, cellMonth);
   const number = (
     <DayNumberOrButton
       cell={cell}
       month={cellMonth}
       onOpen={onOpen}
       stop={gridStop}
+      describedBy={describedBy}
     />
   );
   const style = cellStyle(cell, jump);
@@ -224,14 +148,16 @@ export function DayCellView({
         style={style}
         {...handlers}
       >
-        <div className="flex justify-center pt-[7px]">{number}</div>
+        <div className="flex flex-col items-center pt-[7px]">
+          {number}
+          {label}
+        </div>
         <EventChips dayEvents={dayEvents} onEventSelect={onEventSelect} />
       </div>
     );
   }
 
-  const vAlign = spacious ? "items-start pt-[7px]" : "items-start pt-[5px]";
-  const base = `flex h-full justify-center ${vAlign} ${clickable} ${s.dayText} leading-none tabular-nums`;
+  const base = `flex h-full ${plainLayout(spacious, label !== null)} ${clickable} ${s.dayText} leading-none tabular-nums`;
   return (
     <div
       className={`relative ${base}`}
@@ -240,6 +166,7 @@ export function DayCellView({
       {...handlers}
     >
       {number}
+      {label}
       {!spacious && hasEvents ? <EventDots dayEvents={dayEvents} /> : null}
     </div>
   );
