@@ -1,6 +1,7 @@
 import type {
   CalendarEvent,
   EventColorKey,
+  EventDraft,
   EventPriority,
 } from "@/domain/event";
 import type { CivilDate } from "@/domain/shared/date";
@@ -24,11 +25,23 @@ const DEFAULT_END_TIME = "10:00";
 
 const pad = (n: number): string => String(n).padStart(2, "0");
 
-const toDateInput = (d: CivilDate): string =>
+export const toDateInput = (d: CivilDate): string =>
   `${d.year}-${pad(d.month)}-${pad(d.day)}`;
 
-const toTimeInput = (t: TimeOfDay | undefined, fallback: string): string =>
-  t ? `${pad(t.hour)}:${pad(t.minute)}` : fallback;
+export const fromDateInput = (s: string): CivilDate => {
+  const [year, month, day] = s.split("-").map(Number);
+  return { year, month, day };
+};
+
+export const toTimeInput = (
+  t: TimeOfDay | undefined,
+  fallback: string,
+): string => (t ? `${pad(t.hour)}:${pad(t.minute)}` : fallback);
+
+export const fromTimeInput = (s: string): TimeOfDay => {
+  const [hour, minute] = s.split(":").map(Number);
+  return { hour, minute };
+};
 
 function newEventValues(defaultDate: CivilDate): EventFormValues {
   return {
@@ -65,4 +78,26 @@ export function initialFormValues(
   defaultDate: CivilDate,
 ): EventFormValues {
   return initial ? editedEventValues(initial) : newEventValues(defaultDate);
+}
+
+const trimmedOrUndefined = (s: string): string | undefined =>
+  s.trim() ? s.trim() : undefined;
+
+export function buildDraft(v: EventFormValues): EventDraft {
+  return {
+    title: v.title,
+    allDay: v.allDay,
+    start: {
+      date: fromDateInput(v.startDate),
+      time: v.allDay ? undefined : fromTimeInput(v.startTime),
+    },
+    end: {
+      date: fromDateInput(v.endDate),
+      time: v.allDay ? undefined : fromTimeInput(v.endTime),
+    },
+    colorKey: v.colorKey,
+    priority: v.priority,
+    url: trimmedOrUndefined(v.url),
+    note: trimmedOrUndefined(v.note),
+  };
 }
