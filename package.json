@@ -19,7 +19,8 @@
     "secrets": "secretlint \"**/*\"",
     "check:duplicates": "jscpd",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "check:headers": "node scripts/check-headers.mjs"
   },
   "overrides": {
     "next": {
