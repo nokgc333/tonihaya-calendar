@@ -84,3 +84,76 @@ export function layoutDayColumns(
   flush();
   return out;
 }
+
+export function isSafeUrl(url: string): boolean {
+  try {
+    const u = new URL(url);
+    return u.protocol === "http:" || u.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+export const TITLE_MAX_LENGTH = 200;
+export const NOTE_MAX_LENGTH = 2000;
+export const URL_MAX_LENGTH = 2048;
+
+type EventRule = (d: EventDraft) => readonly string[];
+
+const when = (condition: boolean, message: string): readonly string[] =>
+  condition ? [message] : [];
+
+const titleErrors: EventRule = (d) => [
+  ...when(d.title.trim().length === 0, "タイトルを入力してください"),
+  ...when(
+    d.title.length > TITLE_MAX_LENGTH,
+    `タイトルは${TITLE_MAX_LENGTH}文字以内にしてください`,
+  ),
+];
+
+const noteErrors: EventRule = (d) =>
+  when(
+    Boolean(d.note) && (d.note?.length ?? 0) > NOTE_MAX_LENGTH,
+    `備考は${NOTE_MAX_LENGTH}文字以内にしてください`,
+  );
+
+const urlErrors: EventRule = (d) => [
+  ...when(
+    Boolean(d.url) && !isSafeUrl(d.url ?? ""),
+    "URLは http/https のみ使用できます",
+  ),
+  ...when(
+    Boolean(d.url) && (d.url?.length ?? 0) > URL_MAX_LENGTH,
+    `URLは${URL_MAX_LENGTH}文字以内にしてください`,
+  ),
+];
+
+const dateErrors: EventRule = (d) =>
+  when(
+    epoch(d.end.date) < epoch(d.start.date),
+    "終了日は開始日以降にしてください",
+  );
+
+const timeErrors: EventRule = (d) => {
+  if (d.allDay) return [];
+  if (!d.start.time || !d.end.time) {
+    return ["時間イベントは開始・終了時刻が必要です"];
+  }
+  const isSameDay = epoch(d.start.date) === epoch(d.end.date);
+  return when(
+    isSameDay && minutesOfDay(d.end.time) <= minutesOfDay(d.start.time),
+    "終了時刻は開始時刻より後にしてください",
+  );
+};
+
+const EVENT_RULES: readonly EventRule[] = [
+  titleErrors,
+  noteErrors,
+  urlErrors,
+  dateErrors,
+  timeErrors,
+];
+
+export function validateEvent(d: EventDraft): readonly string[] {
+  return EVENT_RULES.flatMap((rule) => rule(d));
+}

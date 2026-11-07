@@ -5,6 +5,11 @@ import {
   minutesOfDay,
   layoutDayColumns,
   type DaySegment,
+  isSafeUrl,
+  validateEvent,
+  NOTE_MAX_LENGTH,
+  TITLE_MAX_LENGTH,
+  URL_MAX_LENGTH,
 } from "./event";
 import type { CalendarEvent } from "./types";
 
@@ -141,5 +146,101 @@ describe("layoutDayColumns", () => {
     ]);
     expect(out.find((s) => s.event.id === "c")!.columnCount).toBe(1);
     expect(out.find((s) => s.event.id === "a")!.columnCount).toBe(2);
+  });
+});
+
+describe("isSafeUrl", () => {
+  it("allows http/https and rejects everything else", () => {
+    expect(isSafeUrl("https://a.com")).toBe(true);
+    expect(isSafeUrl("http://a.com")).toBe(true);
+    expect(isSafeUrl("javascript:alert(1)")).toBe(false);
+    expect(isSafeUrl("not a url")).toBe(false);
+  });
+});
+
+describe("validateEvent", () => {
+  const okTimed = {
+    title: "x",
+    allDay: false,
+    colorKey: "blue",
+    priority: "normal",
+    start: {
+      date: { year: 2026, month: 7, day: 12 },
+      time: { hour: 9, minute: 0 },
+    },
+    end: {
+      date: { year: 2026, month: 7, day: 12 },
+      time: { hour: 10, minute: 0 },
+    },
+  } as const;
+  it("a valid timed event has no errors", () => {
+    expect(validateEvent(okTimed)).toEqual([]);
+  });
+  it("an empty title is an error", () => {
+    expect(validateEvent({ ...okTimed, title: "  " }).length).toBeGreaterThan(
+      0,
+    );
+  });
+  it("end <= start on the same day is an error", () => {
+    expect(
+      validateEvent({
+        ...okTimed,
+        end: {
+          date: { year: 2026, month: 7, day: 12 },
+          time: { hour: 9, minute: 0 },
+        },
+      }).length,
+    ).toBeGreaterThan(0);
+  });
+  it("end date < start date is an error", () => {
+    expect(
+      validateEvent({
+        ...okTimed,
+        end: {
+          date: { year: 2026, month: 7, day: 11 },
+          time: { hour: 10, minute: 0 },
+        },
+      }).length,
+    ).toBeGreaterThan(0);
+  });
+  it("an invalid URL is an error", () => {
+    expect(
+      validateEvent({ ...okTimed, url: "javascript:alert(1)" }).length,
+    ).toBeGreaterThan(0);
+  });
+  it("a multi-day all-day event is valid", () => {
+    expect(
+      validateEvent({
+        title: "trip",
+        allDay: true,
+        colorKey: "green",
+        priority: "normal",
+        start: { date: { year: 2026, month: 7, day: 10 } },
+        end: { date: { year: 2026, month: 7, day: 15 } },
+      }),
+    ).toEqual([]);
+  });
+  it("a title over the limit is an error", () => {
+    expect(
+      validateEvent({ ...okTimed, title: "a".repeat(TITLE_MAX_LENGTH + 1) })
+        .length,
+    ).toBeGreaterThan(0);
+  });
+  it("a title exactly at the limit is valid", () => {
+    expect(
+      validateEvent({ ...okTimed, title: "a".repeat(TITLE_MAX_LENGTH) }),
+    ).toEqual([]);
+  });
+  it("notes over the limit are an error", () => {
+    expect(
+      validateEvent({ ...okTimed, note: "n".repeat(NOTE_MAX_LENGTH + 1) })
+        .length,
+    ).toBeGreaterThan(0);
+  });
+  it("a URL over the limit is an error", () => {
+    const longUrl = "https://example.com/" + "a".repeat(URL_MAX_LENGTH);
+    expect(validateEvent({ ...okTimed, url: longUrl }).length).toBeGreaterThan(
+      0,
+    );
   });
 });
