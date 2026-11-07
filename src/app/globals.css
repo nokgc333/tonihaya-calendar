@@ -1,6 +1,181 @@
 @import "tailwindcss";
 
+:root {
+  --bg: #ffffff;
+  --surface: #fbfbfb;
+  --surface-2: #ffffff;
+  --sat-bg: color-mix(in srgb, #3b82f6 13%, var(--surface));
+  --sun-bg: color-mix(in srgb, #ef4444 11%, var(--surface));
+  --border: #ececec;
+  --border-strong: #d4d4d4;
+  --text: #171717;
+  --text-muted: #4b5260;
+  --text-faint: #5f6672;
+  --accent-red: #cc1a2b;
+  --accent-sat: #3f5573;
+  --today-bg: #171717;
+  --today-fg: #ffffff;
+  --focus-ring: #1d4ed8;
+  --holiday-disc: color-mix(in srgb, #a3e635 45%, var(--surface));
+  --holiday-text: color-mix(in srgb, #3f6212 88%, var(--text));
+
+  --ev-blue-bg: color-mix(in srgb, #3b82f6 23%, var(--surface));
+  --ev-blue-border: color-mix(in srgb, #3b82f6 50%, var(--surface));
+  --ev-blue-fg: color-mix(in srgb, #3b82f6 60%, var(--text));
+  --ev-green-bg: color-mix(in srgb, #16a34a 23%, var(--surface));
+  --ev-green-border: color-mix(in srgb, #16a34a 50%, var(--surface));
+  --ev-green-fg: color-mix(in srgb, #16a34a 58%, var(--text));
+  --ev-teal-bg: color-mix(in srgb, #14b8a6 23%, var(--surface));
+  --ev-teal-border: color-mix(in srgb, #14b8a6 50%, var(--surface));
+  --ev-teal-fg: color-mix(in srgb, #0d9488 60%, var(--text));
+  --ev-purple-bg: color-mix(in srgb, #8b5cf6 23%, var(--surface));
+  --ev-purple-border: color-mix(in srgb, #8b5cf6 50%, var(--surface));
+  --ev-purple-fg: color-mix(in srgb, #8b5cf6 65%, var(--text));
+  --ev-pink-bg: color-mix(in srgb, #ec4899 23%, var(--surface));
+  --ev-pink-border: color-mix(in srgb, #ec4899 50%, var(--surface));
+  --ev-pink-fg: color-mix(in srgb, #db2777 55%, var(--text));
+  --ev-amber-bg: color-mix(in srgb, #f59e0b 24%, var(--surface));
+  --ev-amber-border: color-mix(in srgb, #f59e0b 52%, var(--surface));
+  --ev-amber-fg: color-mix(in srgb, #b45309 45%, var(--text));
+  --ev-slate-bg: color-mix(in srgb, #64748b 23%, var(--surface));
+  --ev-slate-border: color-mix(in srgb, #64748b 50%, var(--surface));
+  --ev-slate-fg: color-mix(in srgb, #475569 52%, var(--text));
+  --ev-rose-bg: color-mix(in srgb, #f43f5e 23%, var(--surface));
+  --ev-rose-border: color-mix(in srgb, #f43f5e 50%, var(--surface));
+  --ev-rose-fg: color-mix(in srgb, #e11d48 53%, var(--text));
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0e0f11;
+    --surface: #16181b;
+    --surface-2: #1e2126;
+    --border: #26292e;
+    --border-strong: #3a3e45;
+    --text: #ededed;
+    --text-muted: #a9afb7;
+    --text-faint: #9096a0;
+    --accent-red: #ff5a67;
+    --accent-sat: #8fb0d9;
+    --today-bg: #ededed;
+    --today-fg: #0e0f11;
+    --holiday-text: #ffffff;
+    --focus-ring: #7aa7ff;
+  }
+}
+
+:root[data-theme="light"] {
+  --bg: #ffffff;
+  --surface: #fbfbfb;
+  --surface-2: #ffffff;
+  --border: #ececec;
+  --border-strong: #d4d4d4;
+  --text: #171717;
+  --text-muted: #4b5260;
+  --text-faint: #5f6672;
+  --accent-red: #cc1a2b;
+  --accent-sat: #3f5573;
+  --today-bg: #171717;
+  --today-fg: #ffffff;
+  --focus-ring: #1d4ed8;
+}
+
+:root[data-theme="dark"] {
+  --bg: #0e0f11;
+  --surface: #16181b;
+  --surface-2: #1e2126;
+  --border: #26292e;
+  --border-strong: #3a3e45;
+  --text: #ededed;
+  --text-muted: #a9afb7;
+  --text-faint: #9096a0;
+  --accent-red: #ff5a67;
+  --accent-sat: #8fb0d9;
+  --today-bg: #ededed;
+  --today-fg: #0e0f11;
+  --holiday-text: #ffffff;
+  --focus-ring: #7aa7ff;
+}
+
+html {
+  color-scheme: light dark;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+main:focus {
+  outline: none;
+}
+
+.skip-link {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  padding: 0.5rem 1rem;
+  background: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--border-strong);
+  border-radius: 0.5rem;
+  transform: translateY(-120%);
+}
+
+.skip-link:focus {
+  transform: translateY(0.5rem) translateX(0.5rem);
+}
+
 body {
-  margin: 0;
-  font-family: Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-family:
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    "Hiragino Kaku Gothic ProN",
+    "Noto Sans JP",
+    Meiryo,
+    sans-serif;
+  font-feature-settings: "tnum" 1;
+  -webkit-font-smoothing: antialiased;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 200ms;
+}
+
+::view-transition-group(day-zoom),
+::view-transition-group(hour-zoom),
+::view-transition-group(jump-zoom) {
+  animation-duration: 200ms;
+}
+
+@keyframes zoom-source-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+::view-transition-old(day-zoom) {
+  animation: zoom-source-fade-out 100ms ease-out both;
+}
+::view-transition-old(hour-zoom) {
+  animation: zoom-source-fade-out 100ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
 }
