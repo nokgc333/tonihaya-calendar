@@ -25,12 +25,19 @@ const show = (over: Partial<Parameters<typeof WeekDayHeaders>[0]> = {}) =>
   );
 
 describe("WeekDayHeaders", () => {
+  it("describes each day button by its rokuyo, which the button name leaves out", () => {
+    const { container } = show();
+    const button = container.querySelectorAll("button")[0];
+    const id = button.getAttribute("aria-describedby")!;
+    expect(container.querySelector(`#${id}`)?.textContent).toBe("友引");
+  });
+
   it("shows seven day buttons with weekday and day number", () => {
     const { container } = show();
     const buttons = container.querySelectorAll("button");
     expect(buttons).toHaveLength(7);
-    expect(buttons[0].textContent).toBe("日12");
-    expect(buttons[6].textContent).toBe("土18");
+    expect(buttons[0].textContent).toBe("日12友引");
+    expect(buttons[6].textContent).toBe("土18仏滅");
   });
 
   it("opens the day that is clicked", () => {

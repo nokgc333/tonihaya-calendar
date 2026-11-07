@@ -1,5 +1,7 @@
 import type { CSSProperties } from "react";
+import { rokuyoOf } from "@/domain/kyureki";
 import type { WeekDay } from "@/domain/view";
+import { RokuyoLabel } from "@/components/common/RokuyoLabel";
 import { dayTextColor } from "@/components/common/dayPalette";
 import { WEEKDAY_JA } from "@/components/common/weekdays";
 import { GRID_COLS } from "@/components/timeline/timelineLayout";
@@ -46,6 +48,8 @@ function DayHeaderButton({
   readonly isJump: boolean;
   readonly onOpen: (year: number, month: number, day: number) => void;
 }) {
+  const rokuyo = rokuyoOf(day.year, day.month, day.day);
+  const rokuyoId = `rokuyo-${day.year}-${day.month}-${day.day}`;
   return (
     <button
       type="button"
@@ -58,6 +62,7 @@ function DayHeaderButton({
           : {}),
       }}
       aria-label={`${WEEKDAY_JA[day.weekday]}${day.day} ${day.month}月${day.day}日を開く`}
+      aria-describedby={rokuyo === null ? undefined : rokuyoId}
     >
       <div className="text-[11px]" style={{ color: dayTextColor(day) }}>
         {WEEKDAY_JA[day.weekday]}
@@ -65,6 +70,11 @@ function DayHeaderButton({
       <div className="text-base font-bold tabular-nums">
         <DayNumber day={day} />
       </div>
+      {rokuyo === null ? null : (
+        <div className="mt-0.5">
+          <RokuyoLabel rokuyo={rokuyo} id={rokuyoId} />
+        </div>
+      )}
     </button>
   );
 }

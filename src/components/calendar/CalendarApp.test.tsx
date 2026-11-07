@@ -115,7 +115,7 @@ describe("CalendarApp drill-down", () => {
   const clickDay = (root: HTMLElement, day: string): void => {
     const cell = [
       ...root.querySelectorAll<HTMLElement>("[class*='cursor-pointer']"),
-    ].find((e) => e.textContent?.split(" ")[0] === day)!;
+    ].find((e) => e.textContent?.match(/^\d+/)?.[0] === day)!;
     act(() => {
       fireEvent.click(cell);
     });
