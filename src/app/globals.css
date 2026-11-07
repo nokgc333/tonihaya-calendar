@@ -77,6 +77,7 @@
   --accent-sat: #3f5573;
   --today-bg: #171717;
   --today-fg: #ffffff;
+  --holiday-text: color-mix(in srgb, #3f6212 88%, var(--text));
   --focus-ring: #1d4ed8;
 }
 

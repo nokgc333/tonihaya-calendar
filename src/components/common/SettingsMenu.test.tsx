@@ -3,6 +3,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi } from "vitest";
 import { SettingsMenu } from "@/components/common/SettingsMenu";
+import { DisplaySettingsProvider } from "@/components/common/DisplaySettings";
 
 describe("SettingsMenu a11y", () => {
   it("the gear button has aria-haspopup and aria-expanded(false)", () => {
@@ -81,5 +82,30 @@ describe("SettingsMenu a11y", () => {
     expect(screen.getByRole("button", { name: "日" })).not.toHaveAttribute(
       "aria-current",
     );
+  });
+});
+
+describe("SettingsMenu display options", () => {
+  it("offers the rokuyo, the Japanese month names and the theme as groups of buttons", async () => {
+    const user = userEvent.setup();
+    render(
+      <DisplaySettingsProvider>
+        <SettingsMenu weekStart="sun" onWeekStartChange={vi.fn()} />
+      </DisplaySettingsProvider>,
+    );
+    await user.click(screen.getByRole("button", { name: "設定" }));
+    for (const name of ["六曜", "和風月名", "テーマ"]) {
+      expect(screen.getByRole("group", { name })).toBeInTheDocument();
+    }
+    const theme = screen.getByRole("group", { name: "テーマ" });
+    expect(
+      [...theme.querySelectorAll("button")].map((b) => b.textContent),
+    ).toEqual(["システム", "ライト", "ダーク"]);
+    expect(theme.querySelector("[aria-current]")?.textContent).toBe("システム");
+    await user.click(screen.getByRole("button", { name: "ダーク" }));
+    expect(document.documentElement.getAttribute("data-theme")).toBe("dark");
+    expect(theme.querySelector("[aria-current]")?.textContent).toBe("ダーク");
+    document.documentElement.removeAttribute("data-theme");
+    localStorage.clear();
   });
 });

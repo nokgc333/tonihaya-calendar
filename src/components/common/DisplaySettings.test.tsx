@@ -20,11 +20,18 @@ function Probe() {
       <button type="button" onClick={() => settings.onWafuMonthChange(false)}>
         wafu off
       </button>
+      <span data-testid="theme">{settings.theme}</span>
+      <button type="button" onClick={() => settings.onThemeChange("dark")}>
+        theme dark
+      </button>
     </div>
   );
 }
 
-beforeEach(() => localStorage.clear());
+beforeEach(() => {
+  localStorage.clear();
+  document.documentElement.removeAttribute("data-theme");
+});
 afterEach(cleanup);
 
 describe("DisplaySettingsProvider", () => {
@@ -64,5 +71,29 @@ describe("DisplaySettingsProvider", () => {
     await user.click(screen.getByText("wafu off"));
     expect(localStorage.getItem("tonihaya.wafuMonth")).toBe("off");
     expect(screen.getByTestId("state").textContent).toBe("false/false");
+  });
+
+  it("follows the system by default, applies a saved theme, and saves and applies a change", async () => {
+    const root = document.documentElement;
+    const first = render(
+      <DisplaySettingsProvider>
+        <Probe />
+      </DisplaySettingsProvider>,
+    );
+    expect(screen.getByTestId("theme").textContent).toBe("system");
+    expect(root.hasAttribute("data-theme")).toBe(false);
+    const user = userEvent.setup();
+    await user.click(screen.getByText("theme dark"));
+    expect(root.getAttribute("data-theme")).toBe("dark");
+    expect(localStorage.getItem("tonihaya.theme")).toBe("dark");
+    first.unmount();
+    root.removeAttribute("data-theme");
+    render(
+      <DisplaySettingsProvider>
+        <Probe />
+      </DisplaySettingsProvider>,
+    );
+    expect(screen.getByTestId("theme").textContent).toBe("dark");
+    expect(root.getAttribute("data-theme")).toBe("dark");
   });
 });
