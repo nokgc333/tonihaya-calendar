@@ -21,7 +21,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "check:headers": "node scripts/check-headers.mjs",
-    "generate:images": "node scripts/generate-images.mjs"
+    "generate:images": "node scripts/generate-images.mjs",
+    "test:e2e": "playwright test"
   },
   "overrides": {
     "next": {
