@@ -1,18 +1,48 @@
 import type { CalendarEvent } from "@/domain/event";
 import type { EventRepository } from "./eventRepository";
-import { decodeEvents, encodeEvents } from "./storageFormat";
+import { decodeEvents, encodeEvents, type DecodeResult } from "./storageFormat";
 
 const KEY = "tonihaya.events";
+const BACKUP_KEY = `${KEY}.backup`;
+const LEGACY_KEY = `${KEY}.legacy-v0`;
 
 export class LocalStorageEventRepository implements EventRepository {
   constructor(private readonly storage: Storage = window.localStorage) {}
 
   private read(): CalendarEvent[] {
     try {
-      return decodeEvents(this.storage.getItem(KEY)).events;
+      const raw = this.storage.getItem(KEY);
+      const result = decodeEvents(raw);
+      this.settle(raw, result);
+      return result.events;
     } catch {
       return [];
     }
+  }
+
+  private settle(raw: string | null, result: DecodeResult): void {
+    try {
+      this.keepAside(raw, result);
+    } catch (err) {
+      console.error(`Could not set aside the unusable data (key=${KEY})`, err);
+    }
+  }
+
+  private keepAside(raw: string | null, result: DecodeResult): void {
+    const { status } = result;
+    if (status === "corrupt" || status === "too-large" || status === "future") {
+      this.moveAway(raw ?? "");
+      return;
+    }
+    if (status === "migrated") this.storage.setItem(LEGACY_KEY, raw ?? "");
+    if (status === "migrated") {
+      this.storage.setItem(KEY, encodeEvents(result.events));
+    }
+  }
+
+  private moveAway(raw: string): void {
+    this.storage.setItem(BACKUP_KEY, raw);
+    this.storage.removeItem(KEY);
   }
 
   private write(events: readonly CalendarEvent[]): void {
