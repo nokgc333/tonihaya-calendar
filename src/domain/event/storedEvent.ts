@@ -186,3 +186,8 @@ function orderRepairs(repaired: readonly string[]): string[] {
     (a, b) => REPAIR_ORDER.indexOf(a) - REPAIR_ORDER.indexOf(b),
   );
 }
+
+export function isStoredCalendarEvent(v: unknown): v is CalendarEvent {
+  const parsed = parseStoredEvent(v);
+  return parsed.ok && parsed.repaired.length === 0;
+}

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { NOTE_MAX_LENGTH, TITLE_MAX_LENGTH, URL_MAX_LENGTH } from "./event";
-import { parseStoredEvent } from "./storedEvent";
+import { isStoredCalendarEvent, parseStoredEvent } from "./storedEvent";
 
 const allDay = (over: Record<string, unknown> = {}) => ({
   id: "e1",
@@ -239,5 +239,15 @@ describe("parseStoredEvent: what it repairs", () => {
       ].sort(),
     );
     expect(({} as Record<string, unknown>).polluted).toBeUndefined();
+  });
+});
+
+describe("isStoredCalendarEvent", () => {
+  it("is true only for an event that needs no repair", () => {
+    expect(isStoredCalendarEvent(allDay())).toBe(true);
+    expect(isStoredCalendarEvent(allDay({ url: "javascript:alert(1)" }))).toBe(
+      false,
+    );
+    expect(isStoredCalendarEvent(allDay({ id: "" }))).toBe(false);
   });
 });
