@@ -10,6 +10,7 @@ import {
   NOTE_MAX_LENGTH,
   TITLE_MAX_LENGTH,
   URL_MAX_LENGTH,
+  sortForDay,
 } from "./event";
 import type { CalendarEvent } from "./types";
 
@@ -30,6 +31,25 @@ const allDay = (
   allDay: true,
   start: { date: { year: s[0], month: s[1], day: s[2] } },
   end: { date: { year: e[0], month: e[1], day: e[2] } },
+});
+const timed = (
+  id: string,
+  d: [number, number, number],
+  sh: number,
+  eh: number,
+): CalendarEvent => ({
+  ...base,
+  id,
+  title: id,
+  allDay: false,
+  start: {
+    date: { year: d[0], month: d[1], day: d[2] },
+    time: { hour: sh, minute: 0 },
+  },
+  end: {
+    date: { year: d[0], month: d[1], day: d[2] },
+    time: { hour: eh, minute: 0 },
+  },
 });
 
 describe("minutesOfDay", () => {
@@ -242,5 +262,115 @@ describe("validateEvent", () => {
     expect(validateEvent({ ...okTimed, url: longUrl }).length).toBeGreaterThan(
       0,
     );
+  });
+});
+
+describe("validateEvent in detail", () => {
+  const draft = {
+    title: "x",
+    allDay: false,
+    colorKey: "blue",
+    priority: "normal",
+    start: {
+      date: { year: 2026, month: 7, day: 12 },
+      time: { hour: 9, minute: 0 },
+    },
+    end: {
+      date: { year: 2026, month: 7, day: 12 },
+      time: { hour: 10, minute: 0 },
+    },
+  } as const;
+
+  it("treats a title of only spaces as empty", () => {
+    expect(validateEvent({ ...draft, title: "   " })).toEqual([
+      "タイトルを入力してください",
+    ]);
+  });
+
+  it("accepts notes exactly at the limit and an empty note", () => {
+    expect(
+      validateEvent({ ...draft, note: "n".repeat(NOTE_MAX_LENGTH) }),
+    ).toEqual([]);
+    expect(validateEvent({ ...draft, note: "" })).toEqual([]);
+  });
+
+  it("accepts a safe URL exactly at the limit", () => {
+    const url = "https://example.com/" + "a".repeat(URL_MAX_LENGTH - 20);
+    expect(url.length).toBe(URL_MAX_LENGTH);
+    expect(validateEvent({ ...draft, url })).toEqual([]);
+  });
+
+  it("reports a too long but otherwise safe URL once", () => {
+    const url = "https://example.com/" + "a".repeat(URL_MAX_LENGTH);
+    expect(validateEvent({ ...draft, url })).toEqual([
+      `URLは${URL_MAX_LENGTH}文字以内にしてください`,
+    ]);
+  });
+
+  it("asks for both times when a timed event has none", () => {
+    expect(
+      validateEvent({
+        ...draft,
+        start: { date: draft.start.date },
+        end: { date: draft.end.date },
+      }),
+    ).toEqual(["時間イベントは開始・終了時刻が必要です"]);
+  });
+
+  it("asks for both times when only one of them is missing", () => {
+    expect(validateEvent({ ...draft, end: { date: draft.end.date } })).toEqual([
+      "時間イベントは開始・終了時刻が必要です",
+    ]);
+  });
+
+  it("does not compare times across different days", () => {
+    expect(
+      validateEvent({
+        ...draft,
+        end: {
+          date: { year: 2026, month: 7, day: 13 },
+          time: { hour: 8, minute: 0 },
+        },
+      }),
+    ).toEqual([]);
+  });
+
+  it("does not ask an all-day event for times", () => {
+    expect(
+      validateEvent({
+        ...draft,
+        allDay: true,
+        start: { date: draft.start.date },
+        end: { date: draft.end.date },
+      }),
+    ).toEqual([]);
+  });
+
+  it("lists every problem in the order of the form: title, note, URL, dates, times", () => {
+    expect(
+      validateEvent({
+        ...draft,
+        title: "",
+        note: "n".repeat(NOTE_MAX_LENGTH + 1),
+        url: "ftp://example.com",
+        start: { date: { year: 2026, month: 7, day: 12 } },
+        end: { date: { year: 2026, month: 7, day: 11 } },
+      }),
+    ).toEqual([
+      "タイトルを入力してください",
+      `備考は${NOTE_MAX_LENGTH}文字以内にしてください`,
+      "URLは http/https のみ使用できます",
+      "終了日は開始日以降にしてください",
+      "時間イベントは開始・終了時刻が必要です",
+    ]);
+  });
+});
+
+describe("sortForDay", () => {
+  it("all-day events first, then timed events by start time ascending", () => {
+    const t9 = timed("t9", [2026, 7, 12], 9, 10);
+    const t8 = timed("t8", [2026, 7, 12], 8, 9);
+    const a = allDay("a", [2026, 7, 12], [2026, 7, 12]);
+    expect(sortForDay([t9, a, t8]).map((e) => e.id)).toEqual(["a", "t8", "t9"]);
   });
 });

@@ -1,7 +1,7 @@
 import { toEpochDay } from "@/domain/shared/date";
 import type { CivilDate } from "@/domain/shared/date";
 import type { TimeOfDay } from "@/domain/timecalc";
-import type { CalendarEvent } from "./types";
+import type { CalendarEvent, EventPriority } from "./types";
 
 export type EventDraft = Omit<CalendarEvent, "id" | "createdAt" | "updatedAt">;
 
@@ -156,4 +156,27 @@ const EVENT_RULES: readonly EventRule[] = [
 
 export function validateEvent(d: EventDraft): readonly string[] {
   return EVENT_RULES.flatMap((rule) => rule(d));
+}
+
+const PRIORITY_RANK: Record<EventPriority, number> = {
+  high: 0,
+  normal: 1,
+  low: 2,
+};
+
+export function sortForDay(
+  events: readonly CalendarEvent[],
+): readonly CalendarEvent[] {
+  return [...events].sort((a, b) => {
+    if (a.allDay !== b.allDay) return a.allDay ? -1 : 1;
+    if (!a.allDay && !b.allDay) {
+      const am = minutesOfDay(a.start.time!);
+      const bm = minutesOfDay(b.start.time!);
+      if (am !== bm) return am - bm;
+    }
+    if (PRIORITY_RANK[a.priority] !== PRIORITY_RANK[b.priority]) {
+      return PRIORITY_RANK[a.priority] - PRIORITY_RANK[b.priority];
+    }
+    return a.createdAt - b.createdAt;
+  });
 }
