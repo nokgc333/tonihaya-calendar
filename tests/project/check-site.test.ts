@@ -69,4 +69,26 @@ describe("findProblems", () => {
       "structured data is missing",
     ]);
   });
+
+  it("reports a file that is not served, with its status", () => {
+    const problems = findProblems({
+      ...healthy,
+      files: [{ path: "/og.png", status: 404, type: "text/html" }],
+    });
+    expect(problems).toEqual(["/og.png answered 404 (text/html)"]);
+  });
+
+  it("reports several problems together, in a fixed order", () => {
+    const problems = findProblems({
+      ...healthy,
+      months: 3,
+      inlineScripts: 1,
+      canonical: null,
+    });
+    expect(problems).toEqual([
+      "the year view shows 3 months, not 12",
+      "the page has 1 inline scripts",
+      "canonical is missing",
+    ]);
+  });
 });

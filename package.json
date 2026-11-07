@@ -1,76 +1,76 @@
 {
   "name": "tonihaya-calendar",
+  "version": "0.2.4",
   "private": true,
   "type": "module",
   "engines": {
     "node": ">=22"
   },
-  "version": "0.1.0",
   "scripts": {
     "dev": "next dev",
     "build": "next build && node scripts/externalize-inline-scripts.mjs",
     "start": "next start",
     "lint": "eslint . --max-warnings=0",
-    "type-check": "tsc --noEmit",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
+    "check:headers": "node scripts/check-headers.mjs",
+    "check:duplicates": "jscpd",
+    "check:site": "node scripts/check-site.mjs",
+    "generate:images": "node scripts/generate-images.mjs",
+    "test:mutation": "stryker run",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "check": "npm run lint && npm run type-check && npm run format:check && npm run test",
-    "prepare": "husky || true",
-    "secrets": "secretlint \"**/*\"",
-    "check:duplicates": "jscpd",
-    "test": "vitest run",
     "test:watch": "vitest",
-    "check:headers": "node scripts/check-headers.mjs",
-    "generate:images": "node scripts/generate-images.mjs",
-    "test:e2e": "playwright test",
-    "test:coverage": "vitest run --coverage",
+    "type-check": "tsc --noEmit",
     "lighthouse": "node scripts/lighthouse.mjs",
     "ci:lhci": "lhci autorun",
-    "test:mutation": "stryker run",
-    "check:site": "node scripts/check-site.mjs"
+    "prepare": "husky || true",
+    "secrets": "secretlint \"**/*\""
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
+    "@eslint/eslintrc": "^3.3.7",
+    "@lhci/cli": "^0.15.1",
+    "@playwright/test": "^1.64.1",
+    "@secretlint/secretlint-rule-preset-recommend": "^13.1.0",
+    "@stryker-mutator/core": "^10.1.1",
+    "@stryker-mutator/vitest-runner": "^10.1.1",
+    "@tailwindcss/postcss": "^4.3.2",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitest/coverage-v8": "^5.0.5",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^15.5.28",
+    "fast-check": "^4.10.2",
+    "happy-dom": "^21.0.4",
+    "husky": "^9.1.7",
+    "jscpd": "^5.4.2",
+    "lighthouse": "^13.4.0",
+    "lint-staged": "^17.6.0",
+    "postcss": "^8.5.16",
+    "prettier": "^3.9.10",
+    "prettier-plugin-tailwindcss": "^0.8.1",
+    "secretlint": "^13.1.0",
+    "tailwindcss": "^4.3.2",
+    "typescript": "^5.6.0",
+    "vitest": "^5.0.5"
+  },
+  "dependencies": {
+    "@vercel/speed-insights": "^2.0.0",
+    "next": "^15.5.28",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7"
   },
   "overrides": {
     "next": {
       "postcss": "$postcss"
     }
-  },
-  "dependencies": {
-    "next": "^15.5.28",
-    "react": "^19.2.7",
-    "react-dom": "^19.2.7",
-    "@vercel/speed-insights": "^2.0.0"
-  },
-  "devDependencies": {
-    "typescript": "^5.6.0",
-    "@types/node": "^22.20.5",
-    "@types/react": "^19.2.17",
-    "@types/react-dom": "^19.2.3",
-    "tailwindcss": "^4.3.2",
-    "@tailwindcss/postcss": "^4.3.2",
-    "postcss": "^8.5.16",
-    "@eslint/eslintrc": "^3.3.7",
-    "eslint": "^9.39.5",
-    "eslint-config-next": "^15.5.28",
-    "prettier": "^3.9.10",
-    "prettier-plugin-tailwindcss": "^0.8.1",
-    "husky": "^9.1.7",
-    "lint-staged": "^17.6.0",
-    "secretlint": "^13.1.0",
-    "@secretlint/secretlint-rule-preset-recommend": "^13.1.0",
-    "jscpd": "^5.4.2",
-    "vitest": "^5.0.5",
-    "@testing-library/jest-dom": "^7.0.1",
-    "@testing-library/react": "^16.3.2",
-    "happy-dom": "^21.0.4",
-    "@testing-library/user-event": "^14.6.1",
-    "@playwright/test": "^1.64.1",
-    "@axe-core/playwright": "^4.14.0",
-    "@vitest/coverage-v8": "^5.0.5",
-    "fast-check": "^4.10.2",
-    "@lhci/cli": "^0.15.1",
-    "lighthouse": "^13.4.0",
-    "@stryker-mutator/core": "^10.1.1",
-    "@stryker-mutator/vitest-runner": "^10.1.1"
   },
   "lint-staged": {
     "*.{ts,tsx,js,mjs,cjs}": [
@@ -83,5 +83,6 @@
     "*": [
       "secretlint"
     ]
-  }
+  },
+  "license": "MIT"
 }
