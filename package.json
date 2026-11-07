@@ -9,7 +9,12 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "lint": "eslint . --max-warnings=0",
+    "type-check": "tsc --noEmit",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check": "npm run lint && npm run type-check && npm run format:check"
   },
   "overrides": {
     "next": {
@@ -28,6 +33,11 @@
     "@types/react-dom": "^19.2.3",
     "tailwindcss": "^4.3.2",
     "@tailwindcss/postcss": "^4.3.2",
-    "postcss": "^8.5.16"
+    "postcss": "^8.5.16",
+    "@eslint/eslintrc": "^3.3.7",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^15.5.28",
+    "prettier": "^3.9.10",
+    "prettier-plugin-tailwindcss": "^0.8.1"
   }
 }

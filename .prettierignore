@@ -1,0 +1,16 @@
+.next
+out
+node_modules
+package-lock.json
+coverage
+.lighthouse
+.lighthouseci
+.vercel
+docs
+*.md
+next-env.d.ts
+*.tsbuildinfo
+playwright-report
+test-results
+reports
+.stryker-tmp
