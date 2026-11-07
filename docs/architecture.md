@@ -239,7 +239,7 @@ localStorage 書込 → setItem(try/catch) → 失敗は console.error + rethrow
 
 ### CI・計測・テスト基盤
 
-- `.lighthouserc.cjs` の速度予算は「実測ベースライン×1.15」のガードレール。ベースライン（2026-07-11 計測・Lighthouse mobile）は、`out/index.html` の script 転送 119,872 B（予算 138,240 B）、ページ全体 133,011 B（予算 153,600 B）。404.html はどちらも index より小さく同予算を通る。予算を引き上げる場合は、同一PRで値を明示更新して肥大化を履歴に残す。LHCI は `out/` を自前で静的配信する（別途 http サーバ不要）。3回実行の中央値でノイズを低減し、レポート URL は共有ストレージへ出す。
+- `.lighthouserc.cjs` の速度予算は「実測ベースライン×1.15」のガードレール。ベースライン（2026-07-11 計測・Lighthouse mobile）は、`out/index.html` の script 転送 119,872 B（予算 138,240 B）、ページ全体 133,011 B（予算 153,600 B）。404.html はどちらも index より小さく同予算を通る。予算を引き上げる場合は、同一PRで値を明示更新して肥大化を履歴に残す。2026-11-08 に script の予算を 131,072 B から 135,168 B(132 KiB)へ引き上げた。旧暦の表と六曜(約 +2.0 KB)、表示設定とテーマ(約 +1.1 KB)で、`out/index.html` の script 転送が 128,144 B から 131,230 B に増えた(ページ全体は 148,309 B から 151,436 B で、予算 153,600 B の内)。LHCI は `out/` を自前で静的配信する（別途 http サーバ不要）。3回実行の中央値でノイズを低減し、レポート URL は共有ストレージへ出す。
 - `scripts/lighthouse.mjs` は、モバイル・スロットリングの正式ラボ値をローカルで計測する。`npm run lighthouse`（本番 URL）、`-- <url>`（任意 URL）、`-- <url> --desktop`。レポートは `.lighthouse/` に出力（gitignore 済み）。SLO の目安は Performance 95+・LCP<1s・CLS<0.1・TBT 小（INP の代理）。
 - `ci.yml` が `npm ci` ではなく `npm install` を使う理由: macOS で生成した `package-lock.json` は Linux 固有の optional ネイティブ依存（`@emnapi/*`、`*-linux-x64-gnu` など）を記録できず、厳格な `npm ci` が Linux で「lock 不整合」で落ちる。`npm install` はランナーの OS に合わせて optional を解決して自己修復する。
 - `next.config.mjs` は、MVP を完全ステートレスな静的サイトとして配信する（要件定義書§4.1）。`layout.tsx` の Speed Insights は本番（Vercel）で実ユーザーの Web Vitals（RUM）を収集する。ダッシュボードでの有効化が必要。
