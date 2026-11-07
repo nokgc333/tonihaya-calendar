@@ -7,6 +7,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import {
   createStaticServer,
+  headersFromConfig,
   resolveRequestPath,
 } from "../../scripts/serve-out.mjs";
 
@@ -103,5 +104,113 @@ describe("the static server", () => {
     const res = await fetch(`${base}/`, { method: "HEAD" });
     expect(res.status).toBe(200);
     expect(await res.text()).toBe("");
+  });
+});
+
+describe("headersFromConfig", () => {
+  const config = {
+    headers: [
+      {
+        source: "/(.*)",
+        headers: [
+          { key: "X-A", value: "1" },
+          { key: "X-B", value: "2" },
+        ],
+      },
+    ],
+  };
+
+  it("turns the rule for every path into a header object", () => {
+    expect(headersFromConfig(config)).toEqual({ "X-A": "1", "X-B": "2" });
+  });
+
+  it("gives no headers when there is no rule", () => {
+    expect(headersFromConfig({})).toEqual({});
+  });
+
+  it("refuses a rule for another source, because the server cannot match it", () => {
+    expect(() =>
+      headersFromConfig({ headers: [{ source: "/api/(.*)", headers: [] }] }),
+    ).toThrow(/source/);
+  });
+});
+
+describe("the static server headers", () => {
+  it("sends the headers it was given on pages, assets and the 404 page", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "serve-out-h-"));
+    writeFileSync(join(dir, "index.html"), "<h1>home</h1>");
+    const server = createStaticServer(dir, { "X-Test": "yes" });
+    await new Promise<void>((done) => server.listen(0, done));
+    const base = `http://localhost:${(server.address() as AddressInfo).port}`;
+    try {
+      for (const path of ["/", "/missing"]) {
+        expect(
+          (await fetch(`${base}${path}`)).headers.get("x-test"),
+          path,
+        ).toBe("yes");
+      }
+    } finally {
+      await new Promise((done) => server.close(done));
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("the static server compression", () => {
+  let dir: string;
+  let server: ReturnType<typeof createStaticServer>;
+  let base: string;
+  const big = "<p>".padEnd(5000, "a");
+
+  beforeAll(async () => {
+    dir = mkdtempSync(join(tmpdir(), "serve-out-z-"));
+    writeFileSync(join(dir, "index.html"), big);
+    writeFileSync(join(dir, "logo.png"), Buffer.alloc(4000, 1));
+    server = createStaticServer(dir);
+    await new Promise<void>((done) => server.listen(0, done));
+    base = `http://localhost:${(server.address() as AddressInfo).port}`;
+  });
+
+  afterAll(async () => {
+    await new Promise((done) => server.close(done));
+    rmSync(dir, { recursive: true, force: true });
+  });
+
+  it("compresses text with the best encoding the client accepts", async () => {
+    const res = await fetch(`${base}/`, {
+      headers: { "Accept-Encoding": "br, gzip" },
+    });
+    expect(res.headers.get("content-encoding")).toBe("br");
+    expect(await res.text()).toBe(big);
+  });
+
+  it("falls back to gzip when the client does not accept br", async () => {
+    const res = await fetch(`${base}/`, {
+      headers: { "Accept-Encoding": "gzip" },
+    });
+    expect(res.headers.get("content-encoding")).toBe("gzip");
+    expect(await res.text()).toBe(big);
+  });
+
+  it("sends the text as it is when the client accepts no encoding", async () => {
+    const res = await fetch(`${base}/`, {
+      headers: { "Accept-Encoding": "identity" },
+    });
+    expect(res.headers.get("content-encoding")).toBeNull();
+    expect(res.headers.get("content-length")).toBe(String(big.length));
+  });
+
+  it("does not compress images", async () => {
+    const res = await fetch(`${base}/logo.png`, {
+      headers: { "Accept-Encoding": "br, gzip" },
+    });
+    expect(res.headers.get("content-encoding")).toBeNull();
+  });
+
+  it("tells caches that the answer depends on the accepted encoding", async () => {
+    const res = await fetch(`${base}/`, {
+      headers: { "Accept-Encoding": "gzip" },
+    });
+    expect(res.headers.get("vary")).toContain("Accept-Encoding");
   });
 });
