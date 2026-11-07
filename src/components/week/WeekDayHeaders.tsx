@@ -49,7 +49,6 @@ function DayHeaderButton({
   readonly onOpen: (year: number, month: number, day: number) => void;
 }) {
   const rokuyo = rokuyoOf(day.year, day.month, day.day);
-  const rokuyoId = `rokuyo-${day.year}-${day.month}-${day.day}`;
   return (
     <button
       type="button"
@@ -61,8 +60,7 @@ function DayHeaderButton({
           ? { boxShadow: "inset 0 0 0 1.5px var(--today-bg)" }
           : {}),
       }}
-      aria-label={`${WEEKDAY_JA[day.weekday]}${day.day} ${day.month}月${day.day}日を開く`}
-      aria-describedby={rokuyo === null ? undefined : rokuyoId}
+      aria-label={`${WEEKDAY_JA[day.weekday]}${day.day}${rokuyo ?? ""} ${day.month}月${day.day}日を開く`}
     >
       <div className="text-[11px]" style={{ color: dayTextColor(day) }}>
         {WEEKDAY_JA[day.weekday]}
@@ -72,7 +70,7 @@ function DayHeaderButton({
       </div>
       {rokuyo === null ? null : (
         <div className="mt-0.5">
-          <RokuyoLabel rokuyo={rokuyo} id={rokuyoId} />
+          <RokuyoLabel rokuyo={rokuyo} />
         </div>
       )}
     </button>

@@ -146,7 +146,7 @@ describe("CalendarApp drill-down", () => {
     press(container, "次の週");
     expect(window.location.search).toBe("?y=2026&m=7&d=22&v=week");
     expect(window.history.length).toBe(before);
-    press(container, "木23 7月23日を開く");
+    press(container, "木23先負 7月23日を開く");
     expect(window.location.search).toBe("?y=2026&m=7&d=23&v=day");
     expect(window.history.length).toBe(before + 1);
   });
