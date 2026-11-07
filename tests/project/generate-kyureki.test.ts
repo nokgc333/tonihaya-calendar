@@ -14,7 +14,7 @@ const newYearDay = (row: (typeof rows)[number]) =>
 describe("the old calendar table generator", () => {
   it("reproduces the committed table exactly", () => {
     expect(readFileSync("src/domain/kyureki/table.ts", "utf-8")).toBe(
-      renderKyurekiTable(buildKyurekiRows()),
+      renderKyurekiTable(rows),
     );
   });
 
