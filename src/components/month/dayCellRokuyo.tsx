@@ -10,12 +10,12 @@ export interface DayRokuyo {
 
 export function dayRokuyo(
   cell: DayCell,
-  spacious: boolean,
+  show: boolean,
   year: number | undefined,
   month: number | undefined,
 ): DayRokuyo {
   const rokuyo =
-    spacious && cell.inMonth && year !== undefined && month !== undefined
+    show && cell.inMonth && year !== undefined && month !== undefined
       ? rokuyoOf(year, month, cell.day)
       : null;
   if (rokuyo === null) return { label: null, describedBy: undefined };

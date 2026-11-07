@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import { act, renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
-import { usePersistedChoice } from "@/components/calendar/usePersistedChoice";
+import { usePersistedChoice } from "@/components/common/usePersistedChoice";
 
 const KEY = "test.choice";
 const OPTIONS = ["a", "b"] as const;

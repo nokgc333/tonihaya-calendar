@@ -5,6 +5,7 @@ import { buildDayView, type JumpLevel } from "@/domain/view";
 import { fromEpochDay, toEpochDay, type CivilDate } from "@/domain/shared/date";
 import type { WeekStart } from "@/domain/calendar";
 import { rokuyoOf } from "@/domain/kyureki";
+import { useDisplaySettings } from "@/components/common/DisplaySettings";
 import type { WeekDay } from "@/domain/view";
 import { useEvents } from "@/hooks/useEvents";
 import { useEventEditor } from "@/hooks/useEventEditor";
@@ -27,7 +28,8 @@ function DayHeading({
   readonly day: WeekDay;
   readonly jumpPivot: CivilDate | null;
 }) {
-  const rokuyo = rokuyoOf(day.year, day.month, day.day);
+  const { rokuyo: rokuyoOn } = useDisplaySettings();
+  const rokuyo = rokuyoOn ? rokuyoOf(day.year, day.month, day.day) : null;
   return (
     <div
       className="sticky top-0 z-10 grid min-h-[54.5px] shrink-0 items-center py-1.5"

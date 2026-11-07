@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
 import { rokuyoOf } from "@/domain/kyureki";
+import { useDisplaySettings } from "@/components/common/DisplaySettings";
 import type { WeekDay } from "@/domain/view";
 import { RokuyoLabel } from "@/components/common/RokuyoLabel";
 import { dayTextColor } from "@/components/common/dayPalette";
@@ -48,7 +49,8 @@ function DayHeaderButton({
   readonly isJump: boolean;
   readonly onOpen: (year: number, month: number, day: number) => void;
 }) {
-  const rokuyo = rokuyoOf(day.year, day.month, day.day);
+  const { rokuyo: rokuyoOn } = useDisplaySettings();
+  const rokuyo = rokuyoOn ? rokuyoOf(day.year, day.month, day.day) : null;
   return (
     <button
       type="button"

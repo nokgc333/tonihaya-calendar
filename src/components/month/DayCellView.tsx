@@ -1,6 +1,7 @@
 import type { DayCell } from "@/domain/view";
 import type { CalendarEvent } from "@/domain/event";
 import { dayBgColor } from "@/components/common/dayPalette";
+import { useDisplaySettings } from "@/components/common/DisplaySettings";
 import { dayRokuyo, plainLayout } from "@/components/month/dayCellRokuyo";
 import {
   DayNumberOrButton,
@@ -128,7 +129,13 @@ export function DayCellView({
   const onOpen = dayOpener(onDayClick, cellYear, cellMonth, cell.day);
   const handlers = onOpen ? { onClick: onOpen } : {};
   const clickable = onOpen ? "cursor-pointer hover:brightness-95" : "";
-  const { label, describedBy } = dayRokuyo(cell, spacious, cellYear, cellMonth);
+  const { rokuyo: rokuyoOn } = useDisplaySettings();
+  const { label, describedBy } = dayRokuyo(
+    cell,
+    spacious && rokuyoOn,
+    cellYear,
+    cellMonth,
+  );
   const number = (
     <DayNumberOrButton
       cell={cell}
