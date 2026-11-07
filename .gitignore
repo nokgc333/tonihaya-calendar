@@ -1,0 +1,42 @@
+# dependencies
+node_modules/
+# build output
+dist/
+build/
+.next/
+out/
+coverage/
+# env
+.env
+.env.local
+.env.*.local
+# logs
+*.log
+npm-debug.log*
+# os / editor
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+# go
+*.exe
+*.test
+*.out
+bin/
+
+# typescript incremental build cache
+*.tsbuildinfo
+
+.vercel
+
+# Lighthouse report output
+.lighthouse/
+.lighthouseci/
+
+# playwright
+playwright-report/
+test-results/
+
+# mutation testing
+reports/
+.stryker-tmp/
