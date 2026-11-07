@@ -1,6 +1,7 @@
 import type { MonthView } from "@/domain/view";
 import type { WeekStart } from "@/domain/calendar";
 import { WEEKDAY_JA } from "@/components/common/weekdays";
+import { useDisplaySettings } from "@/components/common/DisplaySettings";
 import { SIZE, type MonthCardSize } from "@/components/month/monthCardSize";
 
 const SUNDAY_FIRST_SATURDAY_INDEX = 6;
@@ -33,6 +34,7 @@ export function MonthCardHeader({
   readonly size: MonthCardSize;
   readonly onOpen?: () => void;
 }) {
+  const { wafuMonth } = useDisplaySettings();
   return (
     <header
       className={`flex items-baseline gap-2 ${size === "lg" ? "mb-3" : "mb-2"}`}
@@ -55,19 +57,21 @@ export function MonthCardHeader({
       </h2>
       {size === "lg" ? (
         <span className="text-sm" style={{ color: "var(--text-muted)" }}>
-          {month.labelEn} / {month.labelWafu}
+          {wafuMonth ? `${month.labelEn} / ${month.labelWafu}` : month.labelEn}
         </span>
       ) : (
         <>
           <span className="text-[11px]" style={{ color: "var(--text-muted)" }}>
             {month.labelEn}
           </span>
-          <span
-            className="ml-auto text-[11px]"
-            style={{ color: "var(--text-muted)" }}
-          >
-            {month.labelWafu}
-          </span>
+          {wafuMonth ? (
+            <span
+              className="ml-auto text-[11px]"
+              style={{ color: "var(--text-muted)" }}
+            >
+              {month.labelWafu}
+            </span>
+          ) : null}
         </>
       )}
     </header>

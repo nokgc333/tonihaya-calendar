@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type RefObject } from "react";
 import type { WeekStart } from "@/domain/calendar";
 import { SegmentButton } from "@/components/common/SegmentButton";
+import { useDisplaySettings } from "@/components/common/DisplaySettings";
 
 function GearIcon() {
   return (
@@ -90,6 +91,59 @@ function WeekStartOptions({
   );
 }
 
+function SwitchOptions({
+  title,
+  on,
+  onChange,
+}: {
+  readonly title: string;
+  readonly on: boolean;
+  readonly onChange: (on: boolean) => void;
+}) {
+  return (
+    <div role="group" aria-label={title} className="mt-3">
+      <div
+        className="mb-1.5 text-[11px]"
+        style={{ color: "var(--text-muted)" }}
+      >
+        {title}
+      </div>
+      <div className="flex items-center gap-1">
+        <SegmentButton
+          label="表示"
+          active={on}
+          onClick={() => onChange(true)}
+          aria-current={on ? "true" : undefined}
+        />
+        <SegmentButton
+          label="非表示"
+          active={!on}
+          onClick={() => onChange(false)}
+          aria-current={on ? undefined : "true"}
+        />
+      </div>
+    </div>
+  );
+}
+
+function DisplayOptions() {
+  const settings = useDisplaySettings();
+  return (
+    <>
+      <SwitchOptions
+        title="六曜"
+        on={settings.rokuyo}
+        onChange={settings.onRokuyoChange}
+      />
+      <SwitchOptions
+        title="和風月名"
+        on={settings.wafuMonth}
+        onChange={settings.onWafuMonthChange}
+      />
+    </>
+  );
+}
+
 export function SettingsMenu({
   weekStart,
   onWeekStartChange,
@@ -141,6 +195,7 @@ export function SettingsMenu({
             weekStart={weekStart}
             onWeekStartChange={onWeekStartChange}
           />
+          <DisplayOptions />
         </div>
       )}
     </div>

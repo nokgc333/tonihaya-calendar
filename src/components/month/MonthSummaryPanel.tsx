@@ -1,5 +1,6 @@
 import type { MonthDetail as MonthDetailModel } from "@/domain/view";
 import { weekdayLabel } from "@/components/month/monthDetailModel";
+import { useDisplaySettings } from "@/components/common/DisplaySettings";
 
 function Stat({
   label,
@@ -29,11 +30,14 @@ function Stat({
 }
 
 function PanelHeading({ detail }: { readonly detail: MonthDetailModel }) {
+  const { wafuMonth } = useDisplaySettings();
   return (
     <div className="mb-3 flex items-baseline gap-2">
       <span className="text-2xl font-bold">{detail.month.labelJa}</span>
       <span className="text-sm" style={{ color: "var(--text-muted)" }}>
-        {detail.month.labelEn} / {detail.month.labelWafu}
+        {wafuMonth
+          ? `${detail.month.labelEn} / ${detail.month.labelWafu}`
+          : detail.month.labelEn}
       </span>
     </div>
   );

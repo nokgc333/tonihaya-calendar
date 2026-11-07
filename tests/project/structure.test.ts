@@ -75,6 +75,7 @@ describe("the folders of the components", () => {
           "monthCardKeyboard",
           "eventModalFields",
           "themeVariables",
+          "calendarDisplaySettings",
         ];
         expect(
           owners.length > 0 || known.includes(stem),

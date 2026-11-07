@@ -12,7 +12,8 @@ import { createCalendarNavigation } from "@/hooks/calendarNavigation";
 import { EventProvider } from "@/hooks/useEvents";
 import { EventEditorProvider } from "@/hooks/useEventEditor";
 import type { OverviewLayout } from "@/components/year/OverviewBody";
-import { usePersistedChoice } from "@/components/calendar/usePersistedChoice";
+import { usePersistedChoice } from "@/components/common/usePersistedChoice";
+import { DisplaySettingsProvider } from "@/components/common/DisplaySettings";
 import {
   DayScreen,
   MonthScreen,
@@ -42,7 +43,9 @@ export function CalendarApp() {
     <AnnouncerProvider>
       <EventProvider>
         <EventEditorProvider>
-          <CalendarAppInner />
+          <DisplaySettingsProvider>
+            <CalendarAppInner />
+          </DisplaySettingsProvider>
         </EventEditorProvider>
       </EventProvider>
     </AnnouncerProvider>
