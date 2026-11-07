@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import type { DayCell, MonthView } from "@/domain/view";
 import type { CivilDate } from "@/domain/shared/date";
 import type { WeekStart } from "@/domain/calendar";
@@ -7,9 +8,11 @@ import type { CalendarEvent } from "@/domain/event";
 import { DayCellView } from "@/components/month/DayCellView";
 import { SIZE, type MonthCardSize } from "@/components/month/monthCardSize";
 import { MonthCardHeader, WeekdayRow } from "@/components/month/MonthCardParts";
+import { initialGridIndex, nextGridIndex } from "@/components/month/dayGridNav";
 import {
   cellContext,
   DAYS_PER_WEEK,
+  isPivotWeek,
   type CellContextInput,
 } from "@/components/month/monthCells";
 
@@ -22,8 +25,13 @@ interface GridProps {
   readonly size: MonthCardSize;
   readonly spacious: boolean;
   readonly context: CellContextInput;
+  readonly pivotDay?: CivilDate | null;
   readonly onDayClick?: (year: number, month: number, day: number) => void;
   readonly onEventSelect?: (id: string) => void;
+}
+
+interface Roving {
+  readonly active: number;
 }
 
 interface CellSpot {
@@ -32,7 +40,12 @@ interface CellSpot {
   readonly interactive: boolean;
 }
 
-function renderCell(props: GridProps, cell: DayCell, spot: CellSpot) {
+function renderCell(
+  props: GridProps,
+  cell: DayCell,
+  spot: CellSpot,
+  roving: Roving,
+) {
   const { size, spacious, context, onDayClick, onEventSelect } = props;
   const { weekIndex, cellIndex, interactive } = spot;
   const gridIndex = weekIndex * DAYS_PER_WEEK + cellIndex;
@@ -54,6 +67,11 @@ function renderCell(props: GridProps, cell: DayCell, spot: CellSpot) {
       jump={isJump}
       dayEvents={dayEvents}
       onEventSelect={onEventSelect}
+      gridStop={
+        interactive
+          ? { index: gridIndex, isTabStop: roving.active === gridIndex }
+          : undefined
+      }
     />
   );
 }
@@ -62,29 +80,67 @@ function WeekRow({
   props,
   week,
   weekIndex,
+  roving,
 }: {
   readonly props: GridProps;
   readonly week: readonly DayCell[];
   readonly weekIndex: number;
+  readonly roving: Roving;
 }) {
+  const { context, pivotDay } = props;
   return (
     <div
       className="relative isolate col-span-7 grid grid-cols-subgrid gap-px"
       style={{ background: "var(--border)" }}
     >
       {week.map((cell, ci) =>
-        renderCell(props, cell, {
-          weekIndex,
-          cellIndex: ci,
-          interactive: true,
-        }),
+        renderCell(
+          props,
+          cell,
+          { weekIndex, cellIndex: ci, interactive: true },
+          roving,
+        ),
+      )}
+      {isPivotWeek(context, week, weekIndex, pivotDay) && (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 -z-10 grid grid-cols-7 gap-px"
+          style={{
+            background: "var(--border)",
+            viewTransitionName: "day-zoom",
+          }}
+        >
+          {week.map((cell, ci) =>
+            renderCell(
+              props,
+              cell,
+              { weekIndex, cellIndex: ci, interactive: false },
+              roving,
+            ),
+          )}
+        </div>
       )}
     </div>
   );
 }
 
+function focusDayButton(grid: HTMLElement, index: number): void {
+  grid.querySelector<HTMLElement>(`[data-grid-index="${index}"]`)?.focus();
+}
+
 function MonthGrid(props: GridProps) {
   const { month, size, spacious } = props;
+  const cells = month.weeks.flat();
+  const [active, setActive] = useState(() => initialGridIndex(cells));
+  const roving: Roving = { active };
+
+  const indexOf = (target: EventTarget): number | null => {
+    const raw = (target as HTMLElement)
+      .closest("[data-grid-index]")
+      ?.getAttribute("data-grid-index");
+    return raw == null ? null : Number(raw);
+  };
+
   return (
     <div
       className={`grid grid-cols-7 gap-px border ${spacious ? "aspect-[7/5.3]" : ""}`}
@@ -95,9 +151,27 @@ function MonthGrid(props: GridProps) {
         background: "var(--border)",
         borderColor: "var(--border)",
       }}
+      onFocus={(e) => {
+        const index = indexOf(e.target);
+        if (index !== null) setActive(index);
+      }}
+      onKeyDown={(e) => {
+        const index = indexOf(e.target);
+        if (index === null || e.altKey || e.ctrlKey || e.metaKey) return;
+        const next = nextGridIndex(e.key, index, cells.length, DAYS_PER_WEEK);
+        if (next === null) return;
+        e.preventDefault();
+        focusDayButton(e.currentTarget, next);
+      }}
     >
       {month.weeks.map((week, wi) => (
-        <WeekRow key={wi} props={props} week={week} weekIndex={wi} />
+        <WeekRow
+          key={wi}
+          props={props}
+          week={week}
+          weekIndex={wi}
+          roving={roving}
+        />
       ))}
     </div>
   );
@@ -112,6 +186,7 @@ export function MonthCard({
   spacious = false,
   onDayClick,
   year,
+  pivotDay,
   jumpDay,
   events,
   onEventSelect,
@@ -124,6 +199,7 @@ export function MonthCard({
   readonly spacious?: boolean;
   readonly onDayClick?: (year: number, month: number, day: number) => void;
   readonly year?: number;
+  readonly pivotDay?: CivilDate | null;
   readonly jumpDay?: CivilDate | null;
   readonly events?: readonly CalendarEvent[];
   readonly onEventSelect?: (id: string) => void;
@@ -154,6 +230,7 @@ export function MonthCard({
         size={size}
         spacious={spacious}
         context={context}
+        pivotDay={pivotDay}
         onDayClick={onDayClick}
         onEventSelect={onEventSelect}
       />
