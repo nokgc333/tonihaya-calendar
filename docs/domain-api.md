@@ -66,6 +66,7 @@
 | `addDays(date, days)` | 日付に日数を足す(負の値も可) |
 | `diffDays(from, to)` | 2 つの日付の日数の差 |
 | `addDurations(a, b)` | 時間と分の長さを足す |
+| `subtractDurations(a, b)` | 時間と分の長さを引く。結果が負のときは `negative: true` で、`hours`・`minutes` は大きさ |
 
 ## 予定(`event/event`、`event/storedEvent`)
 
