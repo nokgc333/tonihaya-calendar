@@ -25,7 +25,8 @@
     "test:e2e": "playwright test",
     "test:coverage": "vitest run --coverage",
     "lighthouse": "node scripts/lighthouse.mjs",
-    "ci:lhci": "lhci autorun"
+    "ci:lhci": "lhci autorun",
+    "test:mutation": "stryker run"
   },
   "overrides": {
     "next": {
@@ -66,7 +67,9 @@
     "@vitest/coverage-v8": "^5.0.5",
     "fast-check": "^4.10.2",
     "@lhci/cli": "^0.15.1",
-    "lighthouse": "^13.4.0"
+    "lighthouse": "^13.4.0",
+    "@stryker-mutator/core": "^10.1.1",
+    "@stryker-mutator/vitest-runner": "^10.1.1"
   },
   "lint-staged": {
     "*.{ts,tsx,js,mjs,cjs}": [
