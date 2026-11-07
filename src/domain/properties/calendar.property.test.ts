@@ -1,8 +1,15 @@
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 import { getMonthGrid } from "@/domain/calendar";
+import { formatYearWithEra, toWareki } from "@/domain/era";
+import {
+  getHoliday,
+  getHolidaysInMonth,
+  getHolidaysInYear,
+  isHoliday,
+} from "@/domain/holiday";
 import { daysInMonth } from "@/domain/calendar";
-import { toEpochDay, weekdayOf } from "@/domain/shared/date";
+import { fromEpochDay, toEpochDay, weekdayOf } from "@/domain/shared/date";
 import { buildMonthView, buildWeekView } from "@/domain/view";
 import { APP_YEARS, appDate, weekStart, yearIn } from "./arbitraries";
 
@@ -107,6 +114,202 @@ describe("the week view", () => {
           expect(d.isSaturday).toBe(d.weekday === SATURDAY);
           expect(d.isToday).toBe(epochOf(d) === epochOf(ref));
         }
+      }),
+    );
+  });
+});
+
+describe("the holidays of a year", () => {
+  const years = yearIn(APP_YEARS);
+
+  it("fall inside the year, in order, each date once", () => {
+    fc.assert(
+      fc.property(years, (year) => {
+        const list = getHolidaysInYear(year);
+        for (const h of list) expect(h.date.year).toBe(year);
+        const epochs = list.map((h) => epochOf(h.date));
+        expect(epochs).toEqual([...epochs].sort((a, b) => a - b));
+        expect(new Set(epochs).size).toBe(epochs.length);
+      }),
+    );
+  });
+
+  it("are dates that exist", () => {
+    fc.assert(
+      fc.property(years, (year) => {
+        for (const h of getHolidaysInYear(year)) {
+          expect(h.date.day).toBeGreaterThanOrEqual(1);
+          expect(h.date.day).toBeLessThanOrEqual(
+            daysInMonth(year, h.date.month),
+          );
+          expect(fromEpochDay(epochOf(h.date))).toEqual(h.date);
+        }
+      }),
+    );
+  });
+
+  it("are the same whether asked for by year, by month or by day", () => {
+    fc.assert(
+      fc.property(years, (year) => {
+        const byMonth = Array.from({ length: 12 }, (_, i) =>
+          getHolidaysInMonth(year, i + 1),
+        ).flat();
+        expect(byMonth).toEqual(getHolidaysInYear(year));
+        for (const h of getHolidaysInYear(year)) {
+          expect(isHoliday(year, h.date.month, h.date.day)).toBe(true);
+          expect(getHoliday(year, h.date.month, h.date.day)?.name).toBe(h.name);
+        }
+      }),
+    );
+  });
+
+  it("always include New Year's Day and Constitution Day", () => {
+    fc.assert(
+      fc.property(years, (year) => {
+        expect(getHoliday(year, 1, 1)?.name).toBe("元日");
+        expect(getHoliday(year, 5, 3)?.name).toBe("憲法記念日");
+      }),
+    );
+  });
+
+  it("place the equinox days on the days that the observatory gives, for the years that are known", () => {
+    const known: Array<[number, number, number]> = [
+      [1950, 21, 23],
+      [1960, 20, 23],
+      [1970, 21, 23],
+      [1980, 20, 23],
+      [1999, 21, 23],
+      [2020, 20, 22],
+      [2021, 20, 23],
+      [2022, 21, 23],
+      [2023, 21, 23],
+      [2024, 20, 22],
+      [2025, 20, 23],
+      [2030, 20, 23],
+    ];
+    for (const [year, spring, autumn] of known) {
+      expect(getHoliday(year, 3, spring)?.name, `${year} spring`).toBe(
+        "春分の日",
+      );
+      expect(getHoliday(year, 9, autumn)?.name, `${year} autumn`).toBe(
+        "秋分の日",
+      );
+    }
+  });
+
+  it("keep the equinox days apart from the other holidays of the month, in every year", () => {
+    fc.assert(
+      fc.property(years, (year) => {
+        const autumn = getHolidaysInMonth(year, 9).filter(
+          (h) => h.name === "秋分の日",
+        );
+        const spring = getHolidaysInMonth(year, 3).filter(
+          (h) => h.name === "春分の日",
+        );
+        expect(autumn).toHaveLength(1);
+        expect(spring).toHaveLength(1);
+      }),
+    );
+  });
+
+  it("carry a holiday that falls on a Sunday over to a day that is a holiday too", () => {
+    fc.assert(
+      fc.property(years, (year) => {
+        for (const h of getHolidaysInYear(year)) {
+          if (weekdayOf(h.date.year, h.date.month, h.date.day) !== SUNDAY)
+            continue;
+          const next = fromEpochDay(epochOf(h.date) + 1);
+          if (next.year !== year) continue;
+          expect(isHoliday(next.year, next.month, next.day)).toBe(true);
+        }
+      }),
+    );
+  });
+
+  it("place a citizens' holiday only between two other holidays", () => {
+    fc.assert(
+      fc.property(years, (year) => {
+        for (const h of getHolidaysInYear(year).filter(
+          (x) => x.name === "国民の休日",
+        )) {
+          const before = fromEpochDay(epochOf(h.date) - 1);
+          const after = fromEpochDay(epochOf(h.date) + 1);
+          expect(isHoliday(before.year, before.month, before.day)).toBe(true);
+          expect(isHoliday(after.year, after.month, after.day)).toBe(true);
+        }
+      }),
+    );
+  });
+
+  it("never number more than a handful beyond the national list", () => {
+    fc.assert(
+      fc.property(years, (year) => {
+        const count = getHolidaysInYear(year).length;
+        expect(count).toBeGreaterThanOrEqual(16);
+        expect(count).toBeLessThanOrEqual(22);
+      }),
+    );
+  });
+});
+
+describe("the era", () => {
+  const ERA_STARTS = [
+    { name: "昭和", at: [1926, 12, 25] },
+    { name: "平成", at: [1989, 1, 8] },
+    { name: "令和", at: [2019, 5, 1] },
+  ] as const;
+
+  it("changes on the day an era begins and on no other day", () => {
+    fc.assert(
+      fc.property(appDate, (d) => {
+        const before = fromEpochDay(epochOf(d) - 1);
+        const changes = toWareki(before).name !== toWareki(d).name;
+        const starts = ERA_STARTS.some(
+          ({ at }) => at[0] === d.year && at[1] === d.month && at[2] === d.day,
+        );
+        expect(changes).toBe(starts);
+      }),
+    );
+  });
+
+  it("never goes back to an earlier era as the dates go on", () => {
+    const order = ["昭和", "平成", "令和"];
+    fc.assert(
+      fc.property(appDate, fc.integer({ min: 1, max: 4000 }), (d, n) => {
+        const later = fromEpochDay(epochOf(d) + n);
+        expect(order.indexOf(toWareki(later).name)).toBeGreaterThanOrEqual(
+          order.indexOf(toWareki(d).name),
+        );
+      }),
+    );
+  });
+
+  it("counts the year of the era from its start, one more with each calendar year", () => {
+    fc.assert(
+      fc.property(appDate, (d) => {
+        const next = fromEpochDay(epochOf(d) + 365);
+        const a = toWareki(d);
+        const b = toWareki(next);
+        if (a.name === b.name) expect(b.year - a.year).toBe(next.year - d.year);
+      }),
+    );
+  });
+
+  it("never gives a year before the first of its era, from the start of Showa on", () => {
+    fc.assert(
+      fc.property(appDate, (d) => {
+        if (epochOf(d) < toEpochDay(1926, 12, 25)) return;
+        expect(toWareki(d).year).toBeGreaterThanOrEqual(1);
+      }),
+    );
+  });
+
+  it("writes the Gregorian year and the era in the label", () => {
+    fc.assert(
+      fc.property(appDate, (d) => {
+        const label = formatYearWithEra(d);
+        expect(label).toContain(String(d.year));
+        expect(label).toContain(toWareki(d).name);
       }),
     );
   });
