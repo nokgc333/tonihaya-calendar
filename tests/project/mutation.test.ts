@@ -21,6 +21,7 @@ describe("the mutation testing", () => {
       "!src/domain/**/*.test.ts",
       "!src/domain/**/index.ts",
       "!src/domain/**/types.ts",
+      "!src/domain/kyureki/table.ts",
       "!src/domain/properties/**",
     ]);
   });
