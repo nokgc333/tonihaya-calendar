@@ -97,7 +97,85 @@
   --focus-ring: #7aa7ff;
 }
 
+html {
+  color-scheme: light dark;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+main:focus {
+  outline: none;
+}
+
+.skip-link {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  padding: 0.5rem 1rem;
+  background: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--border-strong);
+  border-radius: 0.5rem;
+  transform: translateY(-120%);
+}
+
+.skip-link:focus {
+  transform: translateY(0.5rem) translateX(0.5rem);
+}
+
 body {
-  margin: 0;
-  font-family: Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-family:
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    "Hiragino Kaku Gothic ProN",
+    "Noto Sans JP",
+    Meiryo,
+    sans-serif;
+  font-feature-settings: "tnum" 1;
+  -webkit-font-smoothing: antialiased;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 200ms;
+}
+
+::view-transition-group(day-zoom),
+::view-transition-group(hour-zoom),
+::view-transition-group(jump-zoom) {
+  animation-duration: 200ms;
+}
+
+@keyframes zoom-source-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+::view-transition-old(day-zoom) {
+  animation: zoom-source-fade-out 100ms ease-out both;
+}
+::view-transition-old(hour-zoom) {
+  animation: zoom-source-fade-out 100ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
 }
