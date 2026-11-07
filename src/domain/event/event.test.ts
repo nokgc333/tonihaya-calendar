@@ -2,16 +2,17 @@ import { describe, expect, it } from "vitest";
 import {
   clipEventToDay,
   eventsForDay,
-  minutesOfDay,
-  layoutDayColumns,
-  type DaySegment,
   isSafeUrl,
+  layoutDayColumns,
+  minutesOfDay,
+  sortForDay,
   validateEvent,
   NOTE_MAX_LENGTH,
   TITLE_MAX_LENGTH,
   URL_MAX_LENGTH,
-  sortForDay,
+  type DaySegment,
 } from "./event";
+import { isStoredCalendarEvent } from "./storedEvent";
 import type { CalendarEvent } from "./types";
 
 const base = {
@@ -372,5 +373,113 @@ describe("sortForDay", () => {
     const t8 = timed("t8", [2026, 7, 12], 8, 9);
     const a = allDay("a", [2026, 7, 12], [2026, 7, 12]);
     expect(sortForDay([t9, a, t8]).map((e) => e.id)).toEqual(["a", "t8", "t9"]);
+  });
+});
+
+describe("isStoredCalendarEvent", () => {
+  const validAllDay = allDay("ok", [2026, 7, 12], [2026, 7, 12]);
+  const validTimed = timed("okt", [2026, 7, 12], 9, 10);
+
+  it("accepts a valid all-day event", () => {
+    expect(isStoredCalendarEvent(validAllDay)).toBe(true);
+  });
+  it("accepts a valid timed event", () => {
+    expect(isStoredCalendarEvent(validTimed)).toBe(true);
+  });
+  it("rejects null and non-objects", () => {
+    expect(isStoredCalendarEvent(null)).toBe(false);
+    expect(isStoredCalendarEvent("x")).toBe(false);
+    expect(isStoredCalendarEvent(42)).toBe(false);
+  });
+  it("rejects a missing or empty id", () => {
+    expect(isStoredCalendarEvent({ ...validAllDay, id: undefined })).toBe(
+      false,
+    );
+    expect(isStoredCalendarEvent({ ...validAllDay, id: "" })).toBe(false);
+  });
+  it("rejects a missing numeric start.date (source of a crash)", () => {
+    expect(
+      isStoredCalendarEvent({
+        ...validAllDay,
+        start: { date: { year: 2026, month: 7 } },
+      }),
+    ).toBe(false);
+    expect(isStoredCalendarEvent({ ...validAllDay, start: undefined })).toBe(
+      false,
+    );
+  });
+  it("rejects a timed event without time (source of a crash in clip)", () => {
+    expect(
+      isStoredCalendarEvent({
+        ...validTimed,
+        start: { date: { year: 2026, month: 7, day: 12 } },
+      }),
+    ).toBe(false);
+  });
+  it("rejects an invalid colorKey or priority", () => {
+    expect(isStoredCalendarEvent({ ...validAllDay, colorKey: "neon" })).toBe(
+      false,
+    );
+    expect(isStoredCalendarEvent({ ...validAllDay, priority: "urgent" })).toBe(
+      false,
+    );
+  });
+  it("rejects non-numeric createdAt or updatedAt", () => {
+    expect(isStoredCalendarEvent({ ...validAllDay, createdAt: "0" })).toBe(
+      false,
+    );
+  });
+
+  it("rejects a title, an id or an all-day flag of the wrong type", () => {
+    expect(isStoredCalendarEvent({ ...validAllDay, title: 1 })).toBe(false);
+    expect(isStoredCalendarEvent({ ...validAllDay, id: 1 })).toBe(false);
+    expect(isStoredCalendarEvent({ ...validAllDay, allDay: "yes" })).toBe(
+      false,
+    );
+  });
+
+  it("rejects an end point that is not a date", () => {
+    expect(isStoredCalendarEvent({ ...validAllDay, end: { date: 1 } })).toBe(
+      false,
+    );
+    expect(isStoredCalendarEvent({ ...validAllDay, start: null })).toBe(false);
+  });
+
+  it("accepts a URL and a note when they are strings, or absent", () => {
+    expect(
+      isStoredCalendarEvent({
+        ...validAllDay,
+        url: "https://x.test",
+        note: "n",
+      }),
+    ).toBe(true);
+    expect(
+      isStoredCalendarEvent({
+        ...validAllDay,
+        url: undefined,
+        note: undefined,
+      }),
+    ).toBe(true);
+  });
+
+  it("rejects a URL or a note that is not a string", () => {
+    expect(isStoredCalendarEvent({ ...validAllDay, url: 1 })).toBe(false);
+    expect(isStoredCalendarEvent({ ...validAllDay, note: {} })).toBe(false);
+    expect(isStoredCalendarEvent({ ...validAllDay, url: null })).toBe(false);
+  });
+
+  it("does not ask an all-day event for times, but asks a timed one", () => {
+    expect(
+      isStoredCalendarEvent({
+        ...validAllDay,
+        start: { date: validAllDay.start.date },
+      }),
+    ).toBe(true);
+    expect(
+      isStoredCalendarEvent({
+        ...validTimed,
+        end: { date: validTimed.end.date },
+      }),
+    ).toBe(false);
   });
 });
