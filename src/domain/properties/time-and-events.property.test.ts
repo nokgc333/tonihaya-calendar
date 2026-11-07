@@ -3,8 +3,11 @@ import { describe, expect, it } from "vitest";
 import {
   clipEventToDay,
   eventsForDay,
+  layoutDayColumns,
   minutesOfDay,
+  sortForDay,
   type CalendarEvent,
+  type DaySegment,
 } from "@/domain/event";
 import { toEpochDay } from "@/domain/shared/date";
 import {
@@ -180,6 +183,166 @@ describe("the events of a day", () => {
           expect(seg.startMin).toBe(minutesOfDay(event.start.time!));
         if (!seg.continuesToNext)
           expect(seg.endMin).toBe(minutesOfDay(event.end.time!));
+      }),
+    );
+  });
+});
+
+const segmentArb = fc
+  .tuple(
+    fc.integer({ min: 0, max: 1380 }),
+    fc.integer({ min: 1, max: 240 }),
+    fc.integer({ min: 0, max: 1_000_000_000 }),
+  )
+  .map(([start, length, key]): DaySegment => ({
+    event: { id: `s${key}` } as CalendarEvent,
+    startMin: start,
+    endMin: Math.min(1440, start + length),
+    continuesFromPrev: false,
+    continuesToNext: false,
+  }));
+
+describe("the columns of a day", () => {
+  const overlap = (a: DaySegment, b: DaySegment) =>
+    a.startMin < b.endMin && b.startMin < a.endMin;
+
+  it("keep every segment, once", () => {
+    fc.assert(
+      fc.property(fc.array(segmentArb, { maxLength: 12 }), (segments) => {
+        const laid = layoutDayColumns(segments);
+        expect(laid).toHaveLength(segments.length);
+        expect(laid.map((l) => l.event.id).sort()).toEqual(
+          segments.map((s) => s.event.id).sort(),
+        );
+      }),
+    );
+  });
+
+  it("never put two segments that overlap in time into the same column", () => {
+    fc.assert(
+      fc.property(fc.array(segmentArb, { maxLength: 12 }), (segments) => {
+        const laid = layoutDayColumns(segments);
+        for (let i = 0; i < laid.length; i += 1) {
+          for (let j = i + 1; j < laid.length; j += 1) {
+            if (overlap(laid[i], laid[j]))
+              expect(laid[i].columnIndex).not.toBe(laid[j].columnIndex);
+          }
+        }
+      }),
+    );
+  });
+
+  it("keep each segment inside the number of columns of its group", () => {
+    fc.assert(
+      fc.property(fc.array(segmentArb, { maxLength: 12 }), (segments) => {
+        for (const l of layoutDayColumns(segments)) {
+          expect(l.columnIndex).toBeGreaterThanOrEqual(0);
+          expect(l.columnIndex).toBeLessThan(l.columnCount);
+        }
+      }),
+    );
+  });
+
+  it("use a single column for segments that never overlap", () => {
+    fc.assert(
+      fc.property(
+        fc.array(fc.integer({ min: 0, max: 20 }), { maxLength: 10 }),
+        (slots) => {
+          const unique = [...new Set(slots)];
+          const segments = unique.map((slot, i): DaySegment => ({
+            event: { id: `n${i}` } as CalendarEvent,
+            startMin: slot * 60,
+            endMin: slot * 60 + 30,
+            continuesFromPrev: false,
+            continuesToNext: false,
+          }));
+          for (const l of layoutDayColumns(segments))
+            expect(l.columnCount).toBe(1);
+        },
+      ),
+    );
+  });
+
+  it("give the same layout whatever the order the segments come in", () => {
+    fc.assert(
+      fc.property(
+        fc.array(segmentArb, { maxLength: 10 }),
+        fc.nat(),
+        (segments, seed) => {
+          const rotated = [
+            ...segments.slice(seed % (segments.length || 1)),
+            ...segments.slice(0, seed % (segments.length || 1)),
+          ];
+          const key = (l: {
+            event: { id?: string };
+            columnIndex: number;
+            columnCount: number;
+          }) => `${l.event.id}:${l.columnIndex}/${l.columnCount}`;
+          const a = layoutDayColumns(segments).map(key).sort();
+          const b = layoutDayColumns(rotated).map(key).sort();
+          const distinctTimes =
+            new Set(segments.map((s) => `${s.startMin}-${s.endMin}`)).size ===
+            segments.length;
+          if (distinctTimes) expect(a).toEqual(b);
+        },
+      ),
+    );
+  });
+});
+
+describe("sorting the events of a day", () => {
+  it("keeps every event, once", () => {
+    fc.assert(
+      fc.property(fc.array(eventArb, { maxLength: 10 }), (events) => {
+        const sorted = sortForDay(events);
+        expect(sorted.map((e) => e.id).sort()).toEqual(
+          events.map((e) => e.id).sort(),
+        );
+      }),
+    );
+  });
+
+  it("puts every all-day event before every timed one", () => {
+    fc.assert(
+      fc.property(fc.array(eventArb, { maxLength: 10 }), (events) => {
+        const kinds = sortForDay(events).map((e) => e.allDay);
+        const firstTimed = kinds.indexOf(false);
+        if (firstTimed >= 0)
+          expect(kinds.slice(firstTimed).every((k) => k === false)).toBe(true);
+      }),
+    );
+  });
+
+  it("is the same whatever the order of the events it is given", () => {
+    fc.assert(
+      fc.property(
+        fc.uniqueArray(eventArb, { maxLength: 10, selector: (e) => e.id }),
+        fc.nat(),
+        (events, seed) => {
+          const k = seed % (events.length || 1);
+          const rotated = [...events.slice(k), ...events.slice(0, k)];
+          const ids = (list: readonly CalendarEvent[]) => list.map((e) => e.id);
+          const distinctKeys =
+            new Set(
+              events.map(
+                (e) =>
+                  `${e.allDay}|${e.start.time ? minutesOfDay(e.start.time) : ""}|${e.priority}|${e.createdAt}`,
+              ),
+            ).size === events.length;
+          if (distinctKeys)
+            expect(ids(sortForDay(rotated))).toEqual(ids(sortForDay(events)));
+        },
+      ),
+    );
+  });
+
+  it("is already sorted when sorted again", () => {
+    fc.assert(
+      fc.property(fc.array(eventArb, { maxLength: 10 }), (events) => {
+        const once = sortForDay(events);
+        expect(sortForDay(once).map((e) => e.id)).toEqual(
+          once.map((e) => e.id),
+        );
       }),
     );
   });
