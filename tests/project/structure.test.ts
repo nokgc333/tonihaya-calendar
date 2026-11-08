@@ -26,11 +26,21 @@ const ALLOWED: Readonly<Record<string, readonly string[]>> = {
   common: [],
   timeline: ["common", "event"],
   event: ["common"],
+  calc: ["common"],
   month: ["common", "event", "calendar"],
   week: ["common", "event", "calendar", "timeline"],
   day: ["common", "event", "calendar", "timeline"],
   year: ["common", "event", "calendar", "month"],
-  calendar: ["common", "event", "year", "month", "week", "day", "timeline"],
+  calendar: [
+    "common",
+    "event",
+    "calc",
+    "year",
+    "month",
+    "week",
+    "day",
+    "timeline",
+  ],
 };
 
 describe("the folders of the components", () => {

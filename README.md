@@ -80,7 +80,7 @@ CI(GitHub Actions)がプルリクエストごとに確認する。
 ```
 src/
   app/            ページ、メタデータ、robots・sitemap・manifest、スタイル(テーマ変数)
-  components/     機能ごとのフォルダ: calendar、year、month、week、day、timeline、event、common
+  components/     機能ごとのフォルダ: calendar、year、month、week、day、timeline、event、calc、common
   domain/         日付・暦・祝日・和暦・カウントダウン・予定・各ビューの計算(UI に依存しない)
   data/           予定の保存(localStorage、版つきの形式、壊れたデータの退避)
   hooks/          状態を持つフック
