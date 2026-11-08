@@ -47,6 +47,17 @@ describe("YearStepper", () => {
     expect(onYearChange).toHaveBeenLastCalledWith(2026);
   });
 
+  it("puts the year back into the field when an empty or invalid entry leaves the year as it was", async () => {
+    const { user } = setup();
+    await user.clear(input());
+    await user.tab();
+    expect(input()).toHaveValue(2026);
+    await user.clear(input());
+    await user.type(input(), "3000");
+    await user.tab();
+    expect(input()).toHaveValue(2150);
+  });
+
   it("disables the this-year button only in the current year", () => {
     const { unmount } = render(
       <YearStepper year={2026} today={today} onYearChange={vi.fn()} />,

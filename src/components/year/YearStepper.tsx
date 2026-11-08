@@ -20,8 +20,11 @@ export function YearStepper({
   useEffect(() => setYearDraft(String(year)), [year]);
 
   const isCurrentYear = today !== null && year === today.year;
-  const commitYearDraft = (): void =>
-    onYearChange(resolveYearInput(yearDraft, year));
+  const commitYearDraft = (): void => {
+    const next = resolveYearInput(yearDraft, year);
+    setYearDraft(String(next));
+    onYearChange(next);
+  };
 
   return (
     <>
