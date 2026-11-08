@@ -78,6 +78,17 @@ test("has no accessibility violation in the event form", async ({ page }) => {
   expect(await newViolations(page)).toEqual([]);
 });
 
+test("has no accessibility violation in the calculator", async ({ page }) => {
+  await openApp(page);
+  await page.getByRole("button", { name: "時間計算を開く" }).click();
+  await expect(page.getByRole("dialog", { name: "時間計算" })).toBeVisible();
+  expect(await newViolations(page)).toEqual([]);
+  const { violations } = await new AxeBuilder({ page })
+    .withRules(["color-contrast"])
+    .analyze();
+  expect(violations).toEqual([]);
+});
+
 test("has no accessibility violation with the settings menu open", async ({
   page,
 }) => {

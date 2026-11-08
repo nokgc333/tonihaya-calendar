@@ -3,6 +3,7 @@ import type { CivilDate } from "@/domain/shared/date";
 import type { WeekStart } from "@/domain/calendar";
 import { LevelSwitcher } from "@/components/common/LevelSwitcher";
 import { SettingsMenu } from "@/components/common/SettingsMenu";
+import { TimeCalcButton } from "@/components/calc/TimeCalcButton";
 import { AddEventButton } from "@/components/event/AddEventButton";
 
 export function ViewActions({
@@ -23,6 +24,7 @@ export function ViewActions({
   return (
     <div className="ml-auto flex items-center gap-3">
       {children}
+      <TimeCalcButton />
       <AddEventButton date={addDate} />
       <LevelSwitcher current={level} onJump={onJump} />
       <SettingsMenu
